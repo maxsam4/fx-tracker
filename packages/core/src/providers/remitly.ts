@@ -122,15 +122,16 @@ async function fetchStandardRateViaCalculator(corridor: CorridorConfig): Promise
     await page.waitForTimeout(4000);
     await page.waitForSelector('input[id*="you-send"]', { timeout: 12_000 });
 
-    // Use `fill()` rather than click+type. Remitly's footer/cookie banner
-    // overlaps the input, so a normal click stalls and a force-click clicks
-    // through but doesn't focus the input — keyboard.type() then went to the
-    // body. fill() directly sets .value and dispatches an input event, which
-    // React's onChange listens for. force: true bypasses the actionability
-    // check (the overlapping banner). No focus required.
+    // Triple-click to select the existing default (e.g. 1000) then type the
+    // new amount via keyboard. fill() looks tempting (sets .value + dispatches
+    // an input event) but Remitly's calculator silently ignores it: the
+    // displayed send-amount stays at the default and the standard-rate row
+    // never renders, so we end up falling through to the SSR promo rate.
+    // keyboard.type() drives React's onChange reliably.
     const sendInput = await page.$('input[id*="you-send"]');
     if (!sendInput) throw new Error('Remitly send-amount input not found');
-    await sendInput.fill(corridor.amountAboveCap, { force: true });
+    await sendInput.click({ clickCount: 3 });
+    await page.keyboard.type(corridor.amountAboveCap, { delay: 30 });
 
     // Poll: wait → read → check. Repeat up to 3x. React's re-render after the
     // input change can be flaky to time precisely.
