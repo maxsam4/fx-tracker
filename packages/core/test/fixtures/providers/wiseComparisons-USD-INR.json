@@ -1,0 +1,42 @@
+{
+  "sourceCurrency": "USD",
+  "targetCurrency": "INR",
+  "sourceAmount": 1000,
+  "providers": [
+    {
+      "name": "Wells Fargo",
+      "alias": "wells-fargo",
+      "quotes": [
+        { "rate": 92.5, "fee": 5, "sourceAmount": 1000, "targetAmount": 92500, "receivedAmount": 92500 }
+      ]
+    },
+    {
+      "name": "Wise",
+      "alias": "wise",
+      "quotes": [
+        { "rate": 94.8, "fee": 4.5, "sourceAmount": 1000, "targetAmount": 94800, "receivedAmount": 94778.5 }
+      ]
+    },
+    {
+      "name": "Xoom",
+      "alias": "xoom",
+      "quotes": [
+        { "rate": 93.6, "fee": 0, "sourceAmount": 1000, "targetAmount": 93600, "receivedAmount": 93600 }
+      ]
+    },
+    {
+      "name": "Remitly",
+      "alias": "remitly",
+      "quotes": [
+        { "rate": 94.2, "fee": 0, "sourceAmount": 1000, "targetAmount": 94200, "receivedAmount": 94200 }
+      ]
+    },
+    {
+      "name": "Instarem",
+      "alias": "instarem",
+      "quotes": [
+        { "rate": 94.5, "fee": 2.5, "sourceAmount": 1000, "targetAmount": 94500, "receivedAmount": 94463.75 }
+      ]
+    }
+  ]
+}

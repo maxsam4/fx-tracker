@@ -1,0 +1,34 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./secrets/cloudflare-origin.pem:/etc/caddy/cloudflare-origin.pem:ro
+      - ./secrets/cloudflare-origin.key:/etc/caddy/cloudflare-origin.key:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN}
+    depends_on:
+      - web
+    restart: unless-stopped
+
+  web:
+    # !reset clears the base port list (Compose v2 list-override syntax).
+    # Without !reset, an empty `ports:` is silently ignored and the base
+    # public bindings persist.
+    ports: !reset []
+    expose:
+      - "3000"
+
+  postgres:
+    ports: !reset []
+    volumes:
+      - /var/lib/fx-tracker/pg:/var/lib/postgresql/data
+
+volumes:
+  caddy-data:
+  caddy-config:

@@ -1,0 +1,25 @@
+{
+  "name": "fx-tracker",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev:web": "pnpm --filter @fx/web dev",
+    "dev:worker": "pnpm --filter @fx/worker dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "db:generate": "pnpm --filter @fx/core db:generate",
+    "db:migrate": "pnpm --filter @fx/core db:migrate",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "@types/node": "^22.7.5",
+    "tsx": "^4.19.1",
+    "vitest": "^2.1.2"
+  }
+}

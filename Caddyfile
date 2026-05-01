@@ -1,0 +1,42 @@
+# Caddy in front of `web` on the same Docker network.
+#
+# TLS strategy: Cloudflare proxies the public domain (fx.mudit.blog). With
+# Cloudflare's "Full" SSL mode (NOT "Full Strict"), Cloudflare connects to
+# this origin over HTTPS but does not validate the cert — so a self-signed
+# cert from Caddy's local CA is fine. `tls internal` does that automatically
+# without needing Let's Encrypt or a Cloudflare Origin CA cert.
+#
+# If you ever want "Full (Strict)" — point an A record directly at this host
+# with proxy off, then swap the `tls internal` line for automatic Let's
+# Encrypt by removing it (Caddy's default).
+{
+	# Disable the on-by-default automatic LE issuance for {$SITE_DOMAIN} —
+	# we're using `tls internal` below.
+	auto_https disable_redirects
+}
+
+{$SITE_DOMAIN} {
+	# Cloudflare Origin CA cert (15-year). Cloudflare-trusted only — not a
+	# public cert. Works with Cloudflare SSL mode "Full" or "Full (Strict)".
+	# Provisioned at /opt/fx-tracker/secrets/ on the host, mounted read-only
+	# into the caddy container at /etc/caddy/.
+	tls /etc/caddy/cloudflare-origin.pem /etc/caddy/cloudflare-origin.key
+
+	encode zstd gzip
+
+	# Security headers (HSTS only meaningful end-to-end; Cloudflare may rewrite)
+	header {
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "geolocation=(), microphone=(), camera=()"
+		-Server
+	}
+
+	# Pass Cloudflare's real client IP through to the app. Cloudflare strips
+	# inbound CF-Connecting-IP from user requests, so this can't be spoofed.
+	reverse_proxy web:3000 {
+		header_up X-Forwarded-For {http.request.header.cf-connecting-ip}
+	}
+}

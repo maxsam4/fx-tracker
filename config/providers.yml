@@ -1,0 +1,67 @@
+# fx-tracker provider manifest
+# Edit + restart the worker to add/remove pairs or providers.
+#
+# Reliability tiers (verified live 2026-04-30):
+#   API-backed (verified working):
+#     wise, remitly, xoom, instarem, aspora — direct JSON APIs
+#   Scrape-based (best-effort, may fail on first deploy):
+#     masarif, lulu, careemPay, westernUnion, remitfinder
+#     -> these need selector tuning against the live DOM. Failures show in
+#        provider_runs (status='error') and do NOT block other providers.
+#        Run `pnpm --filter @fx/core test:live:scrape` to validate selectors.
+#
+# Reference sources for the mid-market median:
+#   wiseMidMarket, xe — verified live
+#   exchangerateHost (open.er-api.com) — verified live, free, no key
+#
+# Reference sources display-only (not in median):
+#   googleFinance — verified live; intentionally excluded from median because
+#                   it lags the market by 5-15 min.
+
+pairs:
+  USD-INR:
+    enabled: true
+    referenceAmounts: [200, 1000, 5000]      # USD
+    providers:
+      - wise              # API
+      - remitly           # via Wise comparisons
+      - xoom              # via Wise comparisons (PayPal-owned)
+      - instarem          # direct API + Wise fallback
+      - aspora            # direct API
+      - westernUnion      # SCRAPE — may need selector tuning
+      - remitfinder       # SCRAPE — corridor URLs return only popular preview; needs work
+    referenceSources:
+      - googleFinance
+
+  AED-INR:
+    enabled: true
+    referenceAmounts: [500, 5000, 25000]     # AED
+    providers:
+      - wise              # API (Wise comparisons may return empty for AED-INR)
+      - instarem          # direct API
+      - aspora            # direct API
+      - remitly           # direct SSR scrape (remitly.com/ae/en/currency-converter/aed-to-inr-rate)
+      - masarif           # SCRAPE aggregator (LuLu, Al Ansari, Sharaf, ...)
+      - westernUnion      # SCRAPE
+      - careemPay         # SCRAPE — Cloudflare may 522
+      - lulu              # SCRAPE direct (complements masarif)
+      - remitfinder       # SCRAPE
+    referenceSources:
+      - googleFinance
+
+midMarket:
+  # Median of these three is the canonical mid-market rate.
+  # All three verified live 2026-04-30.
+  sources: [wiseMidMarket, xe, exchangerateHost]
+  # Tracked, displayed, never feeds alerts.
+  referenceOnly: [googleFinance]
+  # Drop sources whose rate deviates more than this from the median of survivors.
+  outlierTolerancePct: 2.0
+
+# Aggregator dedup: when both an aggregator and a direct scrape return the
+# same providerId (e.g., 'lulu' from both masarif and lulu_direct), the
+# winner is the source listed here.
+preferredSource:
+  lulu: masarif
+  alAnsari: masarif
+  sharaf: masarif

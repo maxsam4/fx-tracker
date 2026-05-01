@@ -1,0 +1,26 @@
+{
+  "min_send_limit": 5.00,
+  "max_send_limit": 30000.00,
+  "base_currency": "USD",
+  "quote_currency": "INR",
+  "send_amount": 1000.00,
+  "savings": 5.86,
+  "message": "Get savings",
+  "providers": [
+    {
+      "name": "Aspora",
+      "logo": "https://static-files.aspora.com/Plus91/Brand+Assets/Aspora-round.png",
+      "quote": { "rate": 95.03, "fee": 2.99, "received_amount": 94745.86, "difference": 0 }
+    },
+    {
+      "name": "Remitly",
+      "logo": "https://dq8dwmysp7hk1.cloudfront.net/logos/remitly.png",
+      "quote": { "rate": 94.74, "fee": 0.0, "received_amount": 94740.0, "difference": 5.86 }
+    },
+    {
+      "name": "Wise",
+      "logo": "https://wise.com/public-resources/assets/logos/wise-personal/logo.png",
+      "quote": { "rate": 95.01, "fee": 11.72, "received_amount": 93896.48, "difference": 849.38 }
+    }
+  ]
+}
