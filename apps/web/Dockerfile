@@ -25,7 +25,10 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
 COPY --from=deps /app/packages/core/node_modules ./packages/core/node_modules
 WORKDIR /app/apps/web
-RUN pnpm exec next build
+# BuildKit cache mount keeps Next's incremental cache across rebuilds. Source
+# changes still trigger a build, but Next reuses cached compilation results.
+RUN --mount=type=cache,target=/app/apps/web/.next/cache,uid=0,gid=0 \
+    pnpm exec next build
 
 FROM base AS runtime
 RUN useradd --system --uid 1001 --create-home nextjs

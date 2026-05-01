@@ -11,6 +11,12 @@ COPY packages/core/package.json packages/core/
 COPY apps/worker/package.json apps/worker/
 RUN pnpm install --frozen-lockfile=false
 
+# Browser cache stage. No source dependency — only this Dockerfile's playwright
+# install line invalidates it. ~280MB of Chromium downloads cache here.
+FROM base AS browsers
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN pnpm dlx playwright install chromium
+
 FROM base AS runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates wget gnupg \
@@ -33,10 +39,11 @@ COPY --chown=node:node apps/worker ./apps/worker
 COPY --from=deps --chown=node:node /app/node_modules ./node_modules
 COPY --from=deps --chown=node:node /app/apps/worker/node_modules ./apps/worker/node_modules
 COPY --from=deps --chown=node:node /app/packages/core/node_modules ./packages/core/node_modules
+# Pre-downloaded browser cache; cached across source-only rebuilds.
+COPY --from=browsers --chown=node:node /ms-playwright /home/node/.cache/ms-playwright
 
 USER node
 ENV PLAYWRIGHT_BROWSERS_PATH=/home/node/.cache/ms-playwright
-RUN pnpm dlx playwright install chromium
 
 WORKDIR /app/apps/worker
 CMD ["pnpm", "start"]
