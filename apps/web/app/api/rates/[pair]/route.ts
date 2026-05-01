@@ -7,6 +7,8 @@ import {
   getReferenceSeries,
   getLatestMid,
   getLatestProviderTable,
+  getLatestReferenceRates,
+  getLatestProviderRunStatus,
 } from '@/lib/queries';
 
 export const dynamic = 'force-dynamic';
@@ -50,18 +52,37 @@ export async function GET(
 
   const pairId = await getPairId(pair);
   if (!pairId) {
-    return NextResponse.json({ mid: null, midSeries: [], refSeries: [], table: [] });
+    return NextResponse.json({
+      mid: null,
+      midSeries: [],
+      refSeries: [],
+      table: [],
+      refLatest: [],
+      runStatus: [],
+    });
   }
 
-  const [mid, midSeries, refSeries, table] = await Promise.all([
+  const [mid, midSeries, refSeries, table, refLatest, runStatus] = await Promise.all([
     getLatestMid(pairId),
     getMidMarketSeries(pairId, windowMs),
     getReferenceSeries(pairId, windowMs),
     getLatestProviderTable(pairId, sendAmount),
+    getLatestReferenceRates(pairId),
+    getLatestProviderRunStatus(pairId),
   ]);
 
   return NextResponse.json(
-    { mid, midSeries, refSeries, table, pair: pairKey, sendAmount, windowMs },
+    {
+      mid,
+      midSeries,
+      refSeries,
+      table,
+      refLatest,
+      runStatus,
+      pair: pairKey,
+      sendAmount,
+      windowMs,
+    },
     { headers: { 'Cache-Control': 'public, max-age=30' } },
   );
 }

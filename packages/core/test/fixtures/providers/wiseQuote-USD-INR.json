@@ -1,0 +1,24 @@
+{
+  "sourceCurrency": "USD",
+  "targetCurrency": "INR",
+  "sourceAmount": 1000,
+  "rate": 94.8,
+  "paymentOptions": [
+    {
+      "sourceAmount": 1000,
+      "targetAmount": 94778.5,
+      "payIn": "BANK_TRANSFER",
+      "payOut": "BANK_TRANSFER",
+      "disabled": false,
+      "fee": { "total": 4.5, "transferwise": 4.5, "payIn": 0, "discount": 0 }
+    },
+    {
+      "sourceAmount": 1000,
+      "targetAmount": 94600,
+      "payIn": "DEBIT",
+      "payOut": "BANK_TRANSFER",
+      "disabled": false,
+      "fee": { "total": 12.0, "transferwise": 4.5, "payIn": 7.5, "discount": 0 }
+    }
+  ]
+}

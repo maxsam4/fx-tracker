@@ -1,0 +1,16 @@
+{
+  "sourceCurrency": "AED",
+  "targetCurrency": "INR",
+  "sourceAmount": 5000,
+  "rate": 25.8413,
+  "paymentOptions": [
+    {
+      "sourceAmount": 5000,
+      "targetAmount": 127934.33,
+      "payIn": "BALANCE",
+      "payOut": "BANK_TRANSFER",
+      "disabled": true,
+      "fee": { "total": 49.23, "transferwise": 49.23, "payIn": 0, "discount": 0 }
+    }
+  ]
+}

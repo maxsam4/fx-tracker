@@ -3,77 +3,59 @@ import { wiseProvider } from '../../src/providers/wise.js';
 import { installFetchMock, resetFetchMock } from '../helpers/mockFetch.js';
 import { readFixtureJson } from '../helpers/fixtures.js';
 
-const fixture = readFixtureJson<{
-  providers: Array<{
-    name: string;
-    alias: string;
-    quotes: Array<{
-      rate: number;
-      fee: number;
-      sourceAmount: number;
-      targetAmount: number;
-      receivedAmount?: number;
-    }>;
-  }>;
-}>('providers/wiseComparisons-USD-INR.json');
-const emptyFixture = readFixtureJson('providers/wiseComparisons-AED-INR-empty.json');
+const usdQuote = readFixtureJson('providers/wiseQuote-USD-INR.json');
+const aedQuote = readFixtureJson('providers/wiseQuote-AED-INR.json');
+const usdComparison = readFixtureJson('providers/wiseComparisons-USD-INR.json');
 
 describe('wiseProvider.fetchQuote', () => {
   afterEach(() => resetFetchMock());
 
-  it('extracts the Wise entry from a comparison response', async () => {
+  it('extracts Wise quote from /v3/quotes/ for USD-INR', async () => {
     installFetchMock({
-      'https://api.wise.com/v3/comparisons/': { body: fixture },
+      'https://api.wise.com/v3/quotes/': { body: usdQuote },
     });
 
-    const q = await wiseProvider.fetchQuote({
-      pair: { from: 'USD', to: 'INR' },
-      sendAmount: 1000,
-    });
-    expect(Array.isArray(q)).toBe(false);
+    const q = await wiseProvider.fetchQuote({ pair: { from: 'USD', to: 'INR' }, sendAmount: 1000 });
     const single = Array.isArray(q) ? q[0]! : q;
     expect(single.providerId).toBe('wise');
-    expect(single.dataSource).toBe('wise_api');
+    expect(single.dataSource).toBe('wise_quote');
     expect(single.rate).toBeCloseTo(94.8);
-    expect(single.feeAmount).toBeCloseTo(4.5);
+    expect(single.feeAmount).toBeCloseTo(4.5); // cheapest non-disabled option wins
     expect(single.receiveAmount).toBeCloseTo(94778.5);
     expect(single.sendAmount).toBe(1000);
   });
 
-  it('throws clearly when Wise is not in the response', async () => {
+  it('extracts Wise quote from /v3/quotes/ for AED-INR (the corridor /comparisons returns empty for)', async () => {
     installFetchMock({
-      'https://api.wise.com/v3/comparisons/': { body: emptyFixture },
+      'https://api.wise.com/v3/quotes/': { body: aedQuote },
     });
-    await expect(
-      wiseProvider.fetchQuote({ pair: { from: 'AED', to: 'INR' }, sendAmount: 5000 }),
-    ).rejects.toThrow(/Wise not found/i);
-  });
 
-  it('uses receivedAmount when present, falls back to targetAmount', async () => {
-    const noReceived = {
-      ...fixture,
-      providers: [
-        {
-          name: 'Wise',
-          alias: 'wise',
-          quotes: [{ rate: 90, fee: 0, sourceAmount: 1000, targetAmount: 90000 }],
-        },
-      ],
-    };
-    installFetchMock({
-      'https://api.wise.com/v3/comparisons/': { body: noReceived },
-    });
-    const q = await wiseProvider.fetchQuote({
-      pair: { from: 'USD', to: 'INR' },
-      sendAmount: 1000,
-    });
+    const q = await wiseProvider.fetchQuote({ pair: { from: 'AED', to: 'INR' }, sendAmount: 5000 });
     const single = Array.isArray(q) ? q[0]! : q;
-    expect(single.receiveAmount).toBe(90000);
+    expect(single.providerId).toBe('wise');
+    expect(single.dataSource).toBe('wise_quote');
+    expect(single.rate).toBeCloseTo(25.8413);
+    // All options disabled in this corridor — still pick the cheapest one.
+    expect(single.feeAmount).toBeCloseTo(49.23);
+    expect(single.receiveAmount).toBeCloseTo(127934.33);
   });
 
-  it('reports network errors', async () => {
+  it('falls back to /v3/comparisons/ when /v3/quotes/ fails', async () => {
     installFetchMock({
-      'https://api.wise.com/v3/comparisons/': { status: 500, text: 'boom' },
+      'https://api.wise.com/v3/quotes/': { status: 500, text: 'boom' },
+      'https://api.wise.com/v3/comparisons/': { body: usdComparison },
+    });
+    const q = await wiseProvider.fetchQuote({ pair: { from: 'USD', to: 'INR' }, sendAmount: 1000 });
+    const single = Array.isArray(q) ? q[0]! : q;
+    expect(single.providerId).toBe('wise');
+    expect(single.dataSource).toBe('wise_api');
+    expect(single.rate).toBeCloseTo(94.8);
+  });
+
+  it('reports the original error when both endpoints fail', async () => {
+    installFetchMock({
+      'https://api.wise.com/v3/quotes/': { status: 500, text: 'boom' },
+      'https://api.wise.com/v3/comparisons/': { status: 500, text: 'also boom' },
     });
     await expect(
       wiseProvider.fetchQuote({ pair: { from: 'USD', to: 'INR' }, sendAmount: 1000 }),

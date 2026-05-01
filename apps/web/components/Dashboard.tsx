@@ -17,17 +17,31 @@ interface TableRow {
   feeAmount: number;
   rate: number;
 }
+interface RefLatest {
+  sourceId: string;
+  capturedAt: string;
+  rate: number;
+}
+interface RunStatus {
+  providerId: string;
+  status: string;
+  errorMessage: string | null;
+  startedAt: string;
+}
 
 interface Props {
   pairKey: string;
   pair: CurrencyPair;
   sendAmount: number;
   referenceAmounts: number[];
+  configuredProviders: string[];
   windowMs: number;
   mid: { rate: number; capturedAt: string; sources: string[] } | null;
   midSeries: MidPoint[];
   refSeries: RefPoint[];
   table: TableRow[];
+  refLatest: RefLatest[];
+  runStatus: RunStatus[];
 }
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
@@ -42,6 +56,8 @@ export function Dashboard(initial: Props) {
       midSeries: initial.midSeries,
       refSeries: initial.refSeries,
       table: initial.table,
+      refLatest: initial.refLatest,
+      runStatus: initial.runStatus,
     },
     revalidateOnFocus: true,
   });
@@ -50,6 +66,8 @@ export function Dashboard(initial: Props) {
   const midSeries: MidPoint[] = data?.midSeries ?? initial.midSeries;
   const refSeries: RefPoint[] = data?.refSeries ?? initial.refSeries;
   const table: TableRow[] = data?.table ?? initial.table;
+  const refLatest: RefLatest[] = data?.refLatest ?? initial.refLatest;
+  const runStatus: RunStatus[] = data?.runStatus ?? initial.runStatus;
 
   return (
     <div className="space-y-6">
@@ -92,9 +110,14 @@ export function Dashboard(initial: Props) {
         </h2>
         <ProviderTable
           rows={table}
+          refLatest={refLatest}
+          runStatus={runStatus}
+          configuredProviders={initial.configuredProviders}
           midRate={mid?.rate ?? null}
           fromCurrency={initial.pair.from}
           toCurrency={initial.pair.to}
+          sendAmount={initial.sendAmount}
+          pairKey={initial.pairKey}
         />
       </section>
     </div>

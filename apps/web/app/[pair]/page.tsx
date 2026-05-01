@@ -7,6 +7,8 @@ import {
   getReferenceSeries,
   getLatestMid,
   getLatestProviderTable,
+  getLatestReferenceRates,
+  getLatestProviderRunStatus,
 } from '@/lib/queries';
 import { Dashboard } from '@/components/Dashboard';
 
@@ -45,11 +47,13 @@ export default async function PairPage({
     );
   }
 
-  const [mid, midSeries, refSeries, table] = await Promise.all([
+  const [mid, midSeries, refSeries, table, refLatest, runStatus] = await Promise.all([
     getLatestMid(pairId),
     getMidMarketSeries(pairId, windowMs),
     getReferenceSeries(pairId, windowMs),
     getLatestProviderTable(pairId, sendAmount),
+    getLatestReferenceRates(pairId),
+    getLatestProviderRunStatus(pairId),
   ]);
 
   return (
@@ -58,11 +62,14 @@ export default async function PairPage({
       pair={pair}
       sendAmount={sendAmount}
       referenceAmounts={pairCfg.referenceAmounts}
+      configuredProviders={pairCfg.providers}
       windowMs={windowMs}
       mid={mid}
       midSeries={midSeries}
       refSeries={refSeries}
       table={table}
+      refLatest={refLatest}
+      runStatus={runStatus}
     />
   );
 }

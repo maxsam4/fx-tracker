@@ -127,6 +127,48 @@ export async function getLatestProviderTable(pairId: number, sendAmount: number)
   }));
 }
 
+export async function getLatestReferenceRates(pairId: number) {
+  const db = getDb();
+  const rows = await db.execute<{
+    source_id: string;
+    captured_at: string;
+    rate: string;
+  }>(sql`
+    SELECT DISTINCT ON (source_id)
+      source_id, captured_at, rate
+    FROM reference_rates
+    WHERE pair_id = ${pairId}
+    ORDER BY source_id, captured_at DESC
+  `);
+  return rows.map((r) => ({
+    sourceId: r.source_id,
+    capturedAt: r.captured_at,
+    rate: parseFloat(r.rate),
+  }));
+}
+
+export async function getLatestProviderRunStatus(pairId: number) {
+  const db = getDb();
+  const rows = await db.execute<{
+    provider_id: string;
+    status: string;
+    error_message: string | null;
+    started_at: string;
+  }>(sql`
+    SELECT DISTINCT ON (provider_id)
+      provider_id, status, error_message, started_at
+    FROM provider_runs
+    WHERE pair_id = ${pairId}
+    ORDER BY provider_id, started_at DESC
+  `);
+  return rows.map((r) => ({
+    providerId: r.provider_id,
+    status: r.status,
+    errorMessage: r.error_message,
+    startedAt: r.started_at,
+  }));
+}
+
 export async function getLatestMid(pairId: number) {
   const db = getDb();
   const [row] = await db
