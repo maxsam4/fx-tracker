@@ -24,41 +24,78 @@ export function ProviderHistoryChart({
 }) {
   const merged = mergeSeries(providerSeries, midSeries);
   if (merged.length === 0) {
-    return <div className="py-8 text-center text-muted">No data in this window yet.</div>;
+    return (
+      <div className="py-16 text-center text-sm text-muted">
+        No data in this window yet.
+      </div>
+    );
   }
   return (
     <div className="h-80 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={merged} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-          <CartesianGrid stroke="#1f242b" strokeDasharray="3 3" />
-          <XAxis dataKey="tLabel" stroke="#7a8693" tick={{ fontSize: 11 }} />
+        <LineChart data={merged} margin={{ top: 16, right: 16, left: 0, bottom: 0 }}>
+          <CartesianGrid
+            stroke="rgb(36, 40, 47)"
+            strokeDasharray="2 4"
+            vertical={false}
+          />
+          <XAxis
+            dataKey="tLabel"
+            stroke="rgb(90, 94, 102)"
+            tick={{ fontSize: 10, fontFamily: 'var(--font-mono)' }}
+            tickLine={false}
+            axisLine={{ stroke: 'rgb(32, 35, 41)' }}
+            minTickGap={48}
+          />
           <YAxis
-            stroke="#7a8693"
+            stroke="rgb(90, 94, 102)"
             domain={['auto', 'auto']}
-            tick={{ fontSize: 11 }}
-            width={70}
+            tick={{ fontSize: 10, fontFamily: 'var(--font-mono)' }}
+            tickLine={false}
+            axisLine={false}
+            width={56}
+            tickFormatter={(v: number) => v.toFixed(3)}
           />
           <Tooltip
-            contentStyle={{ background: '#13171c', border: '1px solid #1f242b' }}
-            labelStyle={{ color: '#e7ebf0' }}
+            cursor={{ stroke: 'rgb(50, 54, 62)', strokeDasharray: '2 4' }}
+            contentStyle={{
+              background: 'rgb(14, 15, 17)',
+              border: '1px solid rgb(50, 54, 62)',
+              borderRadius: 6,
+              fontFamily: 'var(--font-mono)',
+              fontSize: 11,
+              padding: '8px 10px',
+            }}
+            labelStyle={{ color: 'rgb(148, 152, 161)', marginBottom: 4 }}
+            itemStyle={{ color: 'rgb(234, 234, 236)' }}
+            formatter={(value: number) => value.toFixed(4)}
           />
-          <Legend wrapperStyle={{ fontSize: 12 }} />
+          <Legend
+            wrapperStyle={{
+              fontSize: 11,
+              fontFamily: 'var(--font-mono)',
+              paddingTop: 8,
+            }}
+            iconType="plainline"
+            iconSize={16}
+          />
           <Line
             type="monotone"
             dataKey="provider"
             name={providerLabel}
-            stroke="#7cd4b6"
-            strokeWidth={2}
+            stroke="rgb(124, 212, 182)"
+            strokeWidth={1.75}
             dot={false}
+            activeDot={{ r: 3, strokeWidth: 0, fill: 'rgb(124, 212, 182)' }}
             isAnimationActive={false}
           />
           <Line
             type="monotone"
             dataKey="mid"
             name="Mid-market"
-            stroke="#7a8693"
-            strokeDasharray="4 3"
-            strokeWidth={1.4}
+            stroke="rgb(154, 163, 173)"
+            strokeDasharray="3 3"
+            strokeWidth={1}
             dot={false}
             isAnimationActive={false}
           />

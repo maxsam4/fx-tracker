@@ -1,9 +1,12 @@
+import Link from 'next/link';
 import { redirect, notFound } from 'next/navigation';
 import { desc, eq } from 'drizzle-orm';
 import { isAuthenticated } from '@/lib/auth';
 import { loadProvidersConfig } from '@fx/core/config';
 import { getDb, alertRules, alertFires, currencyPairs } from '@fx/core/db';
 import { AlertForm } from '@/components/AlertForm';
+import { Card, CardHeader } from '@/components/ui/Card';
+import { Pill } from '@/components/ui/Pill';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,8 +56,28 @@ export default async function AlertDetailPage({ params }: { params: { id: string
   }));
 
   return (
-    <div className="mx-auto max-w-lg space-y-6">
-      <h1 className="text-xl font-semibold">Edit rule: {rule.name}</h1>
+    <div className="stagger mx-auto max-w-lg space-y-6">
+      <div>
+        <Link
+          href="/alerts"
+          className="text-2xs uppercase tracking-[0.16em] text-subtle hover:text-text"
+        >
+          ← Alerts
+        </Link>
+        <h1 className="mt-2 font-display text-3xl italic tracking-tight text-text">
+          {rule.name}
+        </h1>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <Pill tone="muted" mono>
+            {rule.from}-{rule.to}
+          </Pill>
+          <Pill tone={rule.enabled ? 'accent' : 'muted'}>
+            {rule.enabled ? 'enabled' : 'disabled'}
+          </Pill>
+          <Pill tone="muted">{rule.ruleType}</Pill>
+        </div>
+      </div>
+
       <AlertForm
         pairs={pairs}
         initial={{
@@ -74,57 +97,63 @@ export default async function AlertDetailPage({ params }: { params: { id: string
         }}
       />
 
-      <section>
-        <h2 className="mb-2 text-sm font-medium text-muted">Recent fires</h2>
-        <div className="rounded-md border border-edge bg-surface">
-          {fires.length === 0 ? (
-            <div className="p-4 text-sm text-muted">No fires yet.</div>
-          ) : (
+      <Card>
+        <CardHeader title="Recent fires" subtitle="last 10 events" />
+        {fires.length === 0 ? (
+          <div className="px-5 py-12 text-center text-sm text-muted">
+            No fires yet.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-left text-muted">
-                <tr>
-                  <th className="px-3 py-2">When</th>
-                  <th className="px-3 py-2">Mid</th>
-                  <th className="px-3 py-2">Best</th>
-                  <th className="px-3 py-2">Delivery</th>
+              <thead>
+                <tr className="border-y border-edge bg-bg/40 text-2xs uppercase tracking-[0.12em] text-subtle">
+                  <th className="px-5 py-3 text-left font-medium">When</th>
+                  <th className="px-3 py-3 text-right font-medium">Mid</th>
+                  <th className="px-3 py-3 text-left font-medium">Best</th>
+                  <th className="px-5 py-3 text-left font-medium">Delivery</th>
                 </tr>
               </thead>
               <tbody>
                 {fires.map((f) => (
-                  <tr key={f.id} className="border-t border-edge">
-                    <td className="px-3 py-2 font-mono text-xs">
+                  <tr key={f.id} className="border-b border-edge/60 last:border-b-0">
+                    <td className="px-5 py-3 text-2xs uppercase tracking-[0.12em] text-muted">
                       {new Date(f.firedAt).toLocaleString()}
                     </td>
-                    <td className="px-3 py-2 font-mono text-xs">
+                    <td className="tabular px-3 py-3 text-right font-mono text-xs text-text">
                       {f.midRate ? parseFloat(f.midRate).toFixed(4) : '—'}
                     </td>
-                    <td className="px-3 py-2 font-mono text-xs">
-                      {f.bestProviderId ?? '—'}{' '}
-                      {f.bestEffectiveRate ? `(${parseFloat(f.bestEffectiveRate).toFixed(4)})` : ''}
+                    <td className="px-3 py-3 font-mono text-xs text-muted">
+                      <span className="text-text">{f.bestProviderId ?? '—'}</span>
+                      {f.bestEffectiveRate && (
+                        <span className="ml-1 text-subtle">
+                          ({parseFloat(f.bestEffectiveRate).toFixed(4)})
+                        </span>
+                      )}
                     </td>
-                    <td className="px-3 py-2">
-                      <span
-                        className={
+                    <td className="px-5 py-3">
+                      <Pill
+                        tone={
                           f.deliveryStatus === 'sent'
-                            ? 'text-accent'
+                            ? 'accent'
                             : f.deliveryStatus === 'failed'
-                            ? 'text-bad'
-                            : 'text-muted'
+                              ? 'bad'
+                              : 'muted'
                         }
                       >
                         {f.deliveryStatus}
-                      </span>
+                      </Pill>
                       {f.deliveryError && (
-                        <span className="ml-2 text-xs text-muted">{f.deliveryError}</span>
+                        <span className="ml-2 text-2xs text-subtle">{f.deliveryError}</span>
                       )}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          )}
-        </div>
-      </section>
+          </div>
+        )}
+      </Card>
     </div>
   );
 }

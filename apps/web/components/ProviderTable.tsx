@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { Pill, StatusDot } from './ui/Pill';
 
 interface Row {
   providerId: string;
@@ -65,8 +66,6 @@ export function ProviderTable({
     feeAmount: r.feeAmount,
   }));
 
-  // Mid-market sources = rate-only (no fee). Effective rate equals raw rate.
-  // Display alongside provider quotes so users can compare to the headline mid.
   const referenceRows: UnifiedRow[] = refLatest.map((r) => ({
     kind: 'reference',
     id: r.sourceId,
@@ -78,93 +77,63 @@ export function ProviderTable({
     feeAmount: null,
   }));
 
-  const all = [...referenceRows, ...providerRows].sort(
+  const all = [...providerRows, ...referenceRows].sort(
     (a, b) => b.effectiveRate - a.effectiveRate,
   );
 
-  // Configured providers that have NO recent quote — surface as a failure footer.
+  // For the delta-vs-mid bar viz, normalize across the visible range.
+  const deltas = midRate
+    ? all.map((r) => ((r.effectiveRate - midRate) / midRate) * 100)
+    : [];
+  const maxAbsDelta = deltas.length ? Math.max(...deltas.map(Math.abs), 0.5) : 1;
+
   const presentIds = new Set(rows.map((r) => r.providerId));
   const statusByProvider = new Map(runStatus.map((s) => [s.providerId, s] as const));
   const missing = configuredProviders.filter((p) => !presentIds.has(p));
 
   if (all.length === 0 && missing.length === 0) {
     return (
-      <div className="py-6 text-center text-muted">
+      <div className="px-5 py-12 text-center text-sm text-muted">
         No provider quotes captured yet for this amount.
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="text-left text-muted">
-            <tr>
-              <th className="px-2 py-2">Provider</th>
-              <th className="px-2 py-2">Effective rate</th>
-              <th className="px-2 py-2">Raw rate</th>
-              <th className="px-2 py-2">Δ vs mid</th>
-              <th className="px-2 py-2">Receive ({toCurrency})</th>
-              <th className="px-2 py-2">Fee ({fromCurrency})</th>
-              <th className="px-2 py-2">Updated</th>
+          <thead>
+            <tr className="border-y border-edge bg-bg/40 text-2xs uppercase tracking-[0.12em] text-subtle">
+              <th className="px-5 py-3 text-left font-medium">#</th>
+              <th className="px-3 py-3 text-left font-medium">Provider</th>
+              <th className="px-3 py-3 text-right font-medium">Effective rate</th>
+              <th className="px-3 py-3 text-left font-medium">Δ vs mid</th>
+              <th className="px-3 py-3 text-right font-medium">Receive ({toCurrency})</th>
+              <th className="px-3 py-3 text-right font-medium">Fee ({fromCurrency})</th>
+              <th className="px-5 py-3 text-right font-medium">Updated</th>
             </tr>
           </thead>
           <tbody>
             {all.map((r, i) => {
               const delta = midRate ? ((r.effectiveRate - midRate) / midRate) * 100 : null;
-              const deltaClass =
-                delta === null
-                  ? 'text-muted'
-                  : delta >= -0.5
-                  ? 'text-accent'
-                  : delta >= -2
-                  ? 'text-warn'
-                  : 'text-bad';
               const isReference = r.kind === 'reference';
-              const isBest = i === 0 && !isReference;
-
-              const idCell = isReference ? (
-                <span className="italic">{r.id}</span>
-              ) : (
-                <Link
-                  href={`/${encodeURIComponent(pairKey)}/providers/${encodeURIComponent(r.id)}?amount=${sendAmount}`}
-                  className="font-medium text-text hover:text-accent hover:underline"
-                >
-                  {r.id}
-                </Link>
-              );
-
-              const rowClass = [
-                isBest ? 'bg-edge/30' : '',
-                isReference ? 'text-muted' : '',
-              ]
-                .filter(Boolean)
-                .join(' ');
+              const isBest =
+                !isReference && all.findIndex((x) => x.kind === 'provider') === i;
 
               return (
-                <tr key={`${r.kind}:${r.id}`} className={rowClass}>
-                  <td className="px-2 py-2">
-                    {idCell}
-                    {isReference && (
-                      <span className="ml-2 rounded border border-edge px-1 text-[10px] uppercase tracking-wide text-muted">
-                        mid
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-2 py-2 font-mono">{r.effectiveRate.toFixed(4)}</td>
-                  <td className="px-2 py-2 font-mono">{r.rawRate.toFixed(4)}</td>
-                  <td className={`px-2 py-2 font-mono ${deltaClass}`}>
-                    {delta === null ? '—' : `${delta >= 0 ? '+' : ''}${delta.toFixed(2)}%`}
-                  </td>
-                  <td className="px-2 py-2 font-mono">
-                    {r.receiveAmount === null ? '—' : fmt(r.receiveAmount)}
-                  </td>
-                  <td className="px-2 py-2 font-mono">
-                    {r.feeAmount === null ? '—' : fmt(r.feeAmount)}
-                  </td>
-                  <td className="px-2 py-2 text-muted">{ago(r.capturedAt)}</td>
-                </tr>
+                <RowComponent
+                  key={`${r.kind}:${r.id}`}
+                  row={r}
+                  index={i + 1}
+                  delta={delta}
+                  maxAbsDelta={maxAbsDelta}
+                  isBest={isBest}
+                  isReference={isReference}
+                  pairKey={pairKey}
+                  sendAmount={sendAmount}
+                  toCurrency={toCurrency}
+                />
               );
             })}
           </tbody>
@@ -172,31 +141,37 @@ export function ProviderTable({
       </div>
 
       {missing.length > 0 && (
-        <div className="rounded-md border border-edge bg-surface/60 p-3 text-xs">
-          <div className="mb-2 font-medium text-muted">
-            Configured but not reporting ({missing.length})
+        <div className="border-t border-edge bg-bg/40 px-5 py-4">
+          <div className="mb-2 flex items-center gap-2">
+            <span className="text-2xs uppercase tracking-[0.14em] text-subtle">
+              Configured · not reporting
+            </span>
+            <span className="tabular font-mono text-2xs text-muted">
+              {missing.length}
+            </span>
           </div>
-          <ul className="space-y-1">
+          <ul className="grid gap-1.5 sm:grid-cols-2">
             {missing.map((id) => {
               const s = statusByProvider.get(id);
+              const tone =
+                s?.status === 'ok' ? 'ok'
+                : s?.status === 'timeout' ? 'warn'
+                : s?.status ? 'bad'
+                : 'idle';
               return (
-                <li key={id} className="flex flex-wrap gap-2">
-                  <span className="font-mono text-text">{id}</span>
-                  <span
-                    className={
-                      s?.status === 'ok'
-                        ? 'text-accent'
-                        : s?.status === 'timeout'
-                        ? 'text-warn'
-                        : s?.status
-                        ? 'text-bad'
-                        : 'text-muted'
-                    }
-                  >
+                <li
+                  key={id}
+                  className="flex flex-wrap items-center gap-2 rounded border border-edge bg-surface px-3 py-2 text-xs"
+                >
+                  <StatusDot status={tone} />
+                  <span className="font-mono font-medium text-text">{id}</span>
+                  <span className="text-2xs uppercase tracking-[0.12em] text-muted">
                     {s?.status ?? 'no run'}
                   </span>
                   {s?.errorMessage && (
-                    <span className="text-muted">— {truncate(s.errorMessage, 140)}</span>
+                    <span className="grow truncate text-subtle" title={s.errorMessage}>
+                      — {truncate(s.errorMessage, 60)}
+                    </span>
                   )}
                 </li>
               );
@@ -204,6 +179,161 @@ export function ProviderTable({
           </ul>
         </div>
       )}
+    </div>
+  );
+}
+
+function RowComponent({
+  row,
+  index,
+  delta,
+  maxAbsDelta,
+  isBest,
+  isReference,
+  pairKey,
+  sendAmount,
+  toCurrency,
+}: {
+  row: UnifiedRow;
+  index: number;
+  delta: number | null;
+  maxAbsDelta: number;
+  isBest: boolean;
+  isReference: boolean;
+  pairKey: string;
+  sendAmount: number;
+  toCurrency: string;
+}) {
+  const deltaTone =
+    delta === null
+      ? 'text-subtle'
+      : delta >= -0.5
+        ? 'text-accent'
+        : delta >= -2
+          ? 'text-warn'
+          : 'text-bad';
+
+  return (
+    <tr
+      className={`group relative border-b border-edge/60 last:border-b-0 transition-colors ${
+        isReference ? 'bg-bg/30' : 'hover:bg-elevated/60'
+      }`}
+    >
+      <td className="relative px-5 py-3.5">
+        {isBest && (
+          <span
+            aria-hidden
+            className="absolute inset-y-0 left-0 w-0.5 bg-accent shadow-[0_0_12px_rgb(var(--accent)/0.6)]"
+          />
+        )}
+        <span
+          className={`tabular font-mono text-2xs ${
+            isBest ? 'text-accent' : 'text-subtle'
+          }`}
+        >
+          {isReference ? '—' : String(index).padStart(2, '0')}
+        </span>
+      </td>
+
+      <td className="px-3 py-3.5">
+        <div className="flex flex-wrap items-center gap-2">
+          {isReference ? (
+            <>
+              <span className="font-mono text-sm text-muted">{row.id}</span>
+              <Pill tone="muted">mid feed</Pill>
+            </>
+          ) : (
+            <>
+              <Link
+                href={`/${encodeURIComponent(pairKey)}/providers/${encodeURIComponent(row.id)}?amount=${sendAmount}`}
+                className="font-mono text-sm font-medium text-text transition-colors hover:text-accent"
+              >
+                {row.id}
+              </Link>
+              {isBest && <Pill tone="accent">best</Pill>}
+            </>
+          )}
+        </div>
+      </td>
+
+      <td className="px-3 py-3.5 text-right">
+        <span
+          className={`tabular font-mono text-sm font-medium ${
+            isReference ? 'text-muted' : 'text-text'
+          }`}
+        >
+          {row.effectiveRate.toFixed(4)}
+        </span>
+      </td>
+
+      <td className="px-3 py-3.5">
+        <DeltaCell delta={delta} maxAbsDelta={maxAbsDelta} tone={deltaTone} />
+      </td>
+
+      <td
+        className={`tabular px-3 py-3.5 text-right font-mono text-sm ${
+          isReference ? 'text-muted' : 'text-text'
+        }`}
+      >
+        {row.receiveAmount === null ? '—' : fmt(row.receiveAmount)}
+      </td>
+
+      <td
+        className={`tabular px-3 py-3.5 text-right font-mono text-sm ${
+          isReference || row.feeAmount === null ? 'text-subtle' : 'text-muted'
+        }`}
+      >
+        {row.feeAmount === null ? '—' : fmt(row.feeAmount)}
+      </td>
+
+      <td className="px-5 py-3.5 text-right text-2xs uppercase tracking-[0.12em] text-subtle">
+        {ago(row.capturedAt)}
+      </td>
+    </tr>
+  );
+}
+
+function DeltaCell({
+  delta,
+  maxAbsDelta,
+  tone,
+}: {
+  delta: number | null;
+  maxAbsDelta: number;
+  tone: string;
+}) {
+  if (delta === null) {
+    return <span className="text-subtle">—</span>;
+  }
+  // Bar fills from center; negative = left, positive = right.
+  const halfPct = (Math.abs(delta) / maxAbsDelta) * 50;
+  const isNeg = delta < 0;
+  const barColor =
+    delta >= -0.5
+      ? 'bg-accent'
+      : delta >= -2
+        ? 'bg-warn'
+        : 'bg-bad';
+
+  return (
+    <div className="flex items-center gap-2">
+      <span className={`tabular font-mono text-xs font-medium ${tone} min-w-[3.25rem]`}>
+        {delta >= 0 ? '+' : ''}
+        {delta.toFixed(2)}%
+      </span>
+      <div className="relative h-1 w-16 overflow-hidden rounded-full bg-edge sm:w-24">
+        <span
+          aria-hidden
+          className="absolute inset-y-0 left-1/2 w-px bg-edge-strong"
+        />
+        <span
+          aria-hidden
+          className={`absolute inset-y-0 ${barColor} ${
+            isNeg ? 'right-1/2' : 'left-1/2'
+          }`}
+          style={{ width: `${halfPct}%` }}
+        />
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { SegmentedControl } from './ui/SegmentedControl';
 
 const OPTIONS: Array<{ key: string; label: string; ms: number }> = [
   { key: '24h', label: '24h', ms: 24 * 60 * 60 * 1000 },
@@ -22,24 +22,19 @@ export function WindowControls({
   const amount = params.get('amount');
 
   return (
-    <div className="flex gap-1 rounded-md border border-edge bg-surface p-1">
-      {OPTIONS.map((o) => {
-        const active = Math.abs(currentMs - o.ms) < 1000;
+    <SegmentedControl
+      label="Range"
+      options={OPTIONS.map((o) => {
         const sp = new URLSearchParams();
         sp.set('window', o.key);
         if (amount) sp.set('amount', amount);
-        return (
-          <Link
-            key={o.key}
-            href={`/${pairKey}?${sp.toString()}`}
-            className={`rounded px-2 py-1 text-xs ${
-              active ? 'bg-edge text-text' : 'text-muted hover:text-text'
-            }`}
-          >
-            {o.label}
-          </Link>
-        );
+        return {
+          key: o.key,
+          active: Math.abs(currentMs - o.ms) < 1000,
+          href: `/${pairKey}?${sp.toString()}`,
+          label: <span className="tabular font-mono">{o.label}</span>,
+        };
       })}
-    </div>
+    />
   );
 }

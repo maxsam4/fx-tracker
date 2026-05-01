@@ -22,6 +22,11 @@ interface Props {
   pairs: Array<{ key: string; referenceAmounts: number[] }>;
 }
 
+const inputClass =
+  'w-full rounded border border-edge bg-bg px-3 py-2 text-sm text-text transition-colors placeholder:text-subtle hover:border-edge-strong focus:border-accent/50';
+
+const monoInputClass = `${inputClass} tabular font-mono`;
+
 export function AlertForm({ initial, pairs }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -33,7 +38,7 @@ export function AlertForm({ initial, pairs }: Props) {
 
   return (
     <form
-      className="space-y-4 rounded-md border border-edge bg-surface p-4"
+      className="space-y-5 rounded-md border border-edge bg-surface p-6"
       onSubmit={(e) => {
         e.preventDefault();
         setError(null);
@@ -62,7 +67,7 @@ export function AlertForm({ initial, pairs }: Props) {
           name="name"
           required
           defaultValue={initial?.name ?? ''}
-          className="w-full rounded border border-edge bg-bg px-2 py-1"
+          className={inputClass}
         />
       </Field>
 
@@ -71,10 +76,12 @@ export function AlertForm({ initial, pairs }: Props) {
           name="pair"
           value={pair}
           onChange={(e) => setPair(e.target.value)}
-          className="w-full rounded border border-edge bg-bg px-2 py-1"
+          className={inputClass}
         >
           {pairs.map((p) => (
-            <option key={p.key} value={p.key}>{p.key}</option>
+            <option key={p.key} value={p.key}>
+              {p.key}
+            </option>
           ))}
         </select>
       </Field>
@@ -84,7 +91,7 @@ export function AlertForm({ initial, pairs }: Props) {
           name="ruleType"
           value={ruleType}
           onChange={(e) => setRuleType(e.target.value as 'interval' | 'threshold')}
-          className="w-full rounded border border-edge bg-bg px-2 py-1"
+          className={inputClass}
         >
           <option value="threshold">threshold (price crosses target)</option>
           <option value="interval">interval (digest every N seconds)</option>
@@ -97,7 +104,7 @@ export function AlertForm({ initial, pairs }: Props) {
             <select
               name="thresholdTarget"
               defaultValue={initial?.thresholdTarget ?? 'mid_market'}
-              className="w-full rounded border border-edge bg-bg px-2 py-1"
+              className={inputClass}
             >
               <option value="mid_market">mid-market rate</option>
               <option value="best_effective">best effective rate at amount</option>
@@ -107,7 +114,7 @@ export function AlertForm({ initial, pairs }: Props) {
             <select
               name="thresholdOp"
               defaultValue={initial?.thresholdOp ?? 'gt'}
-              className="w-full rounded border border-edge bg-bg px-2 py-1"
+              className={inputClass}
             >
               <option value="gt">crosses above (&gt;)</option>
               <option value="lt">crosses below (&lt;)</option>
@@ -120,7 +127,7 @@ export function AlertForm({ initial, pairs }: Props) {
               step="0.0001"
               required
               defaultValue={initial?.thresholdValue ?? ''}
-              className="w-full rounded border border-edge bg-bg px-2 py-1 font-mono"
+              className={monoInputClass}
             />
           </Field>
           {pairCfg && (
@@ -128,10 +135,12 @@ export function AlertForm({ initial, pairs }: Props) {
               <select
                 name="referenceAmount"
                 defaultValue={initial?.referenceAmount ?? pairCfg.referenceAmounts[0]}
-                className="w-full rounded border border-edge bg-bg px-2 py-1"
+                className={inputClass}
               >
                 {pairCfg.referenceAmounts.map((a) => (
-                  <option key={a} value={a}>{a}</option>
+                  <option key={a} value={a}>
+                    {a}
+                  </option>
                 ))}
               </select>
             </Field>
@@ -147,7 +156,7 @@ export function AlertForm({ initial, pairs }: Props) {
             min="60"
             required
             defaultValue={initial?.intervalSeconds ?? 21600}
-            className="w-full rounded border border-edge bg-bg px-2 py-1 font-mono"
+            className={monoInputClass}
           />
         </Field>
       )}
@@ -158,7 +167,7 @@ export function AlertForm({ initial, pairs }: Props) {
           required
           defaultValue={initial?.telegramChatId ?? ''}
           placeholder="-100123456789 or 123456789"
-          className="w-full rounded border border-edge bg-bg px-2 py-1 font-mono"
+          className={monoInputClass}
         />
       </Field>
 
@@ -168,7 +177,7 @@ export function AlertForm({ initial, pairs }: Props) {
           type="number"
           min="60"
           defaultValue={initial?.cooldownSeconds ?? 3600}
-          className="w-full rounded border border-edge bg-bg px-2 py-1 font-mono"
+          className={monoInputClass}
         />
       </Field>
 
@@ -179,22 +188,31 @@ export function AlertForm({ initial, pairs }: Props) {
         enabled=true takes precedence (FormData preserves order).
       */}
       <input type="hidden" name="enabled" value="false" />
-      <Field label="Enabled">
+      <label className="flex cursor-pointer items-center gap-3 rounded border border-edge bg-bg/40 px-3 py-2.5 text-sm">
         <input
           name="enabled"
           type="checkbox"
           value="true"
           defaultChecked={initial?.enabled ?? true}
+          className="h-4 w-4 cursor-pointer accent-[rgb(var(--accent))]"
         />
-      </Field>
+        <span className="text-2xs font-medium uppercase tracking-[0.14em] text-muted">
+          Enabled
+        </span>
+      </label>
 
-      {error && <p className="text-sm text-bad">{error}</p>}
+      {error && (
+        <p className="rounded border border-bad/30 bg-bad/10 px-3 py-2 text-sm text-bad">
+          {error}
+        </p>
+      )}
+
       <button
         type="submit"
         disabled={pending}
-        className="rounded bg-accent px-3 py-1 text-sm font-medium text-bg disabled:opacity-50"
+        className="rounded-md border border-accent/40 bg-accent/15 px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-accent transition-colors hover:bg-accent/25 disabled:opacity-50"
       >
-        {pending ? 'Saving…' : initial?.id ? 'Save changes' : 'Create rule'}
+        {pending ? 'Saving…' : initial?.id ? 'Save changes →' : 'Create rule →'}
       </button>
     </form>
   );
@@ -202,9 +220,11 @@ export function AlertForm({ initial, pairs }: Props) {
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="block text-sm">
-      <span className="text-muted">{label}</span>
-      <div className="mt-1">{children}</div>
+    <label className="block">
+      <span className="text-2xs font-medium uppercase tracking-[0.14em] text-subtle">
+        {label}
+      </span>
+      <div className="mt-2">{children}</div>
     </label>
   );
 }

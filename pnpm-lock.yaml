@@ -32,6 +32,9 @@ importers:
       drizzle-orm:
         specifier: ^0.36.0
         version: 0.36.4(@types/react@18.3.28)(postgres@3.4.9)(react@18.3.1)
+      geist:
+        specifier: ^1.7.0
+        version: 1.7.0(next@14.2.35(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       iron-session:
         specifier: ^8.0.4
         version: 8.0.4
@@ -1483,6 +1486,11 @@ packages:
     resolution: {integrity: sha512-+5J6MS/5XksCuXq++uFRsnUd7Ovu1XenbeuIuNRJxYWjgQbPuFhT14lAvsWfqfAmnwluf1OwMjz39HjfLPci0Q==}
     engines: {node: '>=10'}
     deprecated: This package is no longer supported.
+
+  geist@1.7.0:
+    resolution: {integrity: sha512-ZaoiZwkSf0DwwB1ncdLKp+ggAldqxl5L1+SXaNIBGkPAqcu+xjVJLxlf3/S8vLt9UHx1xu5fz3lbzKCj5iOVdQ==}
+    peerDependencies:
+      next: '>=13.2.0'
 
   get-tsconfig@4.14.0:
     resolution: {integrity: sha512-yTb+8DXzDREzgvYmh6s9vHsSVCHeC0G3PI5bEXNBHtmshPnO+S5O7qgLEOn0I5QvMy6kpZN8K1NKGyilLb93wA==}
@@ -3228,6 +3236,10 @@ snapshots:
       string-width: 4.2.3
       strip-ansi: 6.0.1
       wide-align: 1.1.5
+
+  geist@1.7.0(next@14.2.35(react-dom@18.3.1(react@18.3.1))(react@18.3.1)):
+    dependencies:
+      next: 14.2.35(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   get-tsconfig@4.14.0:
     dependencies:

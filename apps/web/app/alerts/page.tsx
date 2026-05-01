@@ -2,7 +2,9 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { desc, eq } from 'drizzle-orm';
 import { isAuthenticated } from '@/lib/auth';
-import { getDb, alertRules, alertFires, currencyPairs } from '@fx/core/db';
+import { getDb, alertRules, currencyPairs } from '@fx/core/db';
+import { Card, CardHeader } from '@/components/ui/Card';
+import { Pill, StatusDot } from '@/components/ui/Pill';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,65 +32,107 @@ export default async function AlertsListPage() {
     .orderBy(desc(alertRules.createdAt));
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-end justify-between">
-        <h1 className="text-xl font-semibold">Alerts</h1>
-        <Link
-          href="/alerts/new"
-          className="rounded bg-accent px-3 py-1 text-sm font-medium text-bg"
-        >
-          New rule
-        </Link>
-      </div>
+    <div className="stagger space-y-8">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-2xs uppercase tracking-[0.16em] text-subtle">Admin</p>
+          <h1 className="mt-1 font-display text-4xl italic tracking-tight text-text">
+            Alerts
+          </h1>
+          <p className="mt-1 text-sm text-muted">
+            Threshold and interval rules — delivered to Telegram.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/alerts/telegram-pair"
+            className="rounded-md border border-edge bg-surface px-3 py-1.5 text-xs font-medium uppercase tracking-[0.14em] text-muted transition-colors hover:border-edge-strong hover:text-text"
+          >
+            Telegram chats
+          </Link>
+          <Link
+            href="/alerts/new"
+            className="rounded-md border border-accent/30 bg-accent/10 px-3 py-1.5 text-xs font-medium uppercase tracking-[0.14em] text-accent transition-colors hover:bg-accent/20"
+          >
+            + New rule
+          </Link>
+        </div>
+      </header>
 
-      <div className="rounded-md border border-edge bg-surface">
+      <Card>
+        <CardHeader
+          title="Rules"
+          subtitle={`${rules.length} configured`}
+          right={
+            <span className="text-2xs uppercase tracking-[0.14em] text-subtle">
+              {rules.filter((r) => r.enabled).length} enabled
+            </span>
+          }
+        />
         {rules.length === 0 ? (
-          <div className="p-6 text-center text-muted">No rules yet.</div>
+          <div className="px-5 py-12 text-center text-sm text-muted">
+            No rules yet — create one to start receiving alerts.
+          </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="text-left text-muted">
-              <tr>
-                <th className="px-3 py-2">Name</th>
-                <th className="px-3 py-2">Pair</th>
-                <th className="px-3 py-2">Type</th>
-                <th className="px-3 py-2">Trigger</th>
-                <th className="px-3 py-2">Last fired</th>
-                <th className="px-3 py-2">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rules.map((r) => (
-                <tr key={r.id} className="border-t border-edge">
-                  <td className="px-3 py-2">
-                    <Link href={`/alerts/${r.id}`} className="text-text hover:underline">
-                      {r.name}
-                    </Link>
-                  </td>
-                  <td className="px-3 py-2 font-mono text-xs">
-                    {r.from}-{r.to}
-                  </td>
-                  <td className="px-3 py-2">{r.ruleType}</td>
-                  <td className="px-3 py-2 font-mono text-xs">
-                    {r.ruleType === 'threshold'
-                      ? `${r.thresholdTarget} ${r.thresholdOp === 'gt' ? '>' : '<'} ${r.thresholdValue}`
-                      : `every ${r.intervalSeconds}s`}
-                  </td>
-                  <td className="px-3 py-2 text-muted">
-                    {r.lastFiredAt ? new Date(r.lastFiredAt).toLocaleString() : '—'}
-                  </td>
-                  <td className="px-3 py-2">
-                    {r.enabled ? (
-                      <span className="text-accent">enabled</span>
-                    ) : (
-                      <span className="text-muted">disabled</span>
-                    )}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-y border-edge bg-bg/40 text-2xs uppercase tracking-[0.12em] text-subtle">
+                  <th className="px-5 py-3 text-left font-medium">Name</th>
+                  <th className="px-3 py-3 text-left font-medium">Pair</th>
+                  <th className="px-3 py-3 text-left font-medium">Type</th>
+                  <th className="px-3 py-3 text-left font-medium">Trigger</th>
+                  <th className="px-3 py-3 text-left font-medium">Last fired</th>
+                  <th className="px-5 py-3 text-left font-medium">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {rules.map((r) => (
+                  <tr
+                    key={r.id}
+                    className="border-b border-edge/60 last:border-b-0 transition-colors hover:bg-elevated/60"
+                  >
+                    <td className="px-5 py-3.5">
+                      <Link
+                        href={`/alerts/${r.id}`}
+                        className="font-medium text-text transition-colors hover:text-accent"
+                      >
+                        {r.name}
+                      </Link>
+                    </td>
+                    <td className="tabular px-3 py-3.5 font-mono text-xs text-muted">
+                      {r.from}-{r.to}
+                    </td>
+                    <td className="px-3 py-3.5">
+                      <Pill tone="muted">{r.ruleType}</Pill>
+                    </td>
+                    <td className="tabular px-3 py-3.5 font-mono text-xs text-muted">
+                      {r.ruleType === 'threshold'
+                        ? `${r.thresholdTarget} ${r.thresholdOp === 'gt' ? '>' : '<'} ${r.thresholdValue}`
+                        : `every ${r.intervalSeconds}s`}
+                    </td>
+                    <td className="px-3 py-3.5 text-2xs uppercase tracking-[0.12em] text-subtle">
+                      {r.lastFiredAt ? new Date(r.lastFiredAt).toLocaleString() : '—'}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span className="inline-flex items-center gap-2">
+                        <StatusDot status={r.enabled ? 'ok' : 'idle'} />
+                        <span
+                          className={`text-2xs uppercase tracking-[0.12em] ${
+                            r.enabled ? 'text-accent' : 'text-subtle'
+                          }`}
+                        >
+                          {r.enabled ? 'enabled' : 'disabled'}
+                        </span>
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

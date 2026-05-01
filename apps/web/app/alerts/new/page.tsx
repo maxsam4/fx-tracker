@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { isAuthenticated } from '@/lib/auth';
 import { loadProvidersConfig } from '@fx/core/config';
@@ -11,8 +12,21 @@ export default async function NewAlertPage() {
     .map(([key, c]) => ({ key, referenceAmounts: c.referenceAmounts }));
 
   return (
-    <div className="mx-auto max-w-lg space-y-4">
-      <h1 className="text-xl font-semibold">New alert rule</h1>
+    <div className="stagger mx-auto max-w-lg space-y-6">
+      <div>
+        <Link
+          href="/alerts"
+          className="text-2xs uppercase tracking-[0.16em] text-subtle hover:text-text"
+        >
+          ← Alerts
+        </Link>
+        <h1 className="mt-2 font-display text-3xl italic tracking-tight text-text">
+          New rule
+        </h1>
+        <p className="mt-1 text-sm text-muted">
+          Threshold rules fire on edge-cross; interval rules digest every N seconds.
+        </p>
+      </div>
       <AlertForm pairs={pairs} />
     </div>
   );

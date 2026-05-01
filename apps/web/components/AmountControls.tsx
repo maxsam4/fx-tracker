@@ -1,6 +1,6 @@
 'use client';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { SegmentedControl } from './ui/SegmentedControl';
 
 export function AmountControls({
   pairKey,
@@ -17,25 +17,25 @@ export function AmountControls({
   const window = params.get('window') ?? '7d';
 
   return (
-    <div className="flex gap-1 rounded-md border border-edge bg-surface p-1">
-      {options.map((o) => {
-        const active = o === current;
+    <SegmentedControl
+      label="Send"
+      options={options.map((o) => {
         const sp = new URLSearchParams();
         sp.set('amount', String(o));
         sp.set('window', window);
-        return (
-          <Link
-            key={o}
-            href={`/${pairKey}?${sp.toString()}`}
-            className={`rounded px-2 py-1 text-xs ${
-              active ? 'bg-edge text-text' : 'text-muted hover:text-text'
-            }`}
-          >
-            {fmt(o)} {from}
-          </Link>
-        );
+        return {
+          key: String(o),
+          active: o === current,
+          href: `/${pairKey}?${sp.toString()}`,
+          label: (
+            <span className="tabular font-mono">
+              {fmt(o)}
+              <span className="ml-1 text-subtle">{from}</span>
+            </span>
+          ),
+        };
       })}
-    </div>
+    />
   );
 }
 
