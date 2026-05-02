@@ -2,53 +2,123 @@ import type { CurrencyPair } from '../types.js';
 import type { RateProvider, Quote } from './types.js';
 import { withPage } from '../scrape/browserPool.js';
 
-// masarif.ae is a UAE rate aggregator that lists daily rates from many
-// exchange houses (LuLu, Al Ansari, Sharaf, UAE Exchange, etc.).
+// masarif.ae aggregates daily AED rates from UAE exchange houses (LuLu,
+// Al Ansari, Sharaf, Al Fardan, etc.). One scrape returns many providers
+// — we emit one Quote per row.
 //
-// One scrape returns many providers — we emit one Quote per row.
+// Page structure (verified live 2026-05-02):
+//   URL:   https://masarif.ae/currency-exchange-rates/inr
+//   Table: <table class="...sortable"> with five columns —
+//     [ Exchange | Buy Rate | Sell Rate | Transfer Rate | Updated At ]
 //
-// SELECTORS BELOW ARE BEST-EFFORT and almost certainly need adjustment after
-// the first live run. The structure is: a table with rows like
-//   <house name> | buy rate | sell rate
-// We use the BUY rate (what they pay for AED in INR) for AED→INR.
-// If the layout has changed, the parser will throw and the run row will be
-// recorded as 'error' — fix selectors and redeploy.
+// Column meaning (from the house's perspective):
+//   - Buy Rate (INR/AED): house pays this many INR for 1 AED that the customer
+//                         is selling. Higher = better for the customer.
+//   - Sell Rate: often expressed as AED/INR (~0.04). Inverse of buy. Some
+//                houses leave it blank or use it as the buy-back rate.
+//   - Transfer Rate (INR/AED): the rate the house offers for AED→INR remittance
+//                              specifically. This is what we want for the
+//                              comparison table — it's the rate the recipient
+//                              actually receives per AED sent.
 //
-// masarif provides no fee data (rates only); we record fee=0 and trust that
-// the underlying houses bake their margin into the rate.
+// Rate selection: prefer Transfer Rate; fall back to Buy Rate if Transfer is
+// blank. Skip rows whose only number is an inverse (sell-rate-style ~0.04)
+// or whose values fall outside a plausible AED-INR band.
+//
+// Freshness: many houses leave stale rows on the page (Sep 2025, Feb 2026).
+// We drop anything updated more than STALE_DAYS ago so the comparison reflects
+// what's actually live today.
 
-// Live probe (2026-04): /en/rates/india returns 404; the homepage at
-// masarif.ae shows aggregated UAE exchange-house rates. The page is JS-rendered
-// (no INR mentions in the static HTML), so Playwright is required. Selector
-// hints below are best-effort.
-const MASARIF_URL_INR = 'https://www.masarif.ae/';
+const URL_INR = 'https://masarif.ae/currency-exchange-rates/inr';
+const STALE_DAYS = 7;
+const RATE_LO = 18;
+const RATE_HI = 35;
 
 interface AggregatorRow {
   providerId: string;
   rate: number;
-  rawName?: string;
+  rawName: string;
+  updatedAt: string;
 }
 
-const PROVIDER_ID_MAP: Record<string, string> = {
-  lulu: 'lulu',
-  'lulu exchange': 'lulu',
-  'al ansari': 'alAnsari',
-  'al ansari exchange': 'alAnsari',
-  sharaf: 'sharaf',
-  'sharaf exchange': 'sharaf',
-  'uae exchange': 'uaeExchange',
-  'wall street': 'wallStreet',
-  'wall street exchange': 'wallStreet',
-  'al fardan': 'alFardan',
-};
+// Lower-cased exchange-name fragment → canonical provider id used in
+// `config/providers.yml` `preferredSource`. Order matters — longer fragments
+// first so "al ansari" doesn't shadow "al ansari exchange".
+const PROVIDER_ID_MAP: Array<[fragment: string, providerId: string]> = [
+  ['lulu international', 'lulu'],
+  ['lulu exchange', 'lulu'],
+  ['lulu money', 'lulu'],
+  ['lulu', 'lulu'],
+  ['al ansari', 'alAnsari'],
+  ['sharaf exchange', 'sharaf'],
+  ['sharaf', 'sharaf'],
+  ['uae exchange', 'uaeExchange'],
+  ['wall street exchange', 'wallStreet'],
+  ['wall street', 'wallStreet'],
+  ['al fardan', 'alFardan'],
+  ['al fuad', 'alFuad'],
+  ['al ghurair', 'alGhurair'],
+  ['al ahalia', 'alAhalia'],
+  ['al dahab', 'alDahab'],
+  ['joyalukkas', 'joyalukkas'],
+  ['lari exchange', 'lari'],
+  ['orient exchange', 'orient'],
+  ['multinet', 'multinet'],
+  ['gcc exchange', 'gcc'],
+  ['hadi express', 'hadiExpress'],
+  ['goodwill', 'goodwill'],
+  ['index exchange', 'indexExchange'],
+  ['leela megh', 'leelaMegh'],
+  ['lm exchange', 'leelaMegh'],
+  ['travelex', 'travelex'],
+  ['universal exchange', 'universalExchange'],
+];
 
 function normalizeProviderId(name: string): string {
   const lower = name.trim().toLowerCase();
-  for (const key of Object.keys(PROVIDER_ID_MAP)) {
-    if (lower.includes(key)) return PROVIDER_ID_MAP[key]!;
+  for (const [fragment, providerId] of PROVIDER_ID_MAP) {
+    if (lower.includes(fragment)) return providerId;
   }
-  // Fallback: snake-cased name
-  return lower.replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+  // Fallback: snake-case the original name. This still produces a stable id;
+  // it just won't be subject to cross-provider dedup against an explicit
+  // direct-scrape plugin (we don't have one for these long-tail houses).
+  return lower
+    .replace(/exchange/g, '')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_|_$/g, '');
+}
+
+function parseRate(cell: string): number | null {
+  const m = cell.replace(/,/g, '').match(/^(\d{1,3}(?:\.\d{1,6})?)$/);
+  if (!m) return null;
+  const v = parseFloat(m[1]!);
+  return Number.isFinite(v) ? v : null;
+}
+
+function inRange(v: number | null): v is number {
+  return v !== null && v > RATE_LO && v < RATE_HI;
+}
+
+// "May 2, 2026 08:30" → Date. Returns null if unparseable. We avoid `new
+// Date(string)` for free-form strings (locale-dependent); instead match the
+// month/day/year/time fields explicitly.
+const MONTHS: Record<string, number> = {
+  Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+  Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
+};
+function parseUpdatedAt(cell: string): Date | null {
+  const m = cell.match(/(\w{3})\s+(\d{1,2}),\s+(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+  if (!m) return null;
+  const month = MONTHS[m[1]!];
+  if (month === undefined) return null;
+  const day = parseInt(m[2]!, 10);
+  const year = parseInt(m[3]!, 10);
+  const hour = m[4] ? parseInt(m[4]!, 10) : 0;
+  const minute = m[5] ? parseInt(m[5]!, 10) : 0;
+  // masarif timestamps appear to be UAE local time (UTC+4). Treat them as
+  // UTC for staleness filtering — the 4-hour drift is irrelevant at the
+  // 7-day threshold we use.
+  return new Date(Date.UTC(year, month, day, hour, minute));
 }
 
 export const masarifProvider: RateProvider = {
@@ -62,34 +132,58 @@ export const masarifProvider: RateProvider = {
 
   async fetchQuote({ pair, sendAmount }): Promise<Quote[]> {
     const rows = await withPage(async (page) => {
-      await page.goto(MASARIF_URL_INR, { waitUntil: 'domcontentloaded', timeout: 25_000 });
-      // Wait for rate table; selector likely to change.
-      await page
-        .waitForSelector('table, .rates-table, [data-rates]', { timeout: 15_000 })
-        .catch(() => {});
-      // Generic extraction: find every row with a number that looks like INR-per-AED
+      await page.goto(URL_INR, { waitUntil: 'domcontentloaded', timeout: 25_000 });
+      // The table is rendered server-side, but we still wait for it explicitly
+      // to fail loudly if the layout has changed.
+      await page.waitForSelector('table.sortable, table', { timeout: 15_000 });
+
+      // Pull cells per row. We grab everything and filter in Node — keeps the
+      // browser-context code minimal (browser context can't access tsx
+      // helpers).
       const data = await page.evaluate(() => {
-        const out: { name: string; rate: number }[] = [];
-        const rows = Array.from(document.querySelectorAll('tr, .row, li'));
-        for (const r of rows) {
-          const text = (r.textContent ?? '').replace(/\s+/g, ' ').trim();
-          // INR-per-AED is typically 22..25
-          const m = text.match(/([A-Za-z][A-Za-z &\-]+?)\s*([\d]{1,3}\.[\d]{2,6})\b/);
-          if (m && m[1] && m[2]) {
-            const rate = parseFloat(m[2]);
-            if (rate > 18 && rate < 35) {
-              out.push({ name: m[1].trim(), rate });
-            }
-          }
-        }
-        return out;
+        const trs = Array.from(document.querySelectorAll('table tbody tr'));
+        return trs.map((tr) =>
+          Array.from(tr.children).map((td) => (td.textContent ?? '').replace(/\s+/g, ' ').trim()),
+        );
       });
-      const mapped: AggregatorRow[] = data.map((r) => ({
-        providerId: normalizeProviderId(r.name),
-        rate: r.rate,
-        rawName: r.name,
-      }));
-      return mapped;
+
+      const cutoff = Date.now() - STALE_DAYS * 24 * 3600 * 1000;
+      const out: AggregatorRow[] = [];
+      for (const cells of data) {
+        if (cells.length < 5) continue;
+        const [name, buyCell, , transferCell, updatedCell] = cells as [
+          string,
+          string,
+          string,
+          string,
+          string,
+        ];
+        if (!name) continue;
+
+        const updatedAt = parseUpdatedAt(updatedCell ?? '');
+        if (!updatedAt || updatedAt.getTime() < cutoff) continue;
+
+        // Prefer Transfer Rate (the row's published AED→INR rate); fall back
+        // to Buy Rate. Sell Rate is intentionally ignored — for many houses
+        // it's expressed in AED/INR and would corrupt the median if treated
+        // as a rate.
+        const transferRate = parseRate(transferCell);
+        const buyRate = parseRate(buyCell);
+        const rate = inRange(transferRate)
+          ? transferRate
+          : inRange(buyRate)
+            ? buyRate
+            : null;
+        if (rate === null) continue;
+
+        out.push({
+          providerId: normalizeProviderId(name),
+          rate,
+          rawName: name,
+          updatedAt: updatedAt.toISOString(),
+        });
+      }
+      return out;
     });
 
     if (rows.length === 0) {
