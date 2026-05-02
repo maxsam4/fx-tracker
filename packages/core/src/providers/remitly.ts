@@ -1,6 +1,6 @@
 import type { CurrencyPair } from '../types.js';
 import type { RateProvider, Quote } from './types.js';
-import { withPage } from '../scrape/browserPool.js';
+import { httpJson } from '../scrape/httpClient.js';
 import { fetchWiseComparison, quoteFromWiseComparison } from './wiseComparisons.js';
 
 // Remitly publishes a "promotional FX rate" on their currency-converter pages
@@ -8,46 +8,45 @@ import { fetchWiseComparison, quoteFromWiseComparison } from './wiseComparisons.
 // customers and amounts above the cap, a different "standard" rate applies —
 // that's the rate users actually pay long-term, and it's the one we want.
 //
-// The promo rate is BETTER than the mid-market rate (Remitly subsidises the
-// first transfer) so showing it would mislead users comparing providers.
-// Hence we never persist a promo quote: if both standard sources fail we
-// throw and the row shows up under "configured · not reporting".
+// The promo rate is BETTER than mid-market (Remitly subsidises the first
+// transfer) so showing it would rank Remitly artificially at the top of the
+// comparison. We always read the standard rate.
 //
 // Resolution order:
-//   1. Wise comparisons API — returns Remitly's STANDARD quote directly.
-//      Fast, no browser. Works for USD→INR. Returns empty for AED→INR.
-//   2. Playwright on Remitly's converter page, calculator filled with amount
-//      above the promo cap. The page then renders BOTH "Special rate" (promo)
-//      and "Standard rate 1 X = N INR applies to the rest of the transfer".
-//      We extract the standard rate. Slower (~5s) but works for both pairs.
+//   1. Remitly's own calculator JSON API (`api.remitly.io/v3/calculator/estimate`).
+//      Returns `exchange_rate.base_rate` directly — that IS the standard rate,
+//      no Playwright needed. Verified live for both USD-INR (USA:USD-IND:INR)
+//      and AED-INR (ARE:AED-IND:INR) corridors.
+//   2. Wise comparisons API — also returns Remitly's standard quote. Used
+//      only as a fallback if Remitly's API is blocked or returns an unexpected
+//      shape; works for USD→INR but Wise returns empty providers for AED→INR.
+//
+// If both fail, throw — never fall back to the promotional rate.
 
 interface CorridorConfig {
-  url: string;
-  // Amount to type into the calculator that crosses the promo cap. The
-  // resulting rendered DOM will show both rates side by side.
-  amountAboveCap: string;
-  // Hardcoded literal regexes per corridor (avoids dynamic RegExp / ReDoS).
-  standardRate: RegExp;
+  // ISO-3 conduit codes for the Remitly calculator API.
+  conduit: string;
   rangeLo: number;
   rangeHi: number;
 }
 
 const CORRIDORS: Record<string, CorridorConfig> = {
-  'USD-INR': {
-    url: 'https://www.remitly.com/us/en/currency-converter/usd-to-inr-rate',
-    amountAboveCap: '10000',
-    standardRate: /Standard\s+rate\s+1\s*USD\s*=\s*(\d{1,3}\.\d{2,6})\s*INR/i,
-    rangeLo: 60,
-    rangeHi: 130,
-  },
-  'AED-INR': {
-    url: 'https://www.remitly.com/ae/en/currency-converter/aed-to-inr-rate',
-    amountAboveCap: '50000',
-    standardRate: /Standard\s+rate\s+1\s*AED\s*=\s*(\d{1,3}\.\d{2,6})\s*INR/i,
-    rangeLo: 18,
-    rangeHi: 35,
-  },
+  'USD-INR': { conduit: 'USA:USD-IND:INR', rangeLo: 60, rangeHi: 130 },
+  'AED-INR': { conduit: 'ARE:AED-IND:INR', rangeLo: 18, rangeHi: 35 },
 };
+
+interface RemitlyEstimateResponse {
+  estimate?: {
+    exchange_rate?: {
+      base_rate?: string;
+      promotional_exchange_rate?: string;
+      capped_promotional_exchange_rate_amount?: string;
+    };
+    fee?: { total_fee_amount?: string };
+    receive_amount?: string;
+    send_amount?: string;
+  };
+}
 
 export const remitlyProvider: RateProvider = {
   id: 'remitly',
@@ -63,78 +62,55 @@ export const remitlyProvider: RateProvider = {
     const corridor = CORRIDORS[key];
     if (!corridor) throw new Error(`Remitly: unsupported pair ${key}`);
 
-    // 1. Wise comparisons — fastest, returns Remitly's standard quote.
+    // 1. Remitly's calculator API — direct path, returns standard rate via
+    //    `base_rate`. Sub-second; no Playwright dependency.
     try {
-      const data = await fetchWiseComparison(pair, sendAmount);
-      return quoteFromWiseComparison(data, pair, ['remitly', 'remitly inc'], 'remitly', sendAmount);
+      const url = new URL('https://api.remitly.io/v3/calculator/estimate');
+      url.searchParams.set('conduit', corridor.conduit);
+      url.searchParams.set('anchor', 'SEND');
+      url.searchParams.set('amount', String(sendAmount));
+      url.searchParams.set('purpose', 'OTHER');
+      url.searchParams.set('customer_segment', 'STANDARD');
+      url.searchParams.set('customer_recognition', 'UNRECOGNIZED');
+      url.searchParams.set('strict_promo', 'false');
+      const data = await httpJson<RemitlyEstimateResponse>(url.toString(), {
+        timeoutMs: 12_000,
+      });
+      const baseRate = data.estimate?.exchange_rate?.base_rate;
+      const fee = data.estimate?.fee?.total_fee_amount ?? '0';
+      if (!baseRate) throw new Error('Remitly API: missing exchange_rate.base_rate');
+      const rate = parseFloat(baseRate);
+      if (
+        !Number.isFinite(rate) ||
+        rate <= corridor.rangeLo ||
+        rate >= corridor.rangeHi
+      ) {
+        throw new Error(`Remitly API: base_rate out of range: ${rate}`);
+      }
+      const feeAmount = parseFloat(fee);
+      return {
+        providerId: 'remitly',
+        dataSource: 'remitly_api',
+        pair,
+        sendAmount,
+        // The standard rate applies to (send - fee), but for amounts at or
+        // above the promo cap the API's `receive_amount` already reflects the
+        // blended (promo + standard) total. We report the raw standard rate
+        // and let the dashboard derive receive = (send - fee) * rate so the
+        // effective rate column is comparable across providers.
+        receiveAmount: (sendAmount - feeAmount) * rate,
+        rate,
+        feeAmount,
+        capturedAt: new Date(),
+        raw: data,
+      };
     } catch {
-      // empty providers (AED-INR) or transient error → fall through
+      // fall through to Wise comparisons
     }
 
-    // 2. Playwright + calculator interaction → standard rate from rendered DOM.
-    // Throws if the standard rate can't be parsed. We deliberately do NOT fall
-    // back to the SSR promo rate: it's first-transfer-only and beats mid, so
-    // showing it would put Remitly artificially at the top of the table.
-    const standardRate = await fetchStandardRateViaCalculator(corridor);
-    if (
-      !Number.isFinite(standardRate) ||
-      standardRate <= corridor.rangeLo ||
-      standardRate >= corridor.rangeHi
-    ) {
-      throw new Error(`Remitly standard rate out of range: ${standardRate}`);
-    }
-    return {
-      providerId: 'remitly',
-      dataSource: 'remitly_standard',
-      pair,
-      sendAmount,
-      receiveAmount: sendAmount * standardRate,
-      rate: standardRate,
-      feeAmount: 0,
-      capturedAt: new Date(),
-      raw: { source: 'remitly_calculator_standard', url: corridor.url },
-    };
+    // 2. Wise comparisons fallback — only useful for USD-INR (Wise returns
+    //    empty providers for AED-INR).
+    const wise = await fetchWiseComparison(pair, sendAmount);
+    return quoteFromWiseComparison(wise, pair, ['remitly', 'remitly inc'], 'remitly', sendAmount);
   },
 };
-
-async function fetchStandardRateViaCalculator(corridor: CorridorConfig): Promise<number> {
-  return withPage(async (page) => {
-    await page.goto(corridor.url, { waitUntil: 'domcontentloaded', timeout: 25_000 });
-    // Give the React app time to hydrate before interacting.
-    await page.waitForTimeout(4000);
-    await page.waitForSelector('input[id*="you-send"]', { timeout: 12_000 });
-
-    // Triple-click to select the existing default (e.g. 1000) then type the
-    // new amount via keyboard. fill() looks tempting (sets .value + dispatches
-    // an input event) but Remitly's calculator silently ignores it: the
-    // displayed send-amount stays at the default and the standard-rate row
-    // never renders, so we end up falling through to the SSR promo rate.
-    // keyboard.type() drives React's onChange reliably.
-    const sendInput = await page.$('input[id*="you-send"]');
-    if (!sendInput) throw new Error('Remitly send-amount input not found');
-    await sendInput.click({ clickCount: 3 });
-    await page.keyboard.type(corridor.amountAboveCap, { delay: 30 });
-
-    // Poll: wait → read → check. Repeat up to 3x. React's re-render after the
-    // input change can be flaky to time precisely.
-    let textBlob = '';
-    for (let attempt = 0; attempt < 3; attempt++) {
-      await page
-        .waitForFunction(
-          () => /Standard\s+rate\s+1\s*[A-Z]{3}\s*=\s*\d/.test(document.body.innerText),
-          undefined,
-          { timeout: 5_000 },
-        )
-        .catch(() => {});
-      textBlob = await page.evaluate(() => document.body.innerText.replace(/\s+/g, ' '));
-      if (corridor.standardRate.test(textBlob)) break;
-      await page.waitForTimeout(2000);
-    }
-
-    const match = textBlob.match(corridor.standardRate);
-    if (!match?.[1]) {
-      throw new Error('Remitly standard rate text not found in rendered DOM');
-    }
-    return parseFloat(match[1]);
-  });
-}
