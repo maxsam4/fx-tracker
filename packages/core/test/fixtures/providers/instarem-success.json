@@ -1,6 +1,14 @@
 {
-  "destination_amount": 94500,
-  "source_amount": 1000,
-  "fx_rate": 94.5,
-  "transfer_fee": 2.5
+  "success": true,
+  "data": {
+    "transaction_config": {
+      "fx_rate": 94.5,
+      "total_fee_amount": 2.5,
+      "from_currency_amount": 100,
+      "source_currency": "USD",
+      "destination_currency": "INR"
+    },
+    "destination_amount": 94252.5,
+    "source_amount": 1000
+  }
 }

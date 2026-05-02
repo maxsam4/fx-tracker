@@ -4,6 +4,7 @@ import { Pill, StatusDot } from './ui/Pill';
 
 interface Row {
   providerId: string;
+  dataSource: string;
   capturedAt: string;
   sendAmount: number;
   receiveAmount: number;
@@ -26,6 +27,7 @@ interface RunStatus {
 interface UnifiedRow {
   kind: 'provider' | 'reference';
   id: string;
+  dataSource: string | null;
   capturedAt: string;
   sendAmount: number;
   receiveAmount: number | null;
@@ -33,6 +35,14 @@ interface UnifiedRow {
   rawRate: number;
   feeAmount: number | null;
 }
+
+// Friendly labels for reference source IDs (kept short to fit the table).
+const REFERENCE_LABELS: Record<string, string> = {
+  wiseMidMarket: 'Wise mid',
+  xe: 'XE',
+  exchangerateHost: 'open.er-api',
+  googleFinance: 'Google Finance',
+};
 
 export function ProviderTable({
   rows,
@@ -58,6 +68,7 @@ export function ProviderTable({
   const providerRows: UnifiedRow[] = rows.map((r) => ({
     kind: 'provider',
     id: r.providerId,
+    dataSource: r.dataSource,
     capturedAt: r.capturedAt,
     sendAmount: r.sendAmount,
     receiveAmount: r.receiveAmount,
@@ -69,6 +80,7 @@ export function ProviderTable({
   const referenceRows: UnifiedRow[] = refLatest.map((r) => ({
     kind: 'reference',
     id: r.sourceId,
+    dataSource: null,
     capturedAt: r.capturedAt,
     sendAmount,
     receiveAmount: sendAmount * r.rate,
@@ -107,6 +119,7 @@ export function ProviderTable({
             <tr className="border-y border-edge bg-bg/40 text-2xs uppercase tracking-[0.12em] text-subtle">
               <th className="px-5 py-3 text-left font-medium">#</th>
               <th className="px-3 py-3 text-left font-medium">Provider</th>
+              <th className="px-3 py-3 text-right font-medium">Raw rate</th>
               <th className="px-3 py-3 text-right font-medium">Effective rate</th>
               <th className="px-3 py-3 text-left font-medium">Δ vs mid</th>
               <th className="px-3 py-3 text-right font-medium">Receive ({toCurrency})</th>
@@ -239,7 +252,9 @@ function RowComponent({
         <div className="flex flex-wrap items-center gap-2">
           {isReference ? (
             <>
-              <span className="font-mono text-sm text-muted">{row.id}</span>
+              <span className="font-mono text-sm text-muted">
+                {REFERENCE_LABELS[row.id] ?? row.id}
+              </span>
               <Pill tone="muted">mid feed</Pill>
             </>
           ) : (
@@ -251,9 +266,22 @@ function RowComponent({
                 {row.id}
               </Link>
               {isBest && <Pill tone="accent">best</Pill>}
+              {row.dataSource && (
+                <Pill tone={dataSourceTone(row.dataSource)} mono>
+                  {dataSourceLabel(row.dataSource)}
+                </Pill>
+              )}
             </>
           )}
         </div>
+      </td>
+
+      <td
+        className={`tabular px-3 py-3.5 text-right font-mono text-sm ${
+          isReference ? 'text-muted' : 'text-subtle'
+        }`}
+      >
+        {row.rawRate.toFixed(4)}
       </td>
 
       <td className="px-3 py-3.5 text-right">
@@ -339,6 +367,40 @@ function DeltaCell({
 }
 
 const fmt = (n: number) => n.toLocaleString('en-US', { maximumFractionDigits: 2 });
+
+// Map a Quote.dataSource string to a short visible label.
+function dataSourceLabel(ds: string): string {
+  switch (ds) {
+    case 'remitly_promo':
+      return 'promo';
+    case 'remitly_standard':
+      return 'standard';
+    case 'wise_comparisons':
+      return 'wise comp';
+    case 'wise_api':
+      return 'wise api';
+    case 'aspora_api':
+      return 'aspora api';
+    case 'instarem_api':
+      return 'instarem api';
+    case 'masarif':
+      return 'masarif';
+    case 'lulu_direct':
+      return 'lulu';
+    case 'remitly_ssr_promo':
+      return 'promo (ssr)';
+    default:
+      return ds;
+  }
+}
+
+// Highlight promo / advisory paths so the user knows the rate isn't directly
+// comparable to the others.
+function dataSourceTone(ds: string): 'neutral' | 'accent' | 'warn' | 'muted' {
+  if (ds === 'remitly_promo' || ds === 'remitly_ssr_promo') return 'warn';
+  if (ds === 'remitly_standard' || ds === 'wise_comparisons') return 'accent';
+  return 'muted';
+}
 
 function ago(iso: string): string {
   const ms = Date.now() - new Date(iso).getTime();

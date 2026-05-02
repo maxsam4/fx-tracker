@@ -13,6 +13,7 @@ interface MidPoint { t: string; rate: number; sources: string[]; }
 interface RefPoint { t: string; rate: number; sourceId: string; }
 interface TableRow {
   providerId: string;
+  dataSource: string;
   capturedAt: string;
   sendAmount: number;
   receiveAmount: number;

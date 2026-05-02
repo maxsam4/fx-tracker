@@ -1,24 +1,25 @@
 import type { CurrencyPair } from '../types.js';
 import type { RateProvider, Quote } from './types.js';
-import { httpText } from '../scrape/httpClient.js';
 import { withPage } from '../scrape/browserPool.js';
 import { fetchWiseComparison, quoteFromWiseComparison } from './wiseComparisons.js';
-import { logger } from '../logger.js';
 
 // Remitly publishes a "promotional FX rate" on their currency-converter pages
 // for first-time customers (capped at ~6000 USD / 4000 AED). For ongoing
 // customers and amounts above the cap, a different "standard" rate applies —
 // that's the rate users actually pay long-term, and it's the one we want.
 //
-// Resolution order (best → worst):
-//   1. Wise comparisons API — returns Remitly's STANDARD quote directly. Fast,
-//      no browser. Works for USD→INR. Returns empty for AED→INR.
+// The promo rate is BETTER than the mid-market rate (Remitly subsidises the
+// first transfer) so showing it would mislead users comparing providers.
+// Hence we never persist a promo quote: if both standard sources fail we
+// throw and the row shows up under "configured · not reporting".
+//
+// Resolution order:
+//   1. Wise comparisons API — returns Remitly's STANDARD quote directly.
+//      Fast, no browser. Works for USD→INR. Returns empty for AED→INR.
 //   2. Playwright on Remitly's converter page, calculator filled with amount
 //      above the promo cap. The page then renders BOTH "Special rate" (promo)
 //      and "Standard rate 1 X = N INR applies to the rest of the transfer".
 //      We extract the standard rate. Slower (~5s) but works for both pairs.
-//   3. Plain HTTP scrape — only the promo rate is in the SSR HTML. Used as a
-//      last resort with a documented caveat.
 
 interface CorridorConfig {
   url: string;
@@ -26,7 +27,6 @@ interface CorridorConfig {
   // resulting rendered DOM will show both rates side by side.
   amountAboveCap: string;
   // Hardcoded literal regexes per corridor (avoids dynamic RegExp / ReDoS).
-  promoRate: RegExp;
   standardRate: RegExp;
   rangeLo: number;
   rangeHi: number;
@@ -36,7 +36,6 @@ const CORRIDORS: Record<string, CorridorConfig> = {
   'USD-INR': {
     url: 'https://www.remitly.com/us/en/currency-converter/usd-to-inr-rate',
     amountAboveCap: '10000',
-    promoRate: /1\s*USD\s*=\s*(\d{1,3}\.\d{2,6})\s*INR/i,
     standardRate: /Standard\s+rate\s+1\s*USD\s*=\s*(\d{1,3}\.\d{2,6})\s*INR/i,
     rangeLo: 60,
     rangeHi: 130,
@@ -44,7 +43,6 @@ const CORRIDORS: Record<string, CorridorConfig> = {
   'AED-INR': {
     url: 'https://www.remitly.com/ae/en/currency-converter/aed-to-inr-rate',
     amountAboveCap: '50000',
-    promoRate: /1\s*AED\s*=\s*(\d{1,3}\.\d{2,6})\s*INR/i,
     standardRate: /Standard\s+rate\s+1\s*AED\s*=\s*(\d{1,3}\.\d{2,6})\s*INR/i,
     rangeLo: 18,
     rangeHi: 35,
@@ -74,43 +72,27 @@ export const remitlyProvider: RateProvider = {
     }
 
     // 2. Playwright + calculator interaction → standard rate from rendered DOM.
-    try {
-      const standardRate = await fetchStandardRateViaCalculator(corridor);
-      if (Number.isFinite(standardRate) && standardRate > corridor.rangeLo && standardRate < corridor.rangeHi) {
-        return {
-          providerId: 'remitly',
-          dataSource: 'remitly_standard',
-          pair,
-          sendAmount,
-          receiveAmount: sendAmount * standardRate,
-          rate: standardRate,
-          feeAmount: 0,
-          capturedAt: new Date(),
-          raw: { source: 'remitly_calculator_standard', url: corridor.url },
-        };
-      }
-    } catch (err) {
-      logger.warn({ err: String(err) }, 'remitly calculator scrape failed');
+    // Throws if the standard rate can't be parsed. We deliberately do NOT fall
+    // back to the SSR promo rate: it's first-transfer-only and beats mid, so
+    // showing it would put Remitly artificially at the top of the table.
+    const standardRate = await fetchStandardRateViaCalculator(corridor);
+    if (
+      !Number.isFinite(standardRate) ||
+      standardRate <= corridor.rangeLo ||
+      standardRate >= corridor.rangeHi
+    ) {
+      throw new Error(`Remitly standard rate out of range: ${standardRate}`);
     }
-
-    // 3. Plain HTTP — promo rate only (caveat: this is the first-transfer
-    //    promotional rate, not what existing customers pay).
-    const html = await httpText(corridor.url, { timeoutMs: 15_000 });
-    const m = html.match(corridor.promoRate);
-    if (!m?.[1]) {
-      throw new Error('Remitly: no rate available from any source');
-    }
-    const rate = parseFloat(m[1]);
     return {
       providerId: 'remitly',
-      dataSource: 'remitly_promo',
+      dataSource: 'remitly_standard',
       pair,
       sendAmount,
-      receiveAmount: sendAmount * rate,
-      rate,
+      receiveAmount: sendAmount * standardRate,
+      rate: standardRate,
       feeAmount: 0,
       capturedAt: new Date(),
-      raw: { source: 'remitly_ssr_promo', url: corridor.url, note: 'promotional rate; first-transfer only' },
+      raw: { source: 'remitly_calculator_standard', url: corridor.url },
     };
   },
 };

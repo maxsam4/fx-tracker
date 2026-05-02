@@ -66,7 +66,24 @@ async function runForPair(
   });
   logger.info({ pair: `${pair.from}-${pair.to}`, mid: mid.midRate }, 'mid-market stored');
 
-  // 2. reference rates (display-only)
+  // 1b. Persist each successful per-source mid-market rate as a reference row
+  // so the dashboard can show wiseMidMarket / xe / exchangerateHost individually
+  // alongside provider quotes. Reuses the rates already fetched for the median —
+  // no extra HTTP calls.
+  const midSourceRows = Object.entries(mid.perSource)
+    .filter(([, v]) => typeof v.rate === 'number')
+    .map(([sourceId, v]) => ({
+      pairId,
+      sourceId,
+      capturedAt: mid.capturedAt,
+      rate: (v.rate as number).toString(),
+      raw: { fromMidMarket: true } as object,
+    }));
+  if (midSourceRows.length > 0) {
+    await db.insert(referenceRates).values(midSourceRows);
+  }
+
+  // 2. reference rates (display-only — sources NOT used for the median)
   for (const refId of pairCfg.referenceSources) {
     try {
       const r = await getReferenceSource(refId).fetchRate({ pair });

@@ -102,6 +102,7 @@ export async function getLatestProviderTable(pairId: number, sendAmount: number)
   const db = getDb();
   const rows = await db.execute<{
     provider_id: string;
+    data_source: string;
     captured_at: string;
     send_amount: string;
     receive_amount: string;
@@ -110,7 +111,7 @@ export async function getLatestProviderTable(pairId: number, sendAmount: number)
     rate: string;
   }>(sql`
     SELECT DISTINCT ON (provider_id)
-      provider_id, captured_at, send_amount, receive_amount,
+      provider_id, data_source, captured_at, send_amount, receive_amount,
       effective_rate, fee_amount, rate
     FROM provider_quotes
     WHERE pair_id = ${pairId} AND send_amount = ${sendAmount}
@@ -118,6 +119,7 @@ export async function getLatestProviderTable(pairId: number, sendAmount: number)
   `);
   return rows.map((r) => ({
     providerId: r.provider_id,
+    dataSource: r.data_source,
     capturedAt: r.captured_at,
     sendAmount: parseFloat(r.send_amount),
     receiveAmount: parseFloat(r.receive_amount),

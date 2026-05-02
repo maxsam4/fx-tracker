@@ -12,10 +12,8 @@ vi.mock('../../src/scrape/browserPool.js', () => ({
 import { remitlyProvider } from '../../src/providers/remitly.js';
 import { __resetWiseComparisonCache } from '../../src/providers/wiseComparisons.js';
 import { installFetchMock, resetFetchMock } from '../helpers/mockFetch.js';
-import { readFixtureText, readFixtureJson } from '../helpers/fixtures.js';
+import { readFixtureJson } from '../helpers/fixtures.js';
 
-const usdHtml = readFixtureText('providers/remitly-USD-INR-page.html');
-const aedHtml = readFixtureText('providers/remitly-AED-INR-page.html');
 const wiseFixture = readFixtureJson('providers/wiseComparisons-USD-INR.json');
 const wiseEmpty = readFixtureJson('providers/wiseComparisons-AED-INR-empty.json');
 
@@ -37,57 +35,26 @@ describe('remitlyProvider — resolution order', () => {
     expect(single.rate).toBe(94.2);
   });
 
-  it('AED-INR falls past Wise (returns empty providers); plain HTTP promo is the unit-test-reachable fallback', async () => {
-    // Playwright is not available in unit tests; route to the final fallback
-    // (plain HTTP promo from SSR HTML) to verify it works.
+  it('AED-INR throws when Wise returns empty AND Playwright is unavailable (no silent promo)', async () => {
+    // Wise comparisons returns no providers for AED-INR; the calculator path
+    // (Playwright) is mocked to fail. Per the design, we MUST throw rather
+    // than silently return a promo rate, since promo > mid would mislead
+    // the user.
     installFetchMock({
       'https://api.wise.com/v3/comparisons/': { body: wiseEmpty },
-      'https://www.remitly.com/ae/en/currency-converter/aed-to-inr-rate': {
-        contentType: 'text/html',
-        text: aedHtml,
-      },
     });
-    const q = await remitlyProvider.fetchQuote({
-      pair: { from: 'AED', to: 'INR' },
-      sendAmount: 5000,
-    });
-    const single = Array.isArray(q) ? q[0]! : q;
-    expect(single.providerId).toBe('remitly');
-    // Either Playwright (skipped in unit tests) or plain HTTP promo.
-    expect(['remitly_standard', 'remitly_promo']).toContain(single.dataSource);
-    expect(single.rate).toBeGreaterThan(18);
-    expect(single.rate).toBeLessThan(35);
+    await expect(
+      remitlyProvider.fetchQuote({ pair: { from: 'AED', to: 'INR' }, sendAmount: 5000 }),
+    ).rejects.toThrow();
   });
 
-  it('throws when every fallback fails', async () => {
+  it('throws for USD-INR when Wise comparisons fails AND Playwright is unavailable', async () => {
     installFetchMock({
       'https://api.wise.com/v3/comparisons/': { status: 500 },
-      'https://www.remitly.com/us/en/currency-converter/usd-to-inr-rate': { status: 500 },
     });
     await expect(
       remitlyProvider.fetchQuote({ pair: { from: 'USD', to: 'INR' }, sendAmount: 1000 }),
     ).rejects.toThrow();
-  });
-
-  it('falls back to plain HTTP promo when Wise comparisons returns empty for USD-INR', async () => {
-    installFetchMock({
-      'https://api.wise.com/v3/comparisons/': {
-        body: { sourceCurrency: 'USD', targetCurrency: 'INR', sourceAmount: 1000, providers: [] },
-      },
-      'https://www.remitly.com/us/en/currency-converter/usd-to-inr-rate': {
-        contentType: 'text/html',
-        text: usdHtml,
-      },
-    });
-    const q = await remitlyProvider.fetchQuote({
-      pair: { from: 'USD', to: 'INR' },
-      sendAmount: 1000,
-    });
-    const single = Array.isArray(q) ? q[0]! : q;
-    expect(single.providerId).toBe('remitly');
-    expect(['remitly_standard', 'remitly_promo']).toContain(single.dataSource);
-    expect(single.rate).toBeGreaterThan(60);
-    expect(single.rate).toBeLessThan(130);
   });
 
   it('declares supports correctly', () => {

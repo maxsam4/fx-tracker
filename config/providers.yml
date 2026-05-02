@@ -38,7 +38,6 @@ pairs:
     referenceAmounts: [500, 5000, 25000]     # AED
     providers:
       - wise              # API (Wise comparisons may return empty for AED-INR)
-      - instarem          # direct API
       - aspora            # direct API
       - remitly           # direct SSR scrape (remitly.com/ae/en/currency-converter/aed-to-inr-rate)
       - masarif           # SCRAPE aggregator (LuLu, Al Ansari, Sharaf, ...)
@@ -46,6 +45,8 @@ pairs:
       - careemPay         # SCRAPE — Cloudflare may 522
       - lulu              # SCRAPE direct (complements masarif)
       - remitfinder       # SCRAPE
+      # Note: Instarem's public API rejects AED→INR ("Invalid combination of
+      # country-currency details") — they don't operate that corridor.
     referenceSources:
       - googleFinance
 
