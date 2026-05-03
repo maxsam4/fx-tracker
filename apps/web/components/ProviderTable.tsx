@@ -220,11 +220,13 @@ function RowComponent({
   const deltaTone =
     delta === null
       ? 'text-subtle'
-      : delta >= -0.5
+      : delta > 0
         ? 'text-accent'
-        : delta >= -2
+        : delta > -0.1
           ? 'text-warn'
-          : 'text-bad';
+          : delta > -0.3
+            ? 'text-caution'
+            : 'text-bad';
 
   return (
     <tr
@@ -337,11 +339,13 @@ function DeltaCell({
   const halfPct = (Math.abs(delta) / maxAbsDelta) * 50;
   const isNeg = delta < 0;
   const barColor =
-    delta >= -0.5
+    delta > 0
       ? 'bg-accent'
-      : delta >= -2
+      : delta > -0.1
         ? 'bg-warn'
-        : 'bg-bad';
+        : delta > -0.3
+          ? 'bg-caution'
+          : 'bg-bad';
 
   return (
     <div className="flex items-center gap-2">

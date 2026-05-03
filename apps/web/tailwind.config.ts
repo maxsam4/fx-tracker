@@ -16,6 +16,7 @@ export default {
         accent: 'rgb(var(--accent) / <alpha-value>)',
         'accent-soft': 'rgb(var(--accent-soft) / <alpha-value>)',
         warn: 'rgb(var(--warn) / <alpha-value>)',
+        caution: 'rgb(var(--caution) / <alpha-value>)',
         bad: 'rgb(var(--bad) / <alpha-value>)',
       },
       fontFamily: {
