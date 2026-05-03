@@ -3,9 +3,9 @@
 #
 # Reliability tiers (verified live 2026-05-03):
 #   API-backed (verified working):
-#     wise, remitly, xoom, instarem, aspora, westernUnion — direct JSON APIs
+#     wise, remitly, xoom, instarem, aspora, westernUnion, careemPay — direct JSON APIs
 #   Scrape-based (best-effort, may fail on first deploy):
-#     masarif, lulu, careemPay, remitfinder
+#     masarif, lulu, remitfinder
 #     -> these need selector tuning against the live DOM. Failures show in
 #        provider_runs (status='error') and do NOT block other providers.
 #        Run `pnpm --filter @fx/core test:live:scrape` to validate selectors.
@@ -42,7 +42,7 @@ pairs:
       - remitly           # direct SSR scrape (remitly.com/ae/en/currency-converter/aed-to-inr-rate)
       - masarif           # SCRAPE aggregator (LuLu, Al Ansari, Sharaf, ...)
       - westernUnion      # API (UAE retail catalog via WRET channel)
-      - careemPay         # SCRAPE — Cloudflare may 522
+      - careemPay         # API (platform.careemapis.com remittance-widget-rates)
       - lulu              # SCRAPE direct (complements masarif)
       - remitfinder       # SCRAPE
       # Note: Instarem's public API rejects AED→INR ("Invalid combination of
