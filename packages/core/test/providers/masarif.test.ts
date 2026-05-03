@@ -4,21 +4,21 @@ import { describe, it, expect, vi } from 'vitest';
 // `page` to the provider's callback. The provider only uses `goto`,
 // `waitForSelector`, and `evaluate` — we mock those.
 const FAKE_TABLE_DATA: string[][] = [
-  // Fresh, transfer rate present → use transfer rate (25.71)
+  // Fresh, transfer rate present → emitted (25.71)
   ['Al Ansari Exchange', '25.58', '', '25.71', 'May 2, 2026 08:45'],
-  // Fresh, only buy rate → use buy rate (25.85)
+  // Fresh but blank Transfer Rate → SKIPPED (we no longer fall back to Buy Rate)
   ['Goodwill Exchange', '25.85', '', '', 'May 1, 2026 18:00'],
   // Fresh; weird buy (33.33), sell (20), but transfer (25) is the canonical
-  // rate. Transfer Rate must win over Buy Rate.
+  // rate. Transfer Rate is read directly.
   ['Al Fardan Exchange', '33.33', '20', '25', 'May 2, 2026 07:14'],
-  // LuLu — three numbers; transfer wins (25.73)
+  // LuLu — three numbers; transfer (25.73) is read
   ['LuLu International Exchange', '25.73', '0.04', '25.73', 'May 2, 2026 09:45'],
-  // Stale row (Sep 2025) → must be skipped even though buy rate is in range
-  ['Al Razouki International Exchange', '24.17', '', '', 'Sep 26, 2025 02:45'],
-  // Both numeric cells out of range → skip
-  ['Bogus Exchange', '0.04', '0.038', '', 'May 2, 2026 03:00'],
-  // Empty rate cells → skip
-  ['Empty Row', '', '', '', 'May 2, 2026 03:00'],
+  // Stale row (Sep 2025) → skipped even though Transfer Rate in range
+  ['Al Razouki International Exchange', '24.17', '', '24.17', 'Sep 26, 2025 02:45'],
+  // Transfer Rate out of range → skip
+  ['Bogus Exchange', '0.04', '0.038', '0.04', 'May 2, 2026 03:00'],
+  // No Transfer Rate at all → skip
+  ['Empty Transfer', '25.85', '0.04', '', 'May 2, 2026 03:00'],
   // Sharaf — transfer rate
   ['Sharaf Exchange', '26.88', '23.69', '25.67', 'May 2, 2026 04:30'],
 ];
@@ -42,7 +42,7 @@ vi.setSystemTime(new Date('2026-05-02T12:00:00Z'));
 import { masarifProvider } from '../../src/providers/masarif.js';
 
 describe('masarifProvider.fetchQuote', () => {
-  it('emits one quote per house, prefers Transfer Rate, drops stale rows', async () => {
+  it('emits one quote per house, ONLY when Transfer Rate is set + fresh', async () => {
     const quotes = await masarifProvider.fetchQuote({
       pair: { from: 'AED', to: 'INR' },
       sendAmount: 5000,
@@ -50,19 +50,24 @@ describe('masarifProvider.fetchQuote', () => {
     const arr = Array.isArray(quotes) ? quotes : [quotes];
     const byId = Object.fromEntries(arr.map((q) => [q.providerId, q]));
 
-    // Fresh rows preserved
-    expect(byId.alAnsari?.rate).toBe(25.71); // transfer rate wins
-    expect(byId.goodwill?.rate).toBe(25.85); // buy rate fallback
-    expect(byId.alFardan?.rate).toBe(25); // transfer rate, not the bogus 33.33
+    // Houses with a fresh Transfer Rate are kept
+    expect(byId.alAnsari?.rate).toBe(25.71);
+    expect(byId.alFardan?.rate).toBe(25); // Transfer Rate, not the bogus 33.33
     expect(byId.lulu?.rate).toBe(25.73);
     expect(byId.sharaf?.rate).toBe(25.67);
 
-    // Stale + bogus rows dropped
-    expect(byId).not.toHaveProperty('alRazouki'); // stale Sep 2025
-    expect(byId).not.toHaveProperty('bogus_'); // out-of-range only
+    // Houses with a blank Transfer Rate are dropped (no buy-rate fallback)
+    expect(byId).not.toHaveProperty('goodwill');
     expect(arr.find((q) => q.providerId.includes('empty'))).toBeUndefined();
 
-    // All rows have the right shape
+    // Stale + out-of-range rows dropped
+    expect(byId).not.toHaveProperty('alRazouki'); // stale Sep 2025
+    expect(byId).not.toHaveProperty('bogus_');
+
+    // capturedAt = masarif's "Updated At", NOT the test's frozen "now"
+    expect(byId.alAnsari?.capturedAt).toEqual(new Date('2026-05-02T08:45:00Z'));
+    expect(byId.lulu?.capturedAt).toEqual(new Date('2026-05-02T09:45:00Z'));
+
     for (const q of arr) {
       expect(q.dataSource).toBe('masarif');
       expect(q.pair).toEqual({ from: 'AED', to: 'INR' });
@@ -72,16 +77,19 @@ describe('masarifProvider.fetchQuote', () => {
     }
   });
 
-  it('throws when the table yields zero usable rows', async () => {
-    // Re-mock withPage to return only stale/out-of-range rows
+  it('throws when no row has a fresh in-range Transfer Rate', async () => {
     const { withPage } = await import('../../src/scrape/browserPool.js');
     (withPage as ReturnType<typeof vi.fn>).mockImplementationOnce(async (fn: any) => {
       const page = {
         goto: vi.fn(),
         waitForSelector: vi.fn(),
         evaluate: vi.fn(async () => [
-          ['Al Razouki', '24.17', '', '', 'Sep 26, 2025 02:45'],
-          ['Bogus', '0.04', '0.038', '', 'May 2, 2026 03:00'],
+          // stale Transfer Rate
+          ['Al Razouki', '24.17', '', '24.17', 'Sep 26, 2025 02:45'],
+          // out-of-range Transfer Rate
+          ['Bogus', '0.04', '0.038', '0.04', 'May 2, 2026 03:00'],
+          // blank Transfer Rate (would have been buy-rate fallback before)
+          ['Buy Only', '25.85', '', '', 'May 2, 2026 03:00'],
         ] as string[][]),
       };
       return fn(page);

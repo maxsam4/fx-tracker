@@ -14,20 +14,22 @@ import { withPage } from '../scrape/browserPool.js';
 // Column meaning (from the house's perspective):
 //   - Buy Rate (INR/AED): house pays this many INR for 1 AED that the customer
 //                         is selling. Higher = better for the customer.
-//   - Sell Rate: often expressed as AED/INR (~0.04). Inverse of buy. Some
-//                houses leave it blank or use it as the buy-back rate.
+//   - Sell Rate: often expressed as AED/INR (~0.04). Inverse of buy.
 //   - Transfer Rate (INR/AED): the rate the house offers for AED→INR remittance
-//                              specifically. This is what we want for the
-//                              comparison table — it's the rate the recipient
+//                              specifically. This is what the recipient
 //                              actually receives per AED sent.
 //
-// Rate selection: prefer Transfer Rate; fall back to Buy Rate if Transfer is
-// blank. Skip rows whose only number is an inverse (sell-rate-style ~0.04)
-// or whose values fall outside a plausible AED-INR band.
+// Rate selection: ONLY Transfer Rate. Buy Rate often reflects branch-counter
+// rates (cash-in-hand AED→INR) that don't apply to remittance, so houses with
+// blank Transfer Rate are intentionally dropped — better to skip a row than
+// to mislead users with a non-comparable rate.
 //
 // Freshness: many houses leave stale rows on the page (Sep 2025, Feb 2026).
-// We drop anything updated more than STALE_DAYS ago so the comparison reflects
-// what's actually live today.
+// We drop anything updated more than STALE_DAYS ago. The Quote's
+// `capturedAt` is set to the masarif-reported "Updated At" timestamp, NOT
+// the time we ran the scrape — so the dashboard shows when the rate was
+// actually published by the house, which can be hours ago even when we
+// just polled.
 
 const URL_INR = 'https://masarif.ae/currency-exchange-rates/inr';
 const STALE_DAYS = 7;
@@ -38,7 +40,7 @@ interface AggregatorRow {
   providerId: string;
   rate: number;
   rawName: string;
-  updatedAt: string;
+  updatedAt: Date;
 }
 
 // Lower-cased exchange-name fragment → canonical provider id used in
@@ -151,7 +153,7 @@ export const masarifProvider: RateProvider = {
       const out: AggregatorRow[] = [];
       for (const cells of data) {
         if (cells.length < 5) continue;
-        const [name, buyCell, , transferCell, updatedCell] = cells as [
+        const [name, , , transferCell, updatedCell] = cells as [
           string,
           string,
           string,
@@ -163,24 +165,18 @@ export const masarifProvider: RateProvider = {
         const updatedAt = parseUpdatedAt(updatedCell ?? '');
         if (!updatedAt || updatedAt.getTime() < cutoff) continue;
 
-        // Prefer Transfer Rate (the row's published AED→INR rate); fall back
-        // to Buy Rate. Sell Rate is intentionally ignored — for many houses
-        // it's expressed in AED/INR and would corrupt the median if treated
-        // as a rate.
+        // Transfer Rate only — Buy Rate is the cash-counter rate, not a
+        // remittance rate, so it's not directly comparable to the rates we
+        // pull from Wise/Aspora/Remitly. A house with a blank Transfer Rate
+        // simply isn't quoting AED→INR remittance and should be skipped.
         const transferRate = parseRate(transferCell);
-        const buyRate = parseRate(buyCell);
-        const rate = inRange(transferRate)
-          ? transferRate
-          : inRange(buyRate)
-            ? buyRate
-            : null;
-        if (rate === null) continue;
+        if (!inRange(transferRate)) continue;
 
         out.push({
           providerId: normalizeProviderId(name),
-          rate,
+          rate: transferRate,
           rawName: name,
-          updatedAt: updatedAt.toISOString(),
+          updatedAt,
         });
       }
       return out;
@@ -190,7 +186,6 @@ export const masarifProvider: RateProvider = {
       throw new Error('masarif scrape returned no rows; selectors may need updating');
     }
 
-    const now = new Date();
     return rows.map((row) => ({
       providerId: row.providerId,
       dataSource: 'masarif',
@@ -199,8 +194,15 @@ export const masarifProvider: RateProvider = {
       receiveAmount: sendAmount * row.rate,
       rate: row.rate,
       feeAmount: 0,
-      capturedAt: now,
-      raw: { source: 'masarif', original: row },
+      // Use masarif's reported "Updated At" as the captured timestamp so the
+      // dashboard's "Updated 2h" column reflects when the house actually
+      // published the rate, not when our worker ran the poll.
+      capturedAt: row.updatedAt,
+      raw: {
+        source: 'masarif',
+        rawName: row.rawName,
+        masarifUpdatedAt: row.updatedAt.toISOString(),
+      },
     }));
   },
 };
