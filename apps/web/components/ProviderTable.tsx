@@ -26,7 +26,7 @@ interface RunStatus {
 }
 
 interface UnifiedRow {
-  kind: 'provider' | 'reference';
+  kind: 'provider' | 'reference' | 'median';
   id: string;
   dataSource: string | null;
   capturedAt: string;
@@ -51,6 +51,7 @@ export function ProviderTable({
   runStatus,
   configuredProviders,
   midRate,
+  midCapturedAt,
   fromCurrency,
   toCurrency,
   sendAmount,
@@ -61,6 +62,7 @@ export function ProviderTable({
   runStatus: RunStatus[];
   configuredProviders: string[];
   midRate: number | null;
+  midCapturedAt: string | null;
   fromCurrency: string;
   toCurrency: string;
   sendAmount: number;
@@ -90,9 +92,42 @@ export function ProviderTable({
     feeAmount: null,
   }));
 
-  const all = [...providerRows, ...referenceRows].sort(
-    (a, b) => b.effectiveRate - a.effectiveRate,
-  );
+  // The median itself is shown as its own row in the table — useful for
+  // comparing each provider against the canonical mid without flicking
+  // back to the hero stat.
+  const medianRow: UnifiedRow | null =
+    midRate !== null && midCapturedAt
+      ? {
+          kind: 'median',
+          id: 'mid-market',
+          dataSource: null,
+          capturedAt: midCapturedAt,
+          sendAmount,
+          receiveAmount: sendAmount * midRate,
+          effectiveRate: midRate,
+          rawRate: midRate,
+          feeAmount: null,
+        }
+      : null;
+
+  const all = [
+    ...providerRows,
+    ...referenceRows,
+    ...(medianRow ? [medianRow] : []),
+  ].sort((a, b) => b.effectiveRate - a.effectiveRate);
+
+  // Provider-only rank: best provider is #01, regardless of how many
+  // mid feeds / median / derived rows sit above it in the sort. Mid
+  // feeds and derived rows render `—` in the # column.
+  const providerRanks = new Map<string, number>();
+  {
+    let n = 0;
+    for (const r of all) {
+      if (r.kind === 'provider') {
+        providerRanks.set(r.id, ++n);
+      }
+    }
+  }
 
   // For the delta-vs-mid bar viz, normalize across the visible range.
   const deltas = midRate
@@ -138,20 +173,25 @@ export function ProviderTable({
               />
             )}
             {all.map((r, i) => {
-              const delta = midRate ? ((r.effectiveRate - midRate) / midRate) * 100 : null;
-              const isReference = r.kind === 'reference';
+              // Median row IS the baseline — its delta is by definition 0,
+              // showing it would be visual noise.
+              const delta =
+                r.kind === 'median' || midRate === null
+                  ? null
+                  : ((r.effectiveRate - midRate) / midRate) * 100;
+              const isProvider = r.kind === 'provider';
               const isBest =
-                !isReference && all.findIndex((x) => x.kind === 'provider') === i;
+                isProvider && all.findIndex((x) => x.kind === 'provider') === i;
+              const rank = isProvider ? providerRanks.get(r.id) ?? null : null;
 
               return (
                 <RowComponent
                   key={`${r.kind}:${r.id}`}
                   row={r}
-                  index={i + 1}
+                  rank={rank}
                   delta={delta}
                   maxAbsDelta={maxAbsDelta}
                   isBest={isBest}
-                  isReference={isReference}
                   pairKey={pairKey}
                   sendAmount={sendAmount}
                   toCurrency={toCurrency}
@@ -207,25 +247,26 @@ export function ProviderTable({
 
 function RowComponent({
   row,
-  index,
+  rank,
   delta,
   maxAbsDelta,
   isBest,
-  isReference,
   pairKey,
   sendAmount,
   toCurrency,
 }: {
   row: UnifiedRow;
-  index: number;
+  rank: number | null;
   delta: number | null;
   maxAbsDelta: number;
   isBest: boolean;
-  isReference: boolean;
   pairKey: string;
   sendAmount: number;
   toCurrency: string;
 }) {
+  const isProvider = row.kind === 'provider';
+  const isMedian = row.kind === 'median';
+  const isReference = row.kind === 'reference';
   const deltaTone =
     delta === null
       ? 'text-subtle'
@@ -240,7 +281,7 @@ function RowComponent({
   return (
     <tr
       className={`group relative border-b border-edge/60 last:border-b-0 transition-colors ${
-        isReference ? 'bg-bg/30' : 'hover:bg-elevated/60'
+        isProvider ? 'hover:bg-elevated/60' : isMedian ? 'bg-accent/[0.04]' : 'bg-bg/30'
       }`}
     >
       <td className="relative px-5 py-3.5">
@@ -255,13 +296,18 @@ function RowComponent({
             isBest ? 'text-accent' : 'text-subtle'
           }`}
         >
-          {isReference ? '—' : String(index).padStart(2, '0')}
+          {rank !== null ? String(rank).padStart(2, '0') : '—'}
         </span>
       </td>
 
       <td className="px-3 py-3.5">
         <div className="flex flex-wrap items-center gap-2">
-          {isReference ? (
+          {isMedian ? (
+            <>
+              <span className="font-mono text-sm font-medium text-text">mid-market</span>
+              <Pill tone="accent">median</Pill>
+            </>
+          ) : isReference ? (
             <>
               <span className="font-mono text-sm text-muted">
                 {REFERENCE_LABELS[row.id] ?? row.id}

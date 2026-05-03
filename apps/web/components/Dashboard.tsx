@@ -181,6 +181,7 @@ export function Dashboard(initial: Props) {
           runStatus={runStatus}
           configuredProviders={initial.configuredProviders}
           midRate={mid?.rate ?? null}
+          midCapturedAt={mid?.capturedAt ?? null}
           fromCurrency={initial.pair.from}
           toCurrency={initial.pair.to}
           sendAmount={initial.sendAmount}
