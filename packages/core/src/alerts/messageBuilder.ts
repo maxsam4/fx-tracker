@@ -22,7 +22,6 @@ export interface BuildAlertMessageInput {
 }
 
 const fmtRate = (r: number) => r.toFixed(4);
-const fmtMoney = (n: number) => n.toLocaleString('en-US', { maximumFractionDigits: 2 });
 
 function formatIst(d: Date): string {
   return d.toLocaleString('en-IN', {
@@ -50,29 +49,25 @@ export function buildAlertMessage(input: BuildAlertMessageInput): string {
   const lines: string[] = [];
   lines.push(`<b>${esc(pairLabel)}</b> — ${esc(input.triggerLabel)}`);
   lines.push('');
-  lines.push(`<b>Mid-market:</b> ${fmtRate(input.midRate)}`);
-  lines.push(`<i>sources: ${esc(input.midSourcesUsed.join(', '))}</i>`);
+  lines.push(`Mid-market  <b>${fmtRate(input.midRate)}</b>`);
   lines.push('');
 
   if (within.length === 0) {
-    lines.push(`<i>No providers within ${withinPct}% of mid-market right now.</i>`);
+    lines.push(`<i>No providers within ${withinPct}% of mid-market.</i>`);
   } else {
-    lines.push(`<b>Within ${withinPct}% of mid (${within.length}):</b>`);
-    for (const p of within) {
-      const delta = pctDelta(p.effectiveRate, input.midRate);
-      const sign = delta >= 0 ? '+' : '';
-      const name = esc(p.displayName ?? p.providerId);
-      lines.push(
-        `• <b>${name}</b> — ${fmtRate(p.effectiveRate)} (${sign}${delta.toFixed(2)}%) ` +
-          `— send ${fmtMoney(p.sendAmount)} ${input.pair.from}, ` +
-          `recv ${fmtMoney(p.receiveAmount)} ${input.pair.to}, ` +
-          `fee ${fmtMoney(p.feeAmount)} ${input.pair.from}`,
-      );
-    }
+    // Monospace block keeps vendor names + rates aligned on phones.
+    const nameWidth = Math.max(
+      ...within.map((p) => (p.displayName ?? p.providerId).length),
+    );
+    const rows = within.map((p) => {
+      const name = (p.displayName ?? p.providerId).padEnd(nameWidth, ' ');
+      return `${esc(name)}  ${fmtRate(p.effectiveRate)}`;
+    });
+    lines.push('<pre>' + rows.join('\n') + '</pre>');
   }
 
   lines.push('');
-  lines.push(`<i>${formatIst(captured)} IST · ${captured.toISOString()}</i>`);
+  lines.push(`<i>${formatIst(captured)} IST</i>`);
   const dashUrl = `${input.baseUrl.replace(/\/$/, '')}/${pairLabel}`;
   lines.push(`<a href="${esc(dashUrl)}">View dashboard</a>`);
 

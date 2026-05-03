@@ -65,4 +65,21 @@ describe('buildAlertMessage', () => {
     expect(text).not.toContain('<script>');
     expect(text).toContain('&lt;script&gt;');
   });
+
+  it('omits send/receive/fee details', () => {
+    const text = buildAlertMessage({
+      ...baseInput,
+      providers: [
+        { providerId: 'wise', effectiveRate: 82.7, sendAmount: 1000, receiveAmount: 82700, feeAmount: 5 },
+      ],
+    });
+    // Vendor + rate must appear; per-provider amounts must not.
+    expect(text).toContain('wise');
+    expect(text).toContain('82.7000');
+    expect(text).not.toMatch(/send/i);
+    expect(text).not.toMatch(/recv|receive/i);
+    expect(text).not.toMatch(/fee/i);
+    expect(text).not.toContain('1,000');
+    expect(text).not.toContain('82,700');
+  });
 });
