@@ -1,0 +1,115 @@
+{
+    "header_reply": {
+        "source_app": "defaultSource",
+        "correlation_id": "ffcb7e0a-7b19-45bc-b6d6-f7fdb1c6b88c",
+        "response_type": "PRICECATALOG"
+    },
+    "response_status": {
+        "status": 1,
+        "code": "P0039",
+        "message": "WARNING.FOUND ITEMS ABOVE MAX PAYOUT",
+        "long_message": "NO ERRORS--NO WARNINGS.1681452.2026-05-03 04:15:35.105_2026-05-03 04:15:35.120"
+    },
+    "sender": {
+        "channel": "WWEB",
+        "client": "WUCOM",
+        "cty_iso2_ext": "US",
+        "curr_iso3": "USD",
+        "cpc": "USA",
+        "funds_in": "AC",
+        "send_amount": 1000
+    },
+    "receiver": {
+        "cty_iso2_ext": "IN",
+        "curr_iso3": "INR"
+    },
+    "available_funds_in": "CC,AC,GP,DC,AP",
+    "services_groups": [
+        {
+            "service": "000",
+            "service_name": "Money In Minutes",
+            "fund_out": "000",
+            "fund_out_mnem": "MM",
+            "cpc": "IND",
+            "dir_flag": "N",
+            "test_question": "P",
+            "test_q_max_amnt": 99999999.99,
+            "fx_fix_flag": "S",
+            "max_payout": 233946.99,
+            "speed_days": 1,
+            "pay_groups": [
+                {
+                    "fund_in": "AC",
+                    "pricing_context": "/WWEB/WUCOM/USA//IND//000/NA/AC//WWEBAC000L0/WEBWEBUS6W-null/USININRAC0L0W:L0:L0/1000.00/93579.00/S/1.00000000/94.90750000/1.4/93.5787/////",
+                    "fx_rate": 93.5787,
+                    "send_amount": 1000,
+                    "receive_amount": 93579,
+                    "gross_amount": 1005.99,
+                    "gross_fee": 5.99,
+                    "base_fee": 5.99,
+                    "surcharge_fee": 0,
+                    "msg_fee": 0,
+                    "msg_meta": "0.00,0,0.00",
+                    "min_amount": 0,
+                    "max_amount": 9999999999.99,
+                    "speed_indicator": "0-4",
+                    "fund_out_speed": "0",
+                    "fund_in_speed": "4"
+                }
+            ]
+        },
+        {
+            "service": "500",
+            "service_name": "Direct to Bank",
+            "fund_out": "500",
+            "fund_out_mnem": "DB",
+            "cpc": "IND",
+            "dir_flag": "N",
+            "test_question": "P",
+            "test_q_max_amnt": 99999999.99,
+            "fx_fix_flag": "S",
+            "max_payout": 99999999.99,
+            "speed_days": 1,
+            "pay_groups": [
+                {
+                    "fund_in": "AC",
+                    "pricing_context": "/WWEB/WUCOM/USA//IND//500/\\EBD/AC//WWEBAC500L0/WEBWEBUS6W-null/USININRAC5L0W:L0:L0/1000.00/94433.00/S/1.00000000/94.90750000/0.5/94.4329/////",
+                    "fx_rate": 94.4329,
+                    "send_amount": 1000,
+                    "receive_amount": 94433,
+                    "gross_amount": 1000,
+                    "gross_fee": 0,
+                    "base_fee": 0,
+                    "surcharge_fee": 0,
+                    "msg_fee": 0,
+                    "msg_meta": "0.00,0,0.00",
+                    "min_amount": 0,
+                    "max_amount": 9999999999.99,
+                    "speed_indicator": "0-4",
+                    "fund_out_speed": "0",
+                    "fund_in_speed": "4"
+                }
+            ]
+        }
+    ],
+    "categories": [
+        {
+            "name": "Best FX",
+            "type": "bestfx",
+            "services": [
+                {
+                    "pay_in": "AC",
+                    "pay_out": "500",
+                    "pay_out_mnem": "DB",
+                    "fx_rate": 94.4329
+                },
+                {
+                    "pay_in": "AC",
+                    "pay_out": "000",
+                    "pay_out_mnem": "MM",
+                    "fx_rate": 93.5787
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,91 @@
+{
+    "header_reply": {
+        "source_app": "defaultSource",
+        "correlation_id": "aeb330e6-dc4c-4bef-8afc-9b7c321bb9bd",
+        "response_type": "PRICECATALOG"
+    },
+    "response_status": {
+        "status": 0,
+        "code": "P0000",
+        "message": "OK.SUCCESSFUL PROCESSING",
+        "long_message": "NO ERRORS--NO WARNINGS.1665051.2026-05-03 04:15:35.703_2026-05-03 04:15:35.725"
+    },
+    "sender": {
+        "channel": "WRET",
+        "client": "AJ2090041",
+        "cty_iso2_ext": "AE",
+        "curr_iso3": "AED",
+        "cpc": "AED",
+        "funds_in": "*",
+        "send_amount": 5000
+    },
+    "receiver": {
+        "cty_iso2_ext": "IN",
+        "curr_iso3": "INR"
+    },
+    "available_funds_in": "CA",
+    "services_groups": [
+        {
+            "service": "000",
+            "service_name": "MONEY IN MINUTES",
+            "fund_out": "000",
+            "fund_out_mnem": "MM",
+            "cpc": "IND",
+            "dir_flag": "N",
+            "test_question": "P",
+            "test_q_max_amnt": 99999999.99,
+            "fx_fix_flag": "S",
+            "max_payout": 233946.99,
+            "speed_days": 1,
+            "pay_groups": [
+                {
+                    "fund_in": "CA",
+                    "pricing_context": "AJ2090041/WRET/AJ2090041/AED//IND//000/NA/CA//WRETCA000L0/7TD3HBAEL95-null/G0-3:L0:L0/5000.00/128545.00/S/3.67315000/94.90750000/0.5/25.7089861/////",
+                    "fx_rate": 25.7089861,
+                    "send_amount": 5000,
+                    "receive_amount": 128545,
+                    "gross_amount": 5015,
+                    "gross_fee": 15,
+                    "base_fee": 15,
+                    "surcharge_fee": 0,
+                    "msg_fee": 0,
+                    "msg_meta": "0.00,0,0.00",
+                    "min_amount": 0,
+                    "max_amount": 21474836.46,
+                    "speed_indicator": "0"
+                }
+            ]
+        },
+        {
+            "service": "500",
+            "service_name": "DIRECT TO BANK",
+            "fund_out": "500",
+            "fund_out_mnem": "DB",
+            "cpc": "IND",
+            "dir_flag": "N",
+            "test_question": "P",
+            "test_q_max_amnt": 99999999.99,
+            "fx_fix_flag": "S",
+            "max_payout": 99999999.99,
+            "speed_days": 1,
+            "pay_groups": [
+                {
+                    "fund_in": "CA",
+                    "pricing_context": "AJ2090041/WRET/AJ2090041/AED//IND//500/INQ06\\EBD/CA//WRETCA500L0/7TD3HBAEL95-null/G0-6:L0:L0/5000.00/129129.00/S/3.67315000/94.95650000/0.1/25.8256655////B/",
+                    "fx_rate": 25.8256655,
+                    "send_amount": 5000,
+                    "receive_amount": 129129,
+                    "gross_amount": 5000,
+                    "gross_fee": 0,
+                    "base_fee": 0,
+                    "surcharge_fee": 0,
+                    "msg_fee": 0,
+                    "msg_meta": "0.00,0,0.00",
+                    "min_amount": 0,
+                    "max_amount": 9999999999.99,
+                    "speed_indicator": "0"
+                }
+            ]
+        }
+    ]
+}

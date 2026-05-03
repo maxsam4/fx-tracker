@@ -1,11 +1,11 @@
 # fx-tracker provider manifest
 # Edit + restart the worker to add/remove pairs or providers.
 #
-# Reliability tiers (verified live 2026-04-30):
+# Reliability tiers (verified live 2026-05-03):
 #   API-backed (verified working):
-#     wise, remitly, xoom, instarem, aspora — direct JSON APIs
+#     wise, remitly, xoom, instarem, aspora, westernUnion — direct JSON APIs
 #   Scrape-based (best-effort, may fail on first deploy):
-#     masarif, lulu, careemPay, westernUnion, remitfinder
+#     masarif, lulu, careemPay, remitfinder
 #     -> these need selector tuning against the live DOM. Failures show in
 #        provider_runs (status='error') and do NOT block other providers.
 #        Run `pnpm --filter @fx/core test:live:scrape` to validate selectors.
@@ -28,7 +28,7 @@ pairs:
       - xoom              # via Wise comparisons (PayPal-owned)
       - instarem          # direct API + Wise fallback
       - aspora            # direct API
-      - westernUnion      # SCRAPE — may need selector tuning
+      - westernUnion      # API (wuconnect/prices/catalog, Direct-to-Bank)
       - remitfinder       # SCRAPE — corridor URLs return only popular preview; needs work
     referenceSources:
       - googleFinance
@@ -41,7 +41,7 @@ pairs:
       - aspora            # direct API
       - remitly           # direct SSR scrape (remitly.com/ae/en/currency-converter/aed-to-inr-rate)
       - masarif           # SCRAPE aggregator (LuLu, Al Ansari, Sharaf, ...)
-      - westernUnion      # SCRAPE
+      - westernUnion      # API (UAE retail catalog via WRET channel)
       - careemPay         # SCRAPE — Cloudflare may 522
       - lulu              # SCRAPE direct (complements masarif)
       - remitfinder       # SCRAPE

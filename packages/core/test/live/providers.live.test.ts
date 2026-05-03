@@ -14,6 +14,7 @@ import { remitlyProvider } from '../../src/providers/remitly.js';
 import { xoomProvider } from '../../src/providers/xoom.js';
 import { instaremProvider } from '../../src/providers/instarem.js';
 import { asporaProvider } from '../../src/providers/aspora.js';
+import { westernUnionProvider } from '../../src/providers/westernUnion.js';
 import { wiseMidMarketSource } from '../../src/providers/reference/wiseMidMarket.js';
 import { exchangerateHostSource } from '../../src/providers/reference/exchangerateHost.js';
 import { xeSource } from '../../src/providers/reference/xe.js';
@@ -81,17 +82,17 @@ d('LIVE: API-based remittance providers', () => {
     const single = Array.isArray(q) ? q[0]! : q;
     expect(single.providerId).toBe('remitly');
     expectRateInRange(single.rate, usdInrLo, usdInrHi, 'remitly USD-INR');
-    // Standard-rate paths only — fail loudly if we fell to remitly_promo.
-    expect(['wise_comparisons', 'remitly_standard']).toContain(single.dataSource);
+    // Standard-rate paths only — primary remitly_api, fallback wise_comparisons.
+    expect(['remitly_api', 'wise_comparisons']).toContain(single.dataSource);
   }, 60_000);
 
-  it('Remitly AED-INR returns standard (non-promo) rate via calculator', async () => {
+  it('Remitly AED-INR returns standard (non-promo) rate', async () => {
     const q = await remitlyProvider.fetchQuote({ pair: AED_INR, sendAmount: 5000 });
     const single = Array.isArray(q) ? q[0]! : q;
     expect(single.providerId).toBe('remitly');
     expectRateInRange(single.rate, aedInrLo, aedInrHi, 'remitly AED-INR');
-    // Wise comparisons returns empty for AED-INR; expect remitly_standard from calculator.
-    expect(['remitly_standard', 'wise_comparisons']).toContain(single.dataSource);
+    // Wise comparisons returns empty for AED-INR — expect remitly_api.
+    expect(single.dataSource).toBe('remitly_api');
   }, 60_000);
 
   it('Xoom USD-INR via Wise comparisons', async () => {
@@ -121,5 +122,21 @@ d('LIVE: API-based remittance providers', () => {
     const single = Array.isArray(q) ? q[0]! : q;
     expect(single.providerId).toBe('aspora');
     expectRateInRange(single.rate, aedInrLo, aedInrHi, 'aspora AED-INR');
+  }, 30_000);
+
+  it('Western Union USD-INR via prices/catalog', async () => {
+    const q = await westernUnionProvider.fetchQuote({ pair: USD_INR, sendAmount: 1000 });
+    const single = Array.isArray(q) ? q[0]! : q;
+    expect(single.providerId).toBe('westernUnion');
+    expect(single.dataSource).toBe('westernunion_api');
+    expectRateInRange(single.rate, usdInrLo, usdInrHi, 'wu USD-INR');
+  }, 30_000);
+
+  it('Western Union AED-INR via UAE retail catalog', async () => {
+    const q = await westernUnionProvider.fetchQuote({ pair: AED_INR, sendAmount: 5000 });
+    const single = Array.isArray(q) ? q[0]! : q;
+    expect(single.providerId).toBe('westernUnion');
+    expect(single.dataSource).toBe('westernunion_api');
+    expectRateInRange(single.rate, aedInrLo, aedInrHi, 'wu AED-INR');
   }, 30_000);
 });

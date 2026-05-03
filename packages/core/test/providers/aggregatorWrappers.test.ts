@@ -9,8 +9,7 @@ import { readFixtureJson } from '../helpers/fixtures.js';
 const wiseFixture = readFixtureJson('providers/wiseComparisons-USD-INR.json');
 
 // Validates that providers backed by Wise's comparison endpoint extract their
-// own row correctly. (The actual scraping of westernUnion is via Playwright
-// and tested separately.)
+// own row correctly. (Western Union's API path is covered in westernUnion.test.ts.)
 
 describe('remittance providers via Wise comparisons', () => {
   beforeEach(() => __resetWiseComparisonCache());

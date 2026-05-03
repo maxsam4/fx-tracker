@@ -14,7 +14,7 @@ pnpm -r test                                # unit tests (no network)
 # Live tests — opt-in via env flag, hit real endpoints
 pnpm --filter @fx/core run test:live              # 13 HTTP-API tests, ~10s
 pnpm --filter @fx/core run test:live:scrape       # required-tier Playwright (Google Finance only)
-pnpm --filter @fx/core run test:live:scrape:fragile  # advisory-tier (masarif/lulu/careem/wu/rf — may fail; informational)
+pnpm --filter @fx/core run test:live:scrape:fragile  # advisory-tier (masarif/lulu/careem/rf — may fail; informational)
 pnpm --filter @fx/core run test:live:all          # everything
 
 # DB
@@ -70,7 +70,8 @@ Tiers (declared via plugin's `kind` field):
 - **`exchangerate.host` now requires an API key.** We use `open.er-api.com/v6/latest/X` instead (free, no key); the source ID is still `exchangerateHost` for config compatibility.
 - **`fetchWiseComparison` memoizes for 60s.** Tests must call `__resetWiseComparisonCache()` in `beforeEach` or rates leak across tests.
 - **Cross-provider dedup runs after `Promise.allSettled`, not per-call.** `dedupeQuotes` (in `packages/core/src/dedupe.ts`) consolidates aggregator outputs using `preferredSource`. Don't reintroduce per-provider dedup — it makes `preferredSource` dead code.
-- **Scrape selectors are best-effort.** masarif, lulu, careemPay, remitfinder, westernUnion failures are expected; system records `provider_runs.status='error'` and continues. They're documented in `config/providers.yml` reliability tier comments.
+- **Scrape selectors are best-effort.** masarif, lulu, careemPay, remitfinder failures are expected; system records `provider_runs.status='error'` and continues. They're documented in `config/providers.yml` reliability tier comments.
+- **Western Union uses `POST /wuconnect/prices/catalog`** (no auth). USD-INR sender body: `{client:"WUCOM", channel:"WWEB", funds_in:"AC", curr_iso3:"USD", cty_iso2_ext:"US"}`. AED-INR is retail-only — `WWEB` returns "MISSING PRICING SETUP FOR THIS CHANNEL AND CLIENT"; use `{client:"AJ2090041" or "AJ2090063", channel:"WRET", funds_in:"*"}`. Pick the highest `fx_rate` across `services_groups[*].pay_groups[*]` (Direct-to-Bank wins on both corridors with 0 fee).
 - **Threshold rules are edge-triggered.** `lastObservedSide` advances ONLY on fire (not during cooldown). New rules call `armRuleAtCurrentSide` so they don't fire retrospectively on first poll.
 - **Alerts that compare across providers must use a single `referenceAmount`.** `pickSnapshotAmount` in evaluator.ts handles this — don't bypass.
 - **Auth gotchas**: `SESSION_SECRET` throws in production if missing or <32 chars; `safeNextPath` rejects protocol-relative + absolute redirects (open-redirect guard).
