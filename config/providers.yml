@@ -11,8 +11,10 @@
 #        Run `pnpm --filter @fx/core test:live:scrape` to validate selectors.
 #
 # Reference sources for the mid-market median:
-#   wiseMidMarket, xe — verified live
+#   xe — verified live
 #   exchangerateHost (open.er-api.com) — verified live, free, no key
+#   (wiseMidMarket dropped 2026-05-03: Wise also appears as a remittance
+#    provider, so its mid-market reading was effectively redundant.)
 #
 # Reference sources display-only (not in median):
 #   googleFinance — verified live; intentionally excluded from median because
@@ -21,7 +23,7 @@
 pairs:
   USD-INR:
     enabled: true
-    referenceAmounts: [200, 1000, 5000]      # USD
+    referenceAmounts: [100000]               # USD — single fixed comparison amount
     providers:
       - wise              # API
       - remitly           # via Wise comparisons
@@ -35,7 +37,7 @@ pairs:
 
   AED-INR:
     enabled: true
-    referenceAmounts: [500, 5000, 25000]     # AED
+    referenceAmounts: [100000]               # AED — single fixed comparison amount
     providers:
       - wise              # API (Wise comparisons may return empty for AED-INR)
       - aspora            # direct API
@@ -51,9 +53,11 @@ pairs:
       - googleFinance
 
 midMarket:
-  # Median of these three is the canonical mid-market rate.
-  # All three verified live 2026-04-30.
-  sources: [wiseMidMarket, xe, exchangerateHost]
+  # Median of these is the canonical mid-market rate. With only 2 sources
+  # the median is the average; if you ever see "All mid-market sources
+  # marked as outliers", consider loosening outlierTolerancePct or adding
+  # a third source.
+  sources: [xe, exchangerateHost]
   # Tracked, displayed, never feeds alerts.
   referenceOnly: [googleFinance]
   # Drop sources whose rate deviates more than this from the median of survivors.
