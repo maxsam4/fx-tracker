@@ -44,6 +44,7 @@ services:
       ALERT_TICK_CRON: ${ALERT_TICK_CRON:-*/1 * * * *}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       TELEGRAM_ADMIN_CHAT_ID: ${TELEGRAM_ADMIN_CHAT_ID}
+      TELEGRAM_BOT_PIN: ${TELEGRAM_BOT_PIN}
       NODE_ENV: production
     depends_on:
       postgres:

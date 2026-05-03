@@ -1,5 +1,6 @@
 import cron from 'node-cron';
 import { logger } from '@fx/core';
+import { startTelegramBot } from '@fx/core/telegramBot';
 import { runPollCycle } from './jobs/pollRates.js';
 import { runIntervalAlerts } from './jobs/evaluateIntervalAlerts.js';
 import { runHealthAlerts } from './jobs/healthAlerts.js';
@@ -45,6 +46,11 @@ cron.schedule('*/30 * * * *', () => {
 
 // Run a poll cycle on boot so we have data immediately.
 void safeRun('pollRates(boot)', runPollCycle, (b) => (pollInFlight = b));
+
+// Start the Telegram bot long-poll loop (no-op if env not configured).
+void startTelegramBot().catch((err) =>
+  logger.error({ err: String(err) }, 'telegram bot loop crashed'),
+);
 
 const shutdown = async (sig: string) => {
   logger.info({ sig }, 'worker shutting down');

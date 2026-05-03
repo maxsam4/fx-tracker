@@ -32,7 +32,7 @@ Three workspaces orchestrated via pnpm:
 
 - **`packages/core`** — shared. DB schema (Drizzle), `RateProvider` plugin interface, alert evaluator, Telegram client, mid-market computation.
 - **`apps/web`** — Next.js (App Router). Public dashboard at `/`, gated `/alerts` admin (iron-session + bcrypt).
-- **`apps/worker`** — Node + node-cron. Polls every hour (`POLL_INTERVAL_CRON`), evaluates interval alerts every minute. Hosts the Playwright pool for scrape providers.
+- **`apps/worker`** — Node + node-cron. Polls every hour (`POLL_INTERVAL_CRON`), evaluates interval alerts every minute. Hosts the Playwright pool for scrape providers. Also runs the **Telegram bot long-poll loop** (`packages/core/src/telegramBot/`) when `TELEGRAM_BOT_TOKEN` + `TELEGRAM_BOT_PIN` are set — users `/login <PIN>` then drive alert CRUD via `/newalert` and `/alerts`.
 
 The web tier never invokes scrapers — slow scrapes only run inside the worker so they can't block the UI.
 
@@ -45,6 +45,8 @@ The web tier never invokes scrapers — slow scrapes only run inside the worker 
 - `packages/core/src/midMarket.ts` — median-of-survivors with outlier guard.
 - `apps/worker/src/jobs/pollRates.ts` — the hourly poll cycle. Cross-provider dedup via `dedupeQuotes`.
 - `apps/web/middleware.ts` — security headers (CSP/HSTS/XFO).
+- `packages/core/src/telegramBot/` — inbound bot: long-poll loop, command router, `/newalert` wizard, `/alerts` list with inline-keyboard actions. Auth via `TELEGRAM_BOT_PIN` shared secret; authorized chat IDs persist in `bot_authorized_chats`.
+- `packages/core/src/alerts/ruleCommands.ts` — shared alert-rule CRUD (`createAlertRule`, `setAlertEnabled`, `deleteAlertRule`, etc). Both the web routes and the bot wizards delegate here.
 
 ## Provider plugin model
 
@@ -76,6 +78,8 @@ Tiers (declared via plugin's `kind` field):
 - **Alerts that compare across providers must use a single `referenceAmount`.** `pickSnapshotAmount` in evaluator.ts handles this — don't bypass.
 - **Auth gotchas**: `SESSION_SECRET` throws in production if missing or <32 chars; `safeNextPath` rejects protocol-relative + absolute redirects (open-redirect guard).
 - **Hardcode regexes per corridor.** Semgrep flags dynamic `new RegExp(`...${pair}...`)` as ReDoS risk. Pattern: `Record<'USD-INR' | 'AED-INR', RegExp>`.
+- **Telegram `getUpdates` is single-consumer.** The worker bot's long-poll loop owns `getUpdates`; never reintroduce a parallel caller (the old web `/alerts/telegram-pair` page used to call `getRecentChats`/`getUpdates`, which would have stolen updates from the bot — the page was refactored to read `bot_authorized_chats` from the DB instead).
+- **Bot wizard state is in-memory.** A worker restart drops in-progress `/newalert` flows. Authorized chat IDs persist in `bot_authorized_chats`, so users only `/login` once.
 
 ## Testing
 
@@ -90,8 +94,9 @@ Tiers (declared via plugin's `kind` field):
 - `DATABASE_URL` — Postgres
 - `ADMIN_PASSWORD_HASH` — bcrypt hash for `/alerts` login
 - `SESSION_SECRET` — 32+ chars
-- `TELEGRAM_BOT_TOKEN` — outbound only, no webhook server
+- `TELEGRAM_BOT_TOKEN` — used for both outbound rule fires AND inbound long-poll bot loop (worker)
 - `TELEGRAM_ADMIN_CHAT_ID` — for self-alerts on persistent provider failures
+- `TELEGRAM_BOT_PIN` — shared PIN for `/login` from Telegram chat. Unset → inbound disabled (worker logs warn and skips bot loop).
 - `POLL_INTERVAL_CRON` (default `0 * * * *`)
 - `ALERT_TICK_CRON` (default `*/1 * * * *`)
 - `SITE_DOMAIN` — for Caddy TLS in prod

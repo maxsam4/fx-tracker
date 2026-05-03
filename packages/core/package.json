@@ -11,7 +11,8 @@
     "./providers": "./src/providers/index.ts",
     "./alerts": "./src/alerts/index.ts",
     "./config": "./src/config/index.ts",
-    "./scrape": "./src/scrape/index.ts"
+    "./scrape": "./src/scrape/index.ts",
+    "./telegramBot": "./src/telegramBot/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

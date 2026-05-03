@@ -165,6 +165,16 @@ export const adminSessions = pgTable('admin_sessions', {
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
 });
 
+// ----------------------------- bot authorized chats -----------------------------
+// Telegram chat IDs allowed to drive the bot via /login. Persisted so a
+// worker restart doesn't force re-PIN.
+export const botAuthorizedChats = pgTable('bot_authorized_chats', {
+  chatId: text('chat_id').primaryKey(),
+  authorizedAt: timestamp('authorized_at', { withTimezone: true }).notNull().defaultNow(),
+  lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).notNull().defaultNow(),
+  label: text('label'),
+});
+
 export type CurrencyPairRow = typeof currencyPairs.$inferSelect;
 export type MidMarketRow = typeof midMarketRates.$inferSelect;
 export type ReferenceRateRow = typeof referenceRates.$inferSelect;
@@ -172,3 +182,4 @@ export type ProviderQuoteRow = typeof providerQuotes.$inferSelect;
 export type ProviderRunRow = typeof providerRuns.$inferSelect;
 export type AlertRuleRow = typeof alertRules.$inferSelect;
 export type AlertFireRow = typeof alertFires.$inferSelect;
+export type BotAuthorizedChatRow = typeof botAuthorizedChats.$inferSelect;
