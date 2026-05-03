@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { Pill, StatusDot } from './ui/Pill';
+import { DerivedRateRow } from './DerivedRateRow';
 
 interface Row {
   providerId: string;
@@ -128,6 +129,14 @@ export function ProviderTable({
             </tr>
           </thead>
           <tbody>
+            {pairKey === 'AED-INR' && (
+              <DerivedRateRow
+                sendAmount={sendAmount}
+                fromCurrency={fromCurrency}
+                toCurrency={toCurrency}
+                midRate={midRate}
+              />
+            )}
             {all.map((r, i) => {
               const delta = midRate ? ((r.effectiveRate - midRate) / midRate) * 100 : null;
               const isReference = r.kind === 'reference';
