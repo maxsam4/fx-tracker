@@ -14,7 +14,6 @@ import {
 export const dynamic = 'force-dynamic';
 
 const QuerySchema = z.object({
-  amount: z.coerce.number().positive().optional(),
   window: z.coerce.number().positive().optional(),
 });
 
@@ -24,7 +23,6 @@ export async function GET(
 ) {
   const url = new URL(req.url);
   const parsed = QuerySchema.safeParse({
-    amount: url.searchParams.get('amount') ?? undefined,
     window: url.searchParams.get('window') ?? undefined,
   });
   if (!parsed.success) {
@@ -43,11 +41,7 @@ export async function GET(
   const pairCfg = config.pairs[pairKey];
   if (!pairCfg) return NextResponse.json({ error: 'unknown pair' }, { status: 404 });
 
-  const sendAmount =
-    parsed.data.amount && pairCfg.referenceAmounts.includes(parsed.data.amount)
-      ? parsed.data.amount
-      : pairCfg.referenceAmounts[Math.floor(pairCfg.referenceAmounts.length / 2)] ??
-        pairCfg.referenceAmounts[0]!;
+  const sendAmount = pairCfg.referenceAmounts[0]!;
   const windowMs = parsed.data.window ?? 7 * 24 * 60 * 60 * 1000;
 
   const pairId = await getPairId(pair);

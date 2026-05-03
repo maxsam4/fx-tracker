@@ -4,7 +4,6 @@ import type { CurrencyPair } from '@fx/core';
 import { MidMarketChart } from './MidMarketChart';
 import { ProviderTable } from './ProviderTable';
 import { WindowControls } from './WindowControls';
-import { AmountControls } from './AmountControls';
 import { Card, CardBody, CardHeader } from './ui/Card';
 import { Pill, StatusDot } from './ui/Pill';
 import { Stat } from './ui/Stat';
@@ -37,7 +36,6 @@ interface Props {
   pairKey: string;
   pair: CurrencyPair;
   sendAmount: number;
-  referenceAmounts: number[];
   configuredProviders: string[];
   windowMs: number;
   mid: { rate: number; capturedAt: string; sources: string[] } | null;
@@ -52,7 +50,7 @@ const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export function Dashboard(initial: Props) {
   // SWR auto-refresh — keeps the UI live every 60s without a full reload.
-  const swrKey = `/api/rates/${encodeURIComponent(initial.pairKey)}?amount=${initial.sendAmount}&window=${initial.windowMs}`;
+  const swrKey = `/api/rates/${encodeURIComponent(initial.pairKey)}?window=${initial.windowMs}`;
   const { data } = useSWR(swrKey, fetcher, {
     refreshInterval: 60_000,
     fallbackData: {
@@ -151,12 +149,6 @@ export function Dashboard(initial: Props) {
           Comparison settings
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <AmountControls
-            pairKey={initial.pairKey}
-            current={initial.sendAmount}
-            options={initial.referenceAmounts}
-            from={initial.pair.from}
-          />
           <WindowControls pairKey={initial.pairKey} currentMs={initial.windowMs} />
         </div>
       </section>

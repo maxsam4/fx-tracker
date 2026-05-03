@@ -262,7 +262,7 @@ function RowComponent({
           ) : (
             <>
               <Link
-                href={`/${encodeURIComponent(pairKey)}/providers/${encodeURIComponent(row.id)}?amount=${sendAmount}`}
+                href={`/${encodeURIComponent(pairKey)}/providers/${encodeURIComponent(row.id)}`}
                 className="font-mono text-sm font-medium text-text transition-colors hover:text-accent"
               >
                 {row.id}

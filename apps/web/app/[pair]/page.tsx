@@ -20,7 +20,7 @@ export default async function PairPage({
   searchParams,
 }: {
   params: { pair: string };
-  searchParams: { window?: string; amount?: string };
+  searchParams: { window?: string };
 }) {
   const pairKey = decodeURIComponent(params.pair).toUpperCase();
   let pair;
@@ -34,7 +34,7 @@ export default async function PairPage({
   const pairCfg = config.pairs[pairKey];
   if (!pairCfg) notFound();
 
-  const sendAmount = pickAmount(searchParams.amount, pairCfg.referenceAmounts);
+  const sendAmount = pairCfg.referenceAmounts[0]!;
   const windowMs = pickWindow(searchParams.window);
 
   const pairId = await getPairId(pair);
@@ -61,7 +61,6 @@ export default async function PairPage({
       pairKey={pairKey}
       pair={pair}
       sendAmount={sendAmount}
-      referenceAmounts={pairCfg.referenceAmounts}
       configuredProviders={pairCfg.providers}
       windowMs={windowMs}
       mid={mid}
@@ -72,14 +71,6 @@ export default async function PairPage({
       runStatus={runStatus}
     />
   );
-}
-
-function pickAmount(input: string | undefined, available: number[]): number {
-  if (input) {
-    const n = parseFloat(input);
-    if (Number.isFinite(n) && available.includes(n)) return n;
-  }
-  return available[Math.floor(available.length / 2)] ?? available[0]!;
 }
 
 function pickWindow(input: string | undefined): number {

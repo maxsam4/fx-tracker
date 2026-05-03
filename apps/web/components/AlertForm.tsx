@@ -132,17 +132,14 @@ export function AlertForm({ initial, pairs }: Props) {
           </Field>
           {pairCfg && (
             <Field label="Reference amount">
-              <select
+              <input
+                type="hidden"
                 name="referenceAmount"
-                defaultValue={initial?.referenceAmount ?? pairCfg.referenceAmounts[0]}
-                className={inputClass}
-              >
-                {pairCfg.referenceAmounts.map((a) => (
-                  <option key={a} value={a}>
-                    {a}
-                  </option>
-                ))}
-              </select>
+                value={pairCfg.referenceAmounts[0]}
+              />
+              <div className={`${monoInputClass} bg-elevated/40 text-muted`}>
+                {pairCfg.referenceAmounts[0]?.toLocaleString('en-US')} {pair.split('-')[0]}
+              </div>
             </Field>
           )}
         </>

@@ -31,7 +31,7 @@ export default async function ProviderPage({
   searchParams,
 }: {
   params: { pair: string; providerId: string };
-  searchParams: { window?: string; amount?: string };
+  searchParams: { window?: string };
 }) {
   const pairKey = decodeURIComponent(params.pair).toUpperCase();
   let pair;
@@ -46,7 +46,7 @@ export default async function ProviderPage({
   if (!pairCfg) notFound();
 
   const providerId = decodeURIComponent(params.providerId);
-  const sendAmount = pickAmount(searchParams.amount, pairCfg.referenceAmounts);
+  const sendAmount = pairCfg.referenceAmounts[0]!;
   const activeWindow = searchParams.window ?? '30d';
   const windowMs = WINDOW_MS[activeWindow] ?? WINDOW_MS['30d']!;
 
@@ -80,7 +80,7 @@ export default async function ProviderPage({
           <div className="flex flex-col gap-5">
             <div className="flex flex-wrap items-center gap-3">
               <Link
-                href={`/${pairKey}?amount=${sendAmount}`}
+                href={`/${pairKey}`}
                 className="text-2xs uppercase tracking-[0.16em] text-subtle hover:text-text"
               >
                 ← {pairKey}
@@ -137,7 +137,7 @@ export default async function ProviderPage({
           {WINDOW_KEYS.map((k) => (
             <Link
               key={k}
-              href={`/${pairKey}/providers/${encodeURIComponent(providerId)}?window=${k}&amount=${sendAmount}`}
+              href={`/${pairKey}/providers/${encodeURIComponent(providerId)}?window=${k}`}
               className={`tabular rounded px-2.5 py-1 font-mono text-xs font-medium transition-colors ${
                 k === activeWindow
                   ? 'bg-elevated text-text shadow-ring'
@@ -195,14 +195,6 @@ export default async function ProviderPage({
       </Card>
     </div>
   );
-}
-
-function pickAmount(input: string | undefined, available: number[]): number {
-  if (input) {
-    const n = parseFloat(input);
-    if (Number.isFinite(n) && available.includes(n)) return n;
-  }
-  return available[Math.floor(available.length / 2)] ?? available[0]!;
 }
 
 function Tile({
