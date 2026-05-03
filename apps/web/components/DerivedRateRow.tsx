@@ -53,9 +53,9 @@ export function DerivedRateRow({
     ? Math.max(...usdInrRates.map((r) => r.effectiveRate))
     : null;
 
-  const [selUsdInr, setSelUsdInr] = useState<string>('best');
+  const [selUsdInr, setSelUsdInr] = useState<string>('mid');
   const [customUsdInr, setCustomUsdInr] = useState<string>('');
-  const [selUsdAed, setSelUsdAed] = useState<string>('3.67300');
+  const [selUsdAed, setSelUsdAed] = useState<string>('3.67250');
   const [customUsdAed, setCustomUsdAed] = useState<string>('');
 
   // Resolve the selected dropdown value to a number (or null if invalid).
@@ -98,140 +98,116 @@ export function DerivedRateRow({
           : 'text-bad';
 
   const selectClass =
-    'rounded border border-edge bg-surface px-2 py-1 font-mono text-xs text-text focus:border-accent focus:outline-none';
+    'rounded border border-edge bg-surface px-1.5 py-0.5 font-mono text-2xs text-text focus:border-accent focus:outline-none';
   const inputClass =
-    'w-24 rounded border border-edge bg-surface px-2 py-1 font-mono text-xs text-text focus:border-accent focus:outline-none';
+    'w-20 rounded border border-edge bg-surface px-1.5 py-0.5 font-mono text-2xs text-text focus:border-accent focus:outline-none';
 
   return (
-    <>
-      <tr className="border-b border-edge/60 bg-bg/30">
-        <td className="px-5 py-3.5">
-          <span className="tabular font-mono text-2xs text-subtle">—</span>
-        </td>
-        <td className="px-3 py-3.5">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-sm font-medium text-text">derived</span>
-            <Pill tone="muted">USD→{toCurrency} ÷ USD→{fromCurrency}</Pill>
-          </div>
-        </td>
-        <td
-          className={`tabular px-3 py-3.5 text-right font-mono text-sm ${
-            aedInrRate === null ? 'text-subtle' : 'text-muted'
+    <tr className="border-b border-edge/60 bg-bg/30">
+      <td className="px-5 py-3.5">
+        <span className="tabular font-mono text-2xs text-subtle">—</span>
+      </td>
+      <td className="px-3 py-3.5">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+          <span className="font-mono text-sm font-medium text-text">derived</span>
+          <Pill tone="muted">USD→{toCurrency} ÷ USD→{fromCurrency}</Pill>
+          <select
+            value={selUsdInr}
+            onChange={(e) => setSelUsdInr(e.target.value)}
+            className={selectClass}
+            aria-label={`USD to ${toCurrency} rate`}
+          >
+            {usdInrMid !== null && (
+              <option value="mid">mid ({usdInrMid.toFixed(4)})</option>
+            )}
+            <option value="best">
+              best{bestUsdInr !== null ? ` (${bestUsdInr.toFixed(4)})` : ''}
+            </option>
+            {usdInrRates.map((r) => (
+              <option key={r.providerId} value={String(r.effectiveRate)}>
+                {r.providerId} ({r.effectiveRate.toFixed(4)})
+              </option>
+            ))}
+            <option value="custom">custom…</option>
+          </select>
+          {selUsdInr === 'custom' && (
+            <input
+              type="number"
+              step="0.0001"
+              inputMode="decimal"
+              value={customUsdInr}
+              onChange={(e) => setCustomUsdInr(e.target.value)}
+              placeholder="94.65"
+              className={inputClass}
+              aria-label={`Custom USD to ${toCurrency} rate`}
+            />
+          )}
+          <span className="font-mono text-2xs text-subtle">÷</span>
+          <select
+            value={selUsdAed}
+            onChange={(e) => setSelUsdAed(e.target.value)}
+            className={selectClass}
+            aria-label={`USD to ${fromCurrency} rate`}
+          >
+            {USD_AED_PRESETS.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+            <option value="custom">custom…</option>
+          </select>
+          {selUsdAed === 'custom' && (
+            <input
+              type="number"
+              step="0.0001"
+              inputMode="decimal"
+              value={customUsdAed}
+              onChange={(e) => setCustomUsdAed(e.target.value)}
+              placeholder="3.67250"
+              className={inputClass}
+              aria-label={`Custom USD to ${fromCurrency} rate`}
+            />
+          )}
+        </div>
+      </td>
+      <td
+        className={`tabular px-3 py-3.5 text-right font-mono text-sm ${
+          aedInrRate === null ? 'text-subtle' : 'text-muted'
+        }`}
+      >
+        {aedInrRate !== null ? aedInrRate.toFixed(4) : '—'}
+      </td>
+      <td className="px-3 py-3.5 text-right">
+        <span
+          className={`tabular font-mono text-sm font-medium ${
+            aedInrRate === null ? 'text-subtle' : 'text-text'
           }`}
         >
           {aedInrRate !== null ? aedInrRate.toFixed(4) : '—'}
-        </td>
-        <td className="px-3 py-3.5 text-right">
-          <span
-            className={`tabular font-mono text-sm font-medium ${
-              aedInrRate === null ? 'text-subtle' : 'text-text'
-            }`}
-          >
-            {aedInrRate !== null ? aedInrRate.toFixed(4) : '—'}
+        </span>
+      </td>
+      <td className="px-3 py-3.5">
+        {delta === null ? (
+          <span className="text-subtle">—</span>
+        ) : (
+          <span className={`tabular font-mono text-xs font-medium ${deltaTone}`}>
+            {delta >= 0 ? '+' : ''}
+            {delta.toFixed(2)}%
           </span>
-        </td>
-        <td className="px-3 py-3.5">
-          {delta === null ? (
-            <span className="text-subtle">—</span>
-          ) : (
-            <span className={`tabular font-mono text-xs font-medium ${deltaTone}`}>
-              {delta >= 0 ? '+' : ''}
-              {delta.toFixed(2)}%
-            </span>
-          )}
-        </td>
-        <td
-          className={`tabular px-3 py-3.5 text-right font-mono text-sm ${
-            receive === null ? 'text-subtle' : 'text-text'
-          }`}
-        >
-          {receive !== null ? fmt(receive) : '—'}
-        </td>
-        <td className="px-3 py-3.5 text-right text-sm text-subtle">—</td>
-        <td className="px-5 py-3.5 text-right text-2xs uppercase tracking-[0.12em] text-subtle">
-          manual
-        </td>
-      </tr>
-      <tr className="border-b border-edge bg-bg/40">
-        <td colSpan={8} className="px-5 pb-4 pt-2">
-          <div className="flex flex-wrap items-end gap-x-4 gap-y-3">
-            <div className="flex flex-col gap-1">
-              <label className="text-2xs uppercase tracking-[0.12em] text-subtle">
-                USD → {toCurrency} rate
-              </label>
-              <div className="flex items-center gap-1.5">
-                <select
-                  value={selUsdInr}
-                  onChange={(e) => setSelUsdInr(e.target.value)}
-                  className={selectClass}
-                  aria-label={`USD to ${toCurrency} rate`}
-                >
-                  <option value="best">
-                    best{bestUsdInr !== null ? ` (${bestUsdInr.toFixed(4)})` : ''}
-                  </option>
-                  {usdInrMid !== null && (
-                    <option value="mid">mid-market ({usdInrMid.toFixed(4)})</option>
-                  )}
-                  {usdInrRates.map((r) => (
-                    <option key={r.providerId} value={String(r.effectiveRate)}>
-                      {r.providerId} ({r.effectiveRate.toFixed(4)})
-                    </option>
-                  ))}
-                  <option value="custom">custom…</option>
-                </select>
-                {selUsdInr === 'custom' && (
-                  <input
-                    type="number"
-                    step="0.0001"
-                    inputMode="decimal"
-                    value={customUsdInr}
-                    onChange={(e) => setCustomUsdInr(e.target.value)}
-                    placeholder="e.g. 94.6500"
-                    className={inputClass}
-                    aria-label={`Custom USD to ${toCurrency} rate`}
-                  />
-                )}
-              </div>
-            </div>
-
-            <span className="self-end pb-1.5 font-mono text-base text-subtle">÷</span>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-2xs uppercase tracking-[0.12em] text-subtle">
-                USD → {fromCurrency} rate
-              </label>
-              <div className="flex items-center gap-1.5">
-                <select
-                  value={selUsdAed}
-                  onChange={(e) => setSelUsdAed(e.target.value)}
-                  className={selectClass}
-                  aria-label={`USD to ${fromCurrency} rate`}
-                >
-                  {USD_AED_PRESETS.map((p) => (
-                    <option key={p} value={p}>
-                      {p}
-                    </option>
-                  ))}
-                  <option value="custom">custom…</option>
-                </select>
-                {selUsdAed === 'custom' && (
-                  <input
-                    type="number"
-                    step="0.0001"
-                    inputMode="decimal"
-                    value={customUsdAed}
-                    onChange={(e) => setCustomUsdAed(e.target.value)}
-                    placeholder="e.g. 3.67250"
-                    className={inputClass}
-                    aria-label={`Custom USD to ${fromCurrency} rate`}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        </td>
-      </tr>
-    </>
+        )}
+      </td>
+      <td
+        className={`tabular px-3 py-3.5 text-right font-mono text-sm ${
+          receive === null ? 'text-subtle' : 'text-text'
+        }`}
+      >
+        {receive !== null ? fmt(receive) : '—'}
+      </td>
+      <td className="px-3 py-3.5 text-right text-sm text-subtle">—</td>
+      <td className="px-5 py-3.5 text-right text-2xs uppercase tracking-[0.12em] text-subtle">
+        manual
+      </td>
+    </tr>
   );
 }
 
