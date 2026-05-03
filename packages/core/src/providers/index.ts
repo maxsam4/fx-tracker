@@ -15,6 +15,8 @@ import { wiseMidMarketSource } from './reference/wiseMidMarket.js';
 import { xeSource } from './reference/xe.js';
 import { exchangerateHostSource } from './reference/exchangerateHost.js';
 import { googleFinanceSource } from './reference/googleFinance.js';
+import { visaSource } from './reference/visa.js';
+import { frankfurterSource } from './reference/frankfurter.js';
 
 export * from './types.js';
 
@@ -36,6 +38,8 @@ const referenceList: ReferenceSource[] = [
   xeSource,
   exchangerateHostSource,
   googleFinanceSource,
+  visaSource,
+  frankfurterSource,
 ];
 
 export const providerRegistry = new Map(providerList.map((p) => [p.id, p] as const));

@@ -1,0 +1,50 @@
+import { httpJson } from '../../scrape/httpClient.js';
+import type { ReferenceRate, ReferenceSource } from '../types.js';
+
+// Frankfurter is a free, no-auth ECB-derived FX feed. Updated daily (~16:00
+// CET) directly from the European Central Bank's reference rates table.
+//
+// Endpoint:
+//   GET https://api.frankfurter.dev/v1/latest?base=USD&symbols=INR
+// Response:
+//   {"amount":1.0, "base":"USD", "date":"YYYY-MM-DD", "rates":{"INR":94.92}}
+//
+// Caveat: ECB only tracks ~30 currencies, AED is not one of them. We throw
+// for unsupported bases (e.g. AED-INR) — `computeMidMarket` records the
+// failure in perSource and just doesn't include this source in that pair's
+// median. The user-facing impact is "Frankfurter contributes to USD-INR
+// only, not AED-INR".
+
+const ENDPOINT = 'https://api.frankfurter.dev/v1/latest';
+
+interface FrankfurterResponse {
+  amount?: number;
+  base?: string;
+  date?: string;
+  rates?: Record<string, number>;
+  message?: string; // present on errors, e.g. {"message":"not found"}
+}
+
+export const frankfurterSource: ReferenceSource = {
+  id: 'frankfurter',
+  displayName: 'Frankfurter (ECB)',
+
+  async fetchRate({ pair }): Promise<ReferenceRate> {
+    const url = `${ENDPOINT}?base=${encodeURIComponent(pair.from)}&symbols=${encodeURIComponent(pair.to)}`;
+    const data = await httpJson<FrankfurterResponse>(url, { timeoutMs: 12_000 });
+    if (data.message) {
+      throw new Error(`Frankfurter: ${data.message} (likely unsupported currency for ${pair.from}-${pair.to})`);
+    }
+    const rate = data.rates?.[pair.to];
+    if (typeof rate !== 'number' || !Number.isFinite(rate) || rate <= 0) {
+      throw new Error(`Frankfurter: missing or invalid rate for ${pair.to}`);
+    }
+    return {
+      sourceId: 'frankfurter',
+      pair,
+      rate,
+      capturedAt: new Date(),
+      raw: data,
+    };
+  },
+};

@@ -11,14 +11,15 @@
 #        Run `pnpm --filter @fx/core test:live:scrape` to validate selectors.
 #
 # Reference sources for the mid-market median:
-#   xe — verified live
+#   xe — verified live (plain HTML scrape)
 #   exchangerateHost (open.er-api.com) — verified live, free, no key
+#   googleFinance — verified live (Playwright + consent cookie)
+#   visa — Visa consumer cmsapi/fx/rates (Playwright; behind Cloudflare)
+#   frankfurter — ECB-derived (api.frankfurter.dev/v1, free, no key,
+#                 USD-INR only — ECB doesn't track AED, so it's silently
+#                 skipped for AED-INR's median)
 #   (wiseMidMarket dropped 2026-05-03: Wise also appears as a remittance
 #    provider, so its mid-market reading was effectively redundant.)
-#
-# Reference sources display-only (not in median):
-#   googleFinance — verified live; intentionally excluded from median because
-#                   it lags the market by 5-15 min.
 
 pairs:
   USD-INR:
@@ -32,8 +33,10 @@ pairs:
       - aspora            # direct API
       - westernUnion      # API (wuconnect/prices/catalog, Direct-to-Bank)
       - remitfinder       # SCRAPE — corridor URLs return only popular preview; needs work
-    referenceSources:
-      - googleFinance
+    # No display-only feeds — googleFinance et al. now contribute to the
+    # midMarket median, and pollRates step 1b persists every successful
+    # per-source rate to reference_rates automatically.
+    referenceSources: []
 
   AED-INR:
     enabled: true
@@ -49,17 +52,17 @@ pairs:
       - remitfinder       # SCRAPE
       # Note: Instarem's public API rejects AED→INR ("Invalid combination of
       # country-currency details") — they don't operate that corridor.
-    referenceSources:
-      - googleFinance
+    referenceSources: []
 
 midMarket:
-  # Median of these is the canonical mid-market rate. With only 2 sources
-  # the median is the average; if you ever see "All mid-market sources
-  # marked as outliers", consider loosening outlierTolerancePct or adding
-  # a third source.
-  sources: [xe, exchangerateHost]
-  # Tracked, displayed, never feeds alerts.
-  referenceOnly: [googleFinance]
+  # Median of these is the canonical mid-market rate. Sources that fail
+  # for a given pair (e.g. frankfurter for AED-INR) drop out — only
+  # successful fetches feed the median.
+  sources: [xe, exchangerateHost, googleFinance, visa, frankfurter]
+  # Display-only feeds that do not feed the median. Currently empty —
+  # all configured sources contribute. If you add a feed you only want
+  # to chart (not let influence alerts), put it here.
+  referenceOnly: []
   # Drop sources whose rate deviates more than this from the median of survivors.
   outlierTolerancePct: 2.0
 
