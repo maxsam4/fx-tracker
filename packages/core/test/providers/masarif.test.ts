@@ -64,9 +64,16 @@ describe('masarifProvider.fetchQuote', () => {
     expect(byId).not.toHaveProperty('alRazouki'); // stale Sep 2025
     expect(byId).not.toHaveProperty('bogus_');
 
-    // capturedAt = masarif's "Updated At", NOT the test's frozen "now"
-    expect(byId.alAnsari?.capturedAt).toEqual(new Date('2026-05-02T08:45:00Z'));
-    expect(byId.lulu?.capturedAt).toEqual(new Date('2026-05-02T09:45:00Z'));
+    // capturedAt = poll time (the frozen "now" of this test), consistent
+    // with every other provider. masarif's house-level publish time is
+    // preserved in raw.masarifUpdatedAt for traceability.
+    const FROZEN_NOW = new Date('2026-05-02T12:00:00Z');
+    expect(byId.alAnsari?.capturedAt).toEqual(FROZEN_NOW);
+    expect(byId.lulu?.capturedAt).toEqual(FROZEN_NOW);
+    expect((byId.alAnsari?.raw as { masarifUpdatedAt?: string })?.masarifUpdatedAt)
+      .toBe('2026-05-02T08:45:00.000Z');
+    expect((byId.lulu?.raw as { masarifUpdatedAt?: string })?.masarifUpdatedAt)
+      .toBe('2026-05-02T09:45:00.000Z');
 
     for (const q of arr) {
       expect(q.dataSource).toBe('masarif');

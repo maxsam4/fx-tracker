@@ -26,10 +26,10 @@ import { withPage } from '../scrape/browserPool.js';
 //
 // Freshness: many houses leave stale rows on the page (Sep 2025, Feb 2026).
 // We drop anything updated more than STALE_DAYS ago. The Quote's
-// `capturedAt` is set to the masarif-reported "Updated At" timestamp, NOT
-// the time we ran the scrape — so the dashboard shows when the rate was
-// actually published by the house, which can be hours ago even when we
-// just polled.
+// `capturedAt` is the time we polled (consistent with every other provider's
+// semantic — "when did fx-tracker last refresh this row"). The masarif-
+// reported "Updated At" — when the house itself last republished — is
+// preserved in `raw.masarifUpdatedAt` for traceability and future UI use.
 
 const URL_INR = 'https://masarif.ae/currency-exchange-rates/inr';
 const STALE_DAYS = 7;
@@ -186,6 +186,7 @@ export const masarifProvider: RateProvider = {
       throw new Error('masarif scrape returned no rows; selectors may need updating');
     }
 
+    const polledAt = new Date();
     return rows.map((row) => ({
       providerId: row.providerId,
       dataSource: 'masarif',
@@ -194,13 +195,12 @@ export const masarifProvider: RateProvider = {
       receiveAmount: sendAmount * row.rate,
       rate: row.rate,
       feeAmount: 0,
-      // Use masarif's reported "Updated At" as the captured timestamp so the
-      // dashboard's "Updated 2h" column reflects when the house actually
-      // published the rate, not when our worker ran the poll.
-      capturedAt: row.updatedAt,
+      capturedAt: polledAt,
       raw: {
         source: 'masarif',
         rawName: row.rawName,
+        // The house's own publish time — preserved for inspection/debugging
+        // and in case the UI later wants to surface "house last refreshed at".
         masarifUpdatedAt: row.updatedAt.toISOString(),
       },
     }));
