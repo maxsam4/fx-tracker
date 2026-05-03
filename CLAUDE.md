@@ -14,7 +14,7 @@ pnpm -r test                                # unit tests (no network)
 # Live tests — opt-in via env flag, hit real endpoints
 pnpm --filter @fx/core run test:live              # 13 HTTP-API tests, ~10s
 pnpm --filter @fx/core run test:live:scrape       # required-tier Playwright (Google Finance only)
-pnpm --filter @fx/core run test:live:scrape:fragile  # advisory-tier (masarif/lulu/careem/rf — may fail; informational)
+pnpm --filter @fx/core run test:live:scrape:fragile  # advisory-tier (lulu/remitfinder — may fail; informational)
 pnpm --filter @fx/core run test:live:all          # everything
 
 # DB
@@ -45,6 +45,8 @@ The web tier never invokes scrapers — slow scrapes only run inside the worker 
 - `packages/core/src/midMarket.ts` — median-of-survivors with outlier guard.
 - `apps/worker/src/jobs/pollRates.ts` — the hourly poll cycle. Cross-provider dedup via `dedupeQuotes`.
 - `apps/web/middleware.ts` — security headers (CSP/HSTS/XFO).
+- `apps/web/components/ProviderTable.tsx` — comparison table. Renders provider rows + per-source mid feeds + a synthetic median row + (AED-INR only) the derived-rate row. The `#` column ranks ONLY `kind === 'provider'` rows (best provider is always #01); mid feeds, the median, and the derived row show `—`.
+- `apps/web/components/DerivedRateRow.tsx` — AED-INR-only client row that pulls USD-INR rates via SWR (`/api/rates/USD-INR`) and lets the user compute `USD-INR ÷ USD-AED` for the "hold USD, pull AED at the peg" path. Defaults to mid-market USD-INR ÷ 3.67250.
 - `packages/core/src/telegramBot/` — inbound bot: long-poll loop, command router, `/newalert` wizard, `/alerts` list with inline-keyboard actions. Auth via `TELEGRAM_BOT_PIN` shared secret; authorized chat IDs persist in `bot_authorized_chats`.
 - `packages/core/src/alerts/ruleCommands.ts` — shared alert-rule CRUD (`createAlertRule`, `setAlertEnabled`, `deleteAlertRule`, etc). Both the web routes and the bot wizards delegate here.
 
@@ -57,27 +59,33 @@ Adding a new remittance provider:
 4. Restart worker. Health visible in the `provider_runs` table.
 
 Tiers (declared via plugin's `kind` field):
-- **`api`** — direct JSON. Most reliable. Examples: Wise, Instarem, Aspora.
-- **`aggregator`** — one call yields multiple providers. Examples: masarif (UAE houses via scrape), Wise comparisons, Aspora API (returns Aspora + Wise + Remitly).
-- **`scrape`** — Playwright fallback. Best-effort.
+- **`api`** — direct JSON. Most reliable. Examples: Wise, Instarem, Aspora, Remitly (`api.remitly.io/v3/calculator/estimate`), Xoom, WesternUnion, CareemPay (`platform.careemapis.com/pubweb/api/remittance-widget-rates`).
+- **`aggregator`** — one call yields multiple providers. Examples: masarif (UAE houses scraped from `masarif.ae/currency-exchange-rates/inr`), Wise comparisons, Aspora API (returns Aspora + Wise + Remitly).
+- **`scrape`** — Playwright fallback. Best-effort. Currently: lulu, remitfinder.
 
 ## Gotchas
 
 - **Wise's `/v3/comparisons/` returns an empty `providers` array for AED→INR.** Plugins relying on it (e.g. remitly's first fallback) silently get no Wise data for that corridor; design for it.
 - **Remitly has two rates**: a "promotional" first-transfer rate (~95.19 USD-INR, ~25.95 AED-INR) capped at 6000 USD / 4000 AED, and a "standard" non-promo rate (~94.65 USD-INR, ~25.77 AED-INR) that's what users actually pay long-term. The plugin reads the standard rate via `https://api.remitly.io/v3/calculator/estimate?conduit=<ISO3-src>:<src_currency>-<ISO3-dst>:<dst_currency>&anchor=SEND&amount=N&customer_segment=STANDARD&customer_recognition=UNRECOGNIZED&strict_promo=false` — `exchange_rate.base_rate` IS the standard rate. No Playwright. Conduits: `USA:USD-IND:INR`, `ARE:AED-IND:INR`. Resolution order: Remitly API → Wise comparisons fallback. **Never fall back to the promo rate** — it's BETTER than mid (Remitly subsidises first transfers) and would rank Remitly artificially at the top of the comparison. If both fail, throw.
 - **Instarem's old `/api/v1/public/transaction/computed-rate` endpoint now returns "Session Expired".** The replacement is `/api/v1/public/transaction/computed-value` with required `country_code` (e.g. `country_code=US` for USD-INR). AED→INR is *not* an Instarem corridor (the API rejects it with "Invalid combination of country-currency details"), so `instaremProvider.supports()` is USD-INR only and Instarem is removed from the AED-INR provider list.
-- **Mid-market source rates also land in `reference_rates`.** `pollRates` step 1b writes each successful per-source rate from the median computation (`wiseMidMarket`, `xe`, `exchangerateHost`) as a reference row, even though only `googleFinance` appears in `pairCfg.referenceSources`. Don't add those mid-market sources to `referenceSources` or you'll double-fetch.
+- **Mid-market source rates also land in `reference_rates`.** `pollRates` step 1b writes each successful per-source rate from the median computation (currently `xe`, `exchangerateHost`, `googleFinance`, `visa`, `frankfurter`) as a reference row. `pairCfg.referenceSources` is empty — never add a feed there if it's already in `midMarket.sources` or you'll double-fetch.
 - **Aspora's API expects `amount` not `send_amount`** (the latter returns 400 with "converted to 0.00"). Endpoint: `POST https://api-z1.aspora.com/appserver/public-forex-provider/get-rates` with `{ base_currency, quote_currency, amount }`.
-- **Google Finance**: use selector `div.N6SYTe` (single occurrence per page = the primary quote). `[jsname="Pdsbrc"]` matches dozens of unrelated tickers in the sidebar.
+- **Google Finance**: use selector `div.N6SYTe` (or `div.N6SYTo`) — single occurrence per page = the primary quote. `[jsname="Pdsbrc"]` matches dozens of unrelated tickers in the sidebar. Force US locale via `?hl=en&gl=US` and pre-set the `CONSENT=YES+` cookie at context creation — Hetzner-DE egress otherwise bounces through `consent.google.com` and the price card never renders. There's a text-walker rate-range fallback in case Google renames the class again.
 - **`exchangerate.host` now requires an API key.** We use `open.er-api.com/v6/latest/X` instead (free, no key); the source ID is still `exchangerateHost` for config compatibility.
 - **`fetchWiseComparison` memoizes for 60s.** Tests must call `__resetWiseComparisonCache()` in `beforeEach` or rates leak across tests.
 - **Cross-provider dedup runs after `Promise.allSettled`, not per-call.** `dedupeQuotes` (in `packages/core/src/dedupe.ts`) consolidates aggregator outputs using `preferredSource`. Don't reintroduce per-provider dedup — it makes `preferredSource` dead code.
-- **Scrape selectors are best-effort.** masarif, lulu, careemPay, remitfinder failures are expected; system records `provider_runs.status='error'` and continues. They're documented in `config/providers.yml` reliability tier comments.
+- **Scrape selectors are best-effort.** lulu and remitfinder failures are expected; system records `provider_runs.status='error'` and continues. They're documented in `config/providers.yml` reliability tier comments. (masarif and careemPay used to be in this list — both moved to API-backed tiers in this session.)
 - **Western Union uses `POST /wuconnect/prices/catalog`** (no auth). USD-INR sender body: `{client:"WUCOM", channel:"WWEB", funds_in:"AC", curr_iso3:"USD", cty_iso2_ext:"US"}`. AED-INR is retail-only — `WWEB` returns "MISSING PRICING SETUP FOR THIS CHANNEL AND CLIENT"; use `{client:"AJ2090041" or "AJ2090063", channel:"WRET", funds_in:"*"}`. Pick the highest `fx_rate` across `services_groups[*].pay_groups[*]` (Direct-to-Bank wins on both corridors with 0 fee).
 - **Threshold rules are edge-triggered.** `lastObservedSide` advances ONLY on fire (not during cooldown). New rules call `armRuleAtCurrentSide` so they don't fire retrospectively on first poll.
 - **Alerts that compare across providers must use a single `referenceAmount`.** `pickSnapshotAmount` in evaluator.ts handles this — don't bypass.
 - **Auth gotchas**: `SESSION_SECRET` throws in production if missing or <32 chars; `safeNextPath` rejects protocol-relative + absolute redirects (open-redirect guard).
 - **Hardcode regexes per corridor.** Semgrep flags dynamic `new RegExp(`...${pair}...`)` as ReDoS risk. Pattern: `Record<'USD-INR' | 'AED-INR', RegExp>`.
+- **Visa `fromCurr` / `toCurr` are CARDHOLDER-CENTRIC, not FX-direction-centric.** To get "1 USD = X INR" from `usa.visa.com/cmsapi/fx/rates`, send `fromCurr=INR&toCurr=USD` (cardholder bills in INR, merchant in USD). Sending it the intuitive way returns the inverse rate (~0.0105 USD per INR), which then gets dropped by the median's outlier guard but silently — comment in `visa.ts` spells this out. Endpoint sits behind Cloudflare turnstile so we drive it through Playwright; the body is JSON we `JSON.parse()`, so this is API consumption, not DOM scraping.
+- **Frankfurter (ECB) doesn't track AED.** `api.frankfurter.dev/v1/latest?base=AED&symbols=INR` returns HTTP 404. The source throws and `computeMidMarket` quietly skips it for AED-INR — USD-INR's median includes Frankfurter, AED-INR's doesn't. Don't try to "fix" Frankfurter for AED.
+- **Mastercard's settlement-rate endpoint is hard-blocked by Akamai.** Returns 403 from every IP I've tried (residential + Hetzner DE), including via Playwright with full browser context. Don't reinvestigate without OAuth credentials to `api.mastercard.com`.
+- **CareemPay's public API exposes only the promo rate.** `platform.careemapis.com/pubweb/api/remittance-widget-rates` returns a static `rate: 25.8` (≈ mid) regardless of `?customer_segment=`/`?strict_promo=` etc. Standard rate is gated behind the authenticated mobile/wallet API. We ship the promo knowingly; the only way to get standard is OAuth into `auth.careem.com`.
+- **4-hour freshness window in `getLatestProviderTable` and `getLatestReferenceRates`.** Providers/sources whose latest row is older than 4h drop off the dashboard automatically (polling is hourly → 4h ≈ 4 missed cycles). When debugging "why is X missing from the table", the answer is usually "we haven't successfully polled it in 4h" — check `provider_runs` not `provider_quotes`. Historical-chart queries deliberately do NOT apply this filter.
+- **masarif: Transfer-Rate-only.** The provider emits a Quote only when a house publishes a Transfer Rate. Buy-Rate-only houses (cash-counter rate, not remittance) are intentionally dropped — Buy Rate isn't comparable to Wise/Aspora/etc. `captured_at` uses poll time (consistent with all other providers); the masarif-reported "Updated At" is preserved in `raw.masarifUpdatedAt` for traceability.
 - **Telegram `getUpdates` is single-consumer.** The worker bot's long-poll loop owns `getUpdates`; never reintroduce a parallel caller (the old web `/alerts/telegram-pair` page used to call `getRecentChats`/`getUpdates`, which would have stolen updates from the bot — the page was refactored to read `bot_authorized_chats` from the DB instead).
 - **Bot wizard state is in-memory.** A worker restart drops in-progress `/newalert` flows. Authorized chat IDs persist in `bot_authorized_chats`, so users only `/login` once.
 
