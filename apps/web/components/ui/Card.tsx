@@ -8,8 +8,8 @@ export function Card({
 }: HTMLAttributes<HTMLDivElement> & { elevated?: boolean }) {
   return (
     <div
-      className={`relative rounded-md border border-edge ${
-        elevated ? 'bg-elevated' : 'bg-surface'
+      className={`relative overflow-hidden rounded-xl card-paper ${
+        elevated ? 'bg-elevated' : ''
       } ${className}`}
       {...props}
     >
@@ -31,11 +31,13 @@ export function CardHeader({
 }) {
   return (
     <div
-      className={`flex items-start justify-between gap-4 border-b border-edge px-5 py-3.5 ${className}`}
+      className={`flex items-start justify-between gap-6 border-b border-edge/60 px-7 py-5 ${className}`}
     >
       <div className="min-w-0">
-        <h3 className="text-2xs font-medium uppercase tracking-[0.14em] text-muted">{title}</h3>
-        {subtitle && <p className="mt-0.5 text-xs text-subtle">{subtitle}</p>}
+        <h3 className="display text-xl font-normal leading-tight text-text">{title}</h3>
+        {subtitle && (
+          <p className="mt-1.5 font-sans text-sm leading-snug text-muted">{subtitle}</p>
+        )}
       </div>
       {right && <div className="shrink-0">{right}</div>}
     </div>
@@ -49,5 +51,5 @@ export function CardBody({
   children: ReactNode;
   className?: string;
 }) {
-  return <div className={`px-5 py-4 ${className}`}>{children}</div>;
+  return <div className={`px-7 py-6 ${className}`}>{children}</div>;
 }

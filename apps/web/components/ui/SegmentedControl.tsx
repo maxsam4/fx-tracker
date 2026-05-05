@@ -19,15 +19,15 @@ export function SegmentedControl({
   className?: string;
 }) {
   return (
-    <div className={`inline-flex items-center gap-2 ${className}`}>
+    <div className={`inline-flex items-center gap-3 ${className}`}>
       {label && (
-        <span className="text-2xs font-medium uppercase tracking-[0.14em] text-subtle">
+        <span className="font-sans text-2xs font-medium uppercase tracking-[0.22em] text-subtle">
           {label}
         </span>
       )}
       <div
         role="radiogroup"
-        className="inline-flex rounded-md border border-edge bg-surface p-0.5"
+        className="inline-flex rounded-full border border-edge bg-surface/80 p-1 backdrop-blur"
       >
         {options.map((o) => (
           <Link
@@ -35,9 +35,9 @@ export function SegmentedControl({
             href={o.href}
             role="radio"
             aria-checked={o.active}
-            className={`relative rounded px-2.5 py-1 text-xs font-medium transition-colors ${
+            className={`tabular relative rounded-full px-3.5 py-1.5 font-sans text-xs font-medium transition-all ${
               o.active
-                ? 'bg-elevated text-text shadow-ring'
+                ? 'bg-text text-bg shadow-sm'
                 : 'text-muted hover:text-text'
             }`}
           >

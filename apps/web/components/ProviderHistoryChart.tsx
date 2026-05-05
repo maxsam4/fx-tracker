@@ -1,7 +1,8 @@
 'use client';
 import {
   ResponsiveContainer,
-  LineChart,
+  ComposedChart,
+  Area,
   Line,
   XAxis,
   YAxis,
@@ -25,81 +26,110 @@ export function ProviderHistoryChart({
   const merged = mergeSeries(providerSeries, midSeries);
   if (merged.length === 0) {
     return (
-      <div className="py-16 text-center text-sm text-muted">
+      <div className="flex h-[420px] items-center justify-center font-sans text-sm text-muted">
         No data in this window yet.
       </div>
     );
   }
   return (
-    <div className="h-80 w-full">
+    <div className="h-[420px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={merged} margin={{ top: 16, right: 16, left: 0, bottom: 0 }}>
+        <ComposedChart data={merged} margin={{ top: 24, right: 32, left: 8, bottom: 8 }}>
+          <defs>
+            <linearGradient id="providerFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgb(92, 200, 156)" stopOpacity={0.30} />
+              <stop offset="100%" stopColor="rgb(92, 200, 156)" stopOpacity={0} />
+            </linearGradient>
+          </defs>
           <CartesianGrid
-            stroke="rgb(36, 40, 47)"
-            strokeDasharray="2 4"
+            stroke="rgb(36, 40, 50)"
+            strokeOpacity={0.4}
             vertical={false}
           />
           <XAxis
             dataKey="tLabel"
-            stroke="rgb(90, 94, 102)"
-            tick={{ fontSize: 10, fontFamily: 'var(--font-mono)' }}
-            tickLine={false}
-            axisLine={{ stroke: 'rgb(32, 35, 41)' }}
-            minTickGap={48}
-          />
-          <YAxis
-            stroke="rgb(90, 94, 102)"
-            domain={['auto', 'auto']}
-            tick={{ fontSize: 10, fontFamily: 'var(--font-mono)' }}
+            stroke="rgb(110, 108, 102)"
+            tick={{
+              fontSize: 11,
+              fontFamily: 'var(--font-sans)',
+              fill: 'rgb(110, 108, 102)',
+            }}
             tickLine={false}
             axisLine={false}
-            width={56}
+            minTickGap={64}
+            dy={10}
+          />
+          <YAxis
+            stroke="rgb(110, 108, 102)"
+            domain={['auto', 'auto']}
+            tick={{
+              fontSize: 11,
+              fontFamily: 'var(--font-mono)',
+              fill: 'rgb(110, 108, 102)',
+            }}
+            tickLine={false}
+            axisLine={false}
+            width={64}
+            orientation="right"
             tickFormatter={(v: number) => v.toFixed(3)}
           />
           <Tooltip
-            cursor={{ stroke: 'rgb(50, 54, 62)', strokeDasharray: '2 4' }}
+            cursor={{ stroke: 'rgb(56, 62, 76)', strokeWidth: 1, strokeDasharray: '3 3' }}
             contentStyle={{
-              background: 'rgb(14, 15, 17)',
-              border: '1px solid rgb(50, 54, 62)',
-              borderRadius: 6,
-              fontFamily: 'var(--font-mono)',
-              fontSize: 11,
-              padding: '8px 10px',
+              background: 'rgb(18, 20, 26)',
+              border: '1px solid rgb(36, 40, 50)',
+              borderRadius: 12,
+              fontFamily: 'var(--font-sans)',
+              fontSize: 12,
+              padding: '10px 12px',
+              boxShadow: '0 24px 48px -24px rgb(0 0 0 / 0.5)',
             }}
-            labelStyle={{ color: 'rgb(148, 152, 161)', marginBottom: 4 }}
-            itemStyle={{ color: 'rgb(234, 234, 236)' }}
+            labelStyle={{
+              color: 'rgb(110, 108, 102)',
+              marginBottom: 6,
+              fontSize: 11,
+              textTransform: 'uppercase',
+              letterSpacing: '0.16em',
+            }}
+            itemStyle={{ color: 'rgb(240, 235, 224)', fontFamily: 'var(--font-mono)' }}
             formatter={(value: number) => value.toFixed(4)}
           />
           <Legend
             wrapperStyle={{
               fontSize: 11,
-              fontFamily: 'var(--font-mono)',
-              paddingTop: 8,
+              fontFamily: 'var(--font-sans)',
+              paddingTop: 16,
             }}
             iconType="plainline"
-            iconSize={16}
+            iconSize={20}
           />
-          <Line
+          <Area
             type="monotone"
             dataKey="provider"
             name={providerLabel}
-            stroke="rgb(124, 212, 182)"
-            strokeWidth={1.75}
-            dot={false}
-            activeDot={{ r: 3, strokeWidth: 0, fill: 'rgb(124, 212, 182)' }}
+            stroke="rgb(92, 200, 156)"
+            strokeWidth={2.5}
+            fill="url(#providerFill)"
+            activeDot={{
+              r: 5,
+              strokeWidth: 2,
+              stroke: 'rgb(18, 20, 26)',
+              fill: 'rgb(92, 200, 156)',
+            }}
             isAnimationActive={false}
           />
           <Line
             type="monotone"
             dataKey="mid"
             name="Mid-market"
-            stroke="rgb(154, 163, 173)"
-            strokeDasharray="3 3"
-            strokeWidth={1}
+            stroke="rgb(165, 162, 152)"
+            strokeDasharray="3 4"
+            strokeWidth={1.25}
             dot={false}
             isAnimationActive={false}
+            opacity={0.7}
           />
-        </LineChart>
+        </ComposedChart>
       </ResponsiveContainer>
     </div>
   );

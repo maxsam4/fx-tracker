@@ -43,12 +43,7 @@ export function Sparkline({
       : tone === 'negative'
         ? 'rgb(var(--bad))'
         : 'rgb(var(--muted))';
-  const fill =
-    tone === 'positive'
-      ? 'rgb(var(--accent) / 0.12)'
-      : tone === 'negative'
-        ? 'rgb(var(--bad) / 0.12)'
-        : 'rgb(var(--muted) / 0.08)';
+  const gradId = `spark-${tone}`;
 
   return (
     <svg
@@ -58,12 +53,18 @@ export function Sparkline({
       className="overflow-visible"
       aria-hidden
     >
-      <path d={area} fill={fill} stroke="none" />
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={stroke} stopOpacity={0.35} />
+          <stop offset="100%" stopColor={stroke} stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <path d={area} fill={`url(#${gradId})`} stroke="none" />
       <path
         d={path}
         fill="none"
         stroke={stroke}
-        strokeWidth={1.25}
+        strokeWidth={1.5}
         strokeLinecap="round"
         strokeLinejoin="round"
       />

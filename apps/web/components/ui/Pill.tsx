@@ -4,9 +4,9 @@ type Tone = 'neutral' | 'accent' | 'warn' | 'bad' | 'muted';
 
 const toneStyles: Record<Tone, string> = {
   neutral: 'border-edge bg-surface text-text',
-  accent: 'border-accent/30 bg-accent/10 text-accent',
-  warn: 'border-warn/30 bg-warn/10 text-warn',
-  bad: 'border-bad/30 bg-bad/10 text-bad',
+  accent: 'border-accent/35 bg-accent/12 text-accent',
+  warn: 'border-warn/35 bg-warn/12 text-warn',
+  bad: 'border-bad/35 bg-bad/12 text-bad',
   muted: 'border-edge bg-surface text-muted',
 };
 
@@ -23,9 +23,9 @@ export function Pill({
 }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-2xs uppercase tracking-[0.12em] ${
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-2xs font-medium uppercase tracking-[0.14em] ${
         toneStyles[tone]
-      } ${mono ? 'font-mono normal-case tracking-normal' : ''} ${className}`}
+      } ${mono ? 'font-mono normal-case tracking-normal' : 'font-sans'} ${className}`}
     >
       {children}
     </span>
@@ -41,11 +41,17 @@ export function StatusDot({
 }) {
   const color =
     status === 'ok'
-      ? 'bg-accent shadow-[0_0_0_3px_rgb(var(--accent)/0.15)]'
+      ? 'bg-accent dot-glow-accent'
       : status === 'warn'
-        ? 'bg-warn shadow-[0_0_0_3px_rgb(var(--warn)/0.15)]'
+        ? 'bg-warn shadow-[0_0_0_4px_rgb(var(--warn)/0.18),0_0_12px_rgb(var(--warn)/0.4)]'
         : status === 'bad'
-          ? 'bg-bad shadow-[0_0_0_3px_rgb(var(--bad)/0.15)]'
+          ? 'bg-bad shadow-[0_0_0_4px_rgb(var(--bad)/0.18),0_0_12px_rgb(var(--bad)/0.4)]'
           : 'bg-subtle';
-  return <span className={`inline-block h-1.5 w-1.5 rounded-full ${color} ${className}`} />;
+  return (
+    <span
+      className={`inline-block h-1.5 w-1.5 rounded-full ${color} ${
+        status === 'ok' ? 'pulse-soft' : ''
+      } ${className}`}
+    />
+  );
 }

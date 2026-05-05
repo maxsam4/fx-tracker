@@ -40,9 +40,14 @@ export default async function PairPage({
   const pairId = await getPairId(pair);
   if (!pairId) {
     return (
-      <div className="rounded-md border border-edge bg-surface p-6 text-muted">
-        No data yet for <span className="text-text">{pairKey}</span>. The first poll will run
-        within an hour of starting the worker.
+      <div className="rounded-2xl border border-edge bg-surface px-8 py-12 text-center">
+        <h2 className="display text-3xl font-normal text-text">
+          Awaiting first poll for{' '}
+          <span className="display-italic text-accent">{pairKey}</span>
+        </h2>
+        <p className="mt-3 font-sans text-sm text-muted">
+          The worker hasn&apos;t captured any data for this pair yet. Polls run hourly — check back shortly.
+        </p>
       </div>
     );
   }

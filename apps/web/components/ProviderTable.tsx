@@ -1,7 +1,21 @@
 'use client';
+import { useState } from 'react';
+import useSWR from 'swr';
 import Link from 'next/link';
 import { Pill, StatusDot } from './ui/Pill';
 import { DerivedRateRow } from './DerivedRateRow';
+
+const fetcher = (url: string) => fetch(url).then((r) => r.json());
+
+interface UsdInrTableRow {
+  providerId: string;
+  effectiveRate: number;
+}
+
+interface UsdInrApiResponse {
+  table?: UsdInrTableRow[];
+  mid?: { rate: number } | null;
+}
 
 interface Row {
   providerId: string;
@@ -26,7 +40,7 @@ interface RunStatus {
 }
 
 interface UnifiedRow {
-  kind: 'provider' | 'reference' | 'median';
+  kind: 'provider' | 'reference' | 'median' | 'derived';
   id: string;
   dataSource: string | null;
   capturedAt: string;
@@ -37,12 +51,30 @@ interface UnifiedRow {
   feeAmount: number | null;
 }
 
-// Friendly labels for reference source IDs (kept short to fit the table).
 const REFERENCE_LABELS: Record<string, string> = {
   wiseMidMarket: 'Wise mid',
   xe: 'XE',
   exchangerateHost: 'open.er-api',
   googleFinance: 'Google Finance',
+  visa: 'Visa',
+  frankfurter: 'Frankfurter (ECB)',
+  twelveData: 'Twelve Data',
+  revolut: 'Revolut',
+  yahooFinance: 'Yahoo Finance',
+};
+
+// Map provider IDs to a friendlier display name. Falls back to the raw id.
+const PROVIDER_LABELS: Record<string, string> = {
+  wise: 'Wise',
+  remitly: 'Remitly',
+  instarem: 'Instarem',
+  aspora: 'Aspora',
+  xoom: 'Xoom',
+  westernUnion: 'Western Union',
+  careemPay: 'CareemPay',
+  remitfinder: 'Remitfinder',
+  lulu: 'LuluXchange',
+  masarif: 'Masarif',
 };
 
 export function ProviderTable({
@@ -68,6 +100,38 @@ export function ProviderTable({
   sendAmount: number;
   pairKey: string;
 }) {
+  const isAedInr = pairKey === 'AED-INR';
+
+  const { data: usdInrData } = useSWR<UsdInrApiResponse>(
+    isAedInr ? '/api/rates/USD-INR' : null,
+    fetcher,
+    { refreshInterval: 60_000 },
+  );
+  const usdInrRates = (usdInrData?.table ?? []).filter(
+    (r) => Number.isFinite(r.effectiveRate) && r.effectiveRate > 0,
+  );
+  const usdInrMid = usdInrData?.mid?.rate ?? null;
+  const bestUsdInr =
+    usdInrRates.length > 0 ? Math.max(...usdInrRates.map((r) => r.effectiveRate)) : null;
+
+  const [selUsdInr, setSelUsdInr] = useState<string>('mid');
+  const [selUsdAed, setSelUsdAed] = useState<string>('3.67250');
+
+  let usdInrValue: number | null = null;
+  if (selUsdInr === 'best') {
+    usdInrValue = bestUsdInr;
+  } else if (selUsdInr === 'mid') {
+    usdInrValue = usdInrMid;
+  } else {
+    const n = parseFloat(selUsdInr);
+    usdInrValue = Number.isFinite(n) && n > 0 ? n : null;
+  }
+  const usdAedValue = parseFloat(selUsdAed);
+  const derivedRate =
+    usdInrValue !== null && Number.isFinite(usdAedValue) && usdAedValue > 0
+      ? usdInrValue / usdAedValue
+      : null;
+
   const providerRows: UnifiedRow[] = rows.map((r) => ({
     kind: 'provider',
     id: r.providerId,
@@ -92,9 +156,6 @@ export function ProviderTable({
     feeAmount: null,
   }));
 
-  // The median itself is shown as its own row in the table — useful for
-  // comparing each provider against the canonical mid without flicking
-  // back to the hero stat.
   const medianRow: UnifiedRow | null =
     midRate !== null && midCapturedAt
       ? {
@@ -110,26 +171,36 @@ export function ProviderTable({
         }
       : null;
 
+  const derivedRow: UnifiedRow | null =
+    isAedInr && derivedRate !== null
+      ? {
+          kind: 'derived',
+          id: 'derived',
+          dataSource: null,
+          capturedAt: new Date().toISOString(),
+          sendAmount,
+          receiveAmount: sendAmount * derivedRate,
+          effectiveRate: derivedRate,
+          rawRate: derivedRate,
+          feeAmount: null,
+        }
+      : null;
+
   const all = [
     ...providerRows,
     ...referenceRows,
     ...(medianRow ? [medianRow] : []),
+    ...(derivedRow ? [derivedRow] : []),
   ].sort((a, b) => b.effectiveRate - a.effectiveRate);
 
-  // Provider-only rank: best provider is #01, regardless of how many
-  // mid feeds / median / derived rows sit above it in the sort. Mid
-  // feeds and derived rows render `—` in the # column.
   const providerRanks = new Map<string, number>();
   {
     let n = 0;
     for (const r of all) {
-      if (r.kind === 'provider') {
-        providerRanks.set(r.id, ++n);
-      }
+      if (r.kind === 'provider') providerRanks.set(r.id, ++n);
     }
   }
 
-  // For the delta-vs-mid bar viz, normalize across the visible range.
   const deltas = midRate
     ? all.map((r) => ((r.effectiveRate - midRate) / midRate) * 100)
     : [];
@@ -141,7 +212,7 @@ export function ProviderTable({
 
   if (all.length === 0 && missing.length === 0) {
     return (
-      <div className="px-5 py-12 text-center text-sm text-muted">
+      <div className="px-7 py-16 text-center font-sans text-sm text-muted">
         No provider quotes captured yet for this amount.
       </div>
     );
@@ -150,35 +221,45 @@ export function ProviderTable({
   return (
     <div>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full">
           <thead>
-            <tr className="border-y border-edge bg-bg/40 text-2xs uppercase tracking-[0.12em] text-subtle">
-              <th className="px-5 py-3 text-left font-medium">#</th>
-              <th className="px-3 py-3 text-left font-medium">Provider</th>
-              <th className="px-3 py-3 text-right font-medium">Raw rate</th>
-              <th className="px-3 py-3 text-right font-medium">Effective rate</th>
-              <th className="px-3 py-3 text-left font-medium">Δ vs mid</th>
-              <th className="px-3 py-3 text-right font-medium">Receive ({toCurrency})</th>
-              <th className="px-3 py-3 text-right font-medium">Fee ({fromCurrency})</th>
-              <th className="px-5 py-3 text-right font-medium">Updated</th>
+            <tr className="border-b border-edge text-2xs font-medium uppercase tracking-[0.18em] text-subtle">
+              <th className="px-7 py-4 text-left">#</th>
+              <th className="px-2 py-4 text-left">Provider</th>
+              <th className="px-3 py-4 text-right">Rate</th>
+              <th className="px-3 py-4 text-left">Δ vs mid</th>
+              <th className="px-3 py-4 text-right">You receive</th>
+              <th className="px-3 py-4 text-right">Fee</th>
+              <th className="px-7 py-4 text-right">Updated</th>
             </tr>
           </thead>
           <tbody>
-            {pairKey === 'AED-INR' && (
-              <DerivedRateRow
-                sendAmount={sendAmount}
-                fromCurrency={fromCurrency}
-                toCurrency={toCurrency}
-                midRate={midRate}
-              />
-            )}
             {all.map((r, i) => {
-              // Median row IS the baseline — its delta is by definition 0,
-              // showing it would be visual noise.
               const delta =
                 r.kind === 'median' || midRate === null
                   ? null
                   : ((r.effectiveRate - midRate) / midRate) * 100;
+
+              if (r.kind === 'derived') {
+                return (
+                  <DerivedRateRow
+                    key="derived"
+                    rate={r.effectiveRate}
+                    receiveAmount={r.receiveAmount}
+                    delta={delta}
+                    fromCurrency={fromCurrency}
+                    toCurrency={toCurrency}
+                    selUsdInr={selUsdInr}
+                    setSelUsdInr={setSelUsdInr}
+                    selUsdAed={selUsdAed}
+                    setSelUsdAed={setSelUsdAed}
+                    usdInrMid={usdInrMid}
+                    bestUsdInr={bestUsdInr}
+                    usdInrRates={usdInrRates}
+                  />
+                );
+              }
+
               const isProvider = r.kind === 'provider';
               const isBest =
                 isProvider && all.findIndex((x) => x.kind === 'provider') === i;
@@ -193,8 +274,8 @@ export function ProviderTable({
                   maxAbsDelta={maxAbsDelta}
                   isBest={isBest}
                   pairKey={pairKey}
-                  sendAmount={sendAmount}
                   toCurrency={toCurrency}
+                  fromCurrency={fromCurrency}
                 />
               );
             })}
@@ -203,16 +284,16 @@ export function ProviderTable({
       </div>
 
       {missing.length > 0 && (
-        <div className="border-t border-edge bg-bg/40 px-5 py-4">
-          <div className="mb-2 flex items-center gap-2">
-            <span className="text-2xs uppercase tracking-[0.14em] text-subtle">
+        <div className="border-t border-edge/60 bg-elevated/40 px-7 py-5">
+          <div className="mb-3 flex items-center gap-3">
+            <span className="font-sans text-2xs font-medium uppercase tracking-[0.22em] text-subtle">
               Configured · not reporting
             </span>
-            <span className="tabular font-mono text-2xs text-muted">
+            <span className="tabular rounded-full border border-edge bg-surface px-2 py-0.5 font-mono text-2xs text-muted">
               {missing.length}
             </span>
           </div>
-          <ul className="grid gap-1.5 sm:grid-cols-2">
+          <ul className="grid gap-2 sm:grid-cols-2">
             {missing.map((id) => {
               const s = statusByProvider.get(id);
               const tone =
@@ -223,11 +304,13 @@ export function ProviderTable({
               return (
                 <li
                   key={id}
-                  className="flex flex-wrap items-center gap-2 rounded border border-edge bg-surface px-3 py-2 text-xs"
+                  className="flex flex-wrap items-center gap-2.5 rounded-lg border border-edge bg-surface px-4 py-3 font-sans text-xs"
                 >
                   <StatusDot status={tone} />
-                  <span className="font-mono font-medium text-text">{id}</span>
-                  <span className="text-2xs uppercase tracking-[0.12em] text-muted">
+                  <span className="font-sans font-medium text-text">
+                    {PROVIDER_LABELS[id] ?? id}
+                  </span>
+                  <span className="font-sans text-2xs uppercase tracking-[0.16em] text-muted">
                     {s?.status ?? 'no run'}
                   </span>
                   {s?.errorMessage && (
@@ -252,8 +335,8 @@ function RowComponent({
   maxAbsDelta,
   isBest,
   pairKey,
-  sendAmount,
   toCurrency,
+  fromCurrency,
 }: {
   row: UnifiedRow;
   rank: number | null;
@@ -261,138 +344,176 @@ function RowComponent({
   maxAbsDelta: number;
   isBest: boolean;
   pairKey: string;
-  sendAmount: number;
   toCurrency: string;
+  fromCurrency: string;
 }) {
   const isProvider = row.kind === 'provider';
   const isMedian = row.kind === 'median';
   const isReference = row.kind === 'reference';
-  const deltaTone =
-    delta === null
-      ? 'text-subtle'
-      : delta > 0
-        ? 'text-accent'
-        : delta > -0.1
-          ? 'text-warn'
-          : delta > -0.3
-            ? 'text-caution'
-            : 'text-bad';
+
+  const rowBg = isMedian
+    ? 'bg-accent/[0.05]'
+    : isReference
+      ? 'bg-bg/30'
+      : 'hover:bg-elevated/50 transition-colors';
 
   return (
-    <tr
-      className={`group relative border-b border-edge/60 last:border-b-0 transition-colors ${
-        isProvider ? 'hover:bg-elevated/60' : isMedian ? 'bg-accent/[0.04]' : 'bg-bg/30'
-      }`}
-    >
-      <td className="relative px-5 py-3.5">
-        {isBest && (
-          <span
-            aria-hidden
-            className="absolute inset-y-0 left-0 w-0.5 bg-accent shadow-[0_0_12px_rgb(var(--accent)/0.6)]"
-          />
+    <tr className={`group border-b border-edge/40 last:border-b-0 ${rowBg}`}>
+      {/* RANK */}
+      <td className="px-7 py-5">
+        {rank !== null ? (
+          <RankBadge n={rank} isBest={isBest} />
+        ) : isMedian ? (
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-accent/40 bg-accent/10 font-sans text-xs">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent dot-glow-accent" />
+          </span>
+        ) : (
+          <span className="font-sans text-xs text-subtle">—</span>
         )}
-        <span
-          className={`tabular font-mono text-2xs ${
-            isBest ? 'text-accent' : 'text-subtle'
-          }`}
-        >
-          {rank !== null ? String(rank).padStart(2, '0') : '—'}
-        </span>
       </td>
 
-      <td className="px-3 py-3.5">
-        <div className="flex flex-wrap items-center gap-2">
-          {isMedian ? (
-            <>
-              <span className="font-mono text-sm font-medium text-text">mid-market</span>
-              <Pill tone="accent">median</Pill>
-            </>
-          ) : isReference ? (
-            <>
-              <span className="font-mono text-sm text-muted">
-                {REFERENCE_LABELS[row.id] ?? row.id}
-              </span>
-              <Pill tone="muted">mid feed</Pill>
-            </>
-          ) : (
-            <>
-              <Link
-                href={`/${encodeURIComponent(pairKey)}/providers/${encodeURIComponent(row.id)}`}
-                className="font-mono text-sm font-medium text-text transition-colors hover:text-accent"
-              >
-                {row.id}
-              </Link>
-              {isBest && <Pill tone="accent">best</Pill>}
-              {row.dataSource && (
-                <Pill tone={dataSourceTone(row.dataSource)} mono>
-                  {dataSourceLabel(row.dataSource)}
-                </Pill>
-              )}
-            </>
+      {/* PROVIDER */}
+      <td className="px-2 py-5">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex flex-wrap items-center gap-2">
+            {isMedian ? (
+              <>
+                <span className="font-sans text-base font-medium text-text">Mid-market median</span>
+                <Pill tone="accent">benchmark</Pill>
+              </>
+            ) : isReference ? (
+              <>
+                <span className="font-sans text-base text-muted">
+                  {REFERENCE_LABELS[row.id] ?? row.id}
+                </span>
+                <Pill tone="muted">mid feed</Pill>
+              </>
+            ) : (
+              <>
+                <Link
+                  href={`/${encodeURIComponent(pairKey)}/providers/${encodeURIComponent(row.id)}`}
+                  className="font-sans text-base font-medium text-text transition-colors hover:text-accent"
+                >
+                  {PROVIDER_LABELS[row.id] ?? row.id}
+                </Link>
+                {isBest && <Pill tone="accent">best deal</Pill>}
+                {row.dataSource && (
+                  <Pill tone={dataSourceTone(row.dataSource)}>
+                    {dataSourceLabel(row.dataSource)}
+                  </Pill>
+                )}
+              </>
+            )}
+          </div>
+          {isProvider && (
+            <span className="tabular font-mono text-2xs text-subtle">
+              raw {row.rawRate.toFixed(4)} · sending{' '}
+              {row.sendAmount.toLocaleString('en-US')} {fromCurrency}
+            </span>
           )}
         </div>
       </td>
 
-      <td
-        className={`tabular px-3 py-3.5 text-right font-mono text-sm ${
-          isReference ? 'text-muted' : 'text-subtle'
-        }`}
-      >
-        {row.rawRate.toFixed(4)}
-      </td>
-
-      <td className="px-3 py-3.5 text-right">
+      {/* RATE */}
+      <td className="px-3 py-5 text-right">
         <span
-          className={`tabular font-mono text-sm font-medium ${
-            isReference ? 'text-muted' : 'text-text'
+          className={`tabular block font-mono text-lg ${
+            isReference ? 'text-muted font-normal' : 'text-text font-medium'
           }`}
         >
           {row.effectiveRate.toFixed(4)}
         </span>
+        <span className="font-sans text-2xs uppercase tracking-[0.16em] text-subtle">
+          {toCurrency} / {fromCurrency}
+        </span>
       </td>
 
-      <td className="px-3 py-3.5">
-        <DeltaCell delta={delta} maxAbsDelta={maxAbsDelta} tone={deltaTone} />
+      {/* DELTA */}
+      <td className="px-3 py-5">
+        <DeltaCell delta={delta} maxAbsDelta={maxAbsDelta} />
       </td>
 
-      <td
-        className={`tabular px-3 py-3.5 text-right font-mono text-sm ${
-          isReference ? 'text-muted' : 'text-text'
-        }`}
-      >
-        {row.receiveAmount === null ? '—' : fmt(row.receiveAmount)}
+      {/* RECEIVE */}
+      <td className="px-3 py-5 text-right">
+        <span
+          className={`tabular block font-mono text-base ${
+            isReference ? 'text-muted' : 'text-text font-medium'
+          }`}
+        >
+          {row.receiveAmount === null ? '—' : fmt(row.receiveAmount)}
+        </span>
+        <span className="font-sans text-2xs uppercase tracking-[0.16em] text-subtle">
+          {toCurrency}
+        </span>
       </td>
 
-      <td
-        className={`tabular px-3 py-3.5 text-right font-mono text-sm ${
-          isReference || row.feeAmount === null ? 'text-subtle' : 'text-muted'
-        }`}
-      >
-        {row.feeAmount === null ? '—' : fmt(row.feeAmount)}
+      {/* FEE */}
+      <td className="px-3 py-5 text-right">
+        <span
+          className={`tabular font-mono text-sm ${
+            row.feeAmount === null ? 'text-subtle' : row.feeAmount > 0 ? 'text-muted' : 'text-good'
+          }`}
+        >
+          {row.feeAmount === null
+            ? '—'
+            : row.feeAmount === 0
+              ? 'free'
+              : fmt(row.feeAmount)}
+        </span>
       </td>
 
-      <td className="px-5 py-3.5 text-right text-2xs uppercase tracking-[0.12em] text-subtle">
-        {ago(row.capturedAt)}
+      {/* UPDATED */}
+      <td className="px-7 py-5 text-right">
+        <span className="font-sans text-2xs uppercase tracking-[0.16em] text-subtle">
+          {ago(row.capturedAt)}
+        </span>
       </td>
     </tr>
+  );
+}
+
+function RankBadge({ n, isBest }: { n: number; isBest: boolean }) {
+  return (
+    <span
+      className={`tabular relative inline-flex h-9 w-9 items-center justify-center rounded-full border font-sans text-sm font-medium ${
+        isBest
+          ? 'border-accent/50 bg-accent/15 text-accent shadow-glow'
+          : n <= 3
+            ? 'border-edge-strong bg-elevated text-text'
+            : 'border-edge bg-surface text-muted'
+      }`}
+    >
+      {n}
+      {isBest && (
+        <span
+          aria-hidden
+          className="absolute -inset-1 rounded-full border border-accent/30"
+        />
+      )}
+    </span>
   );
 }
 
 function DeltaCell({
   delta,
   maxAbsDelta,
-  tone,
 }: {
   delta: number | null;
   maxAbsDelta: number;
-  tone: string;
 }) {
   if (delta === null) {
-    return <span className="text-subtle">—</span>;
+    return <span className="font-sans text-xs text-subtle">—</span>;
   }
-  // Bar fills from center; negative = left, positive = right.
   const halfPct = (Math.abs(delta) / maxAbsDelta) * 50;
   const isNeg = delta < 0;
+  const tone =
+    delta > 0
+      ? 'text-accent'
+      : delta > -0.1
+        ? 'text-warn'
+        : delta > -0.3
+          ? 'text-caution'
+          : 'text-bad';
   const barColor =
     delta > 0
       ? 'bg-accent'
@@ -403,12 +524,12 @@ function DeltaCell({
           : 'bg-bad';
 
   return (
-    <div className="flex items-center gap-2">
-      <span className={`tabular font-mono text-xs font-medium ${tone} min-w-[3.25rem]`}>
+    <div className="flex items-center gap-3">
+      <span className={`tabular font-sans text-sm font-medium ${tone} min-w-[3.75rem]`}>
         {delta >= 0 ? '+' : ''}
         {delta.toFixed(2)}%
       </span>
-      <div className="relative h-1 w-16 overflow-hidden rounded-full bg-edge sm:w-24">
+      <div className="relative h-1.5 w-20 overflow-hidden rounded-full bg-edge sm:w-32">
         <span
           aria-hidden
           className="absolute inset-y-0 left-1/2 w-px bg-edge-strong"
@@ -417,7 +538,7 @@ function DeltaCell({
           aria-hidden
           className={`absolute inset-y-0 ${barColor} ${
             isNeg ? 'right-1/2' : 'left-1/2'
-          }`}
+          } rounded-sm shadow-[0_0_8px_currentColor] opacity-90`}
           style={{ width: `${halfPct}%` }}
         />
       </div>
@@ -427,7 +548,6 @@ function DeltaCell({
 
 const fmt = (n: number) => n.toLocaleString('en-US', { maximumFractionDigits: 2 });
 
-// Map a Quote.dataSource string to a short visible label.
 function dataSourceLabel(ds: string): string {
   switch (ds) {
     case 'remitly_promo':
@@ -453,8 +573,6 @@ function dataSourceLabel(ds: string): string {
   }
 }
 
-// Highlight promo / advisory paths so the user knows the rate isn't directly
-// comparable to the others.
 function dataSourceTone(ds: string): 'neutral' | 'accent' | 'warn' | 'muted' {
   if (ds === 'remitly_promo' || ds === 'remitly_ssr_promo') return 'warn';
   if (ds === 'remitly_standard' || ds === 'wise_comparisons') return 'accent';
