@@ -88,14 +88,18 @@ input[type='number'] {
   font-feature-settings: 'tnum' 1, 'cv02' 1, 'cv03' 1, 'cv04' 1;
 }
 
+/* "Display" = a tighter, heavier variant of the body sans for headers and
+   the rate readout. No serif fall-through — fintech-clean throughout. */
 .display {
-  font-family: var(--font-display), 'Cormorant Garamond', Georgia, serif;
-  font-optical-sizing: auto;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.022em;
 }
 .display-italic {
-  font-family: var(--font-display), 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 500;
   font-style: italic;
-  font-optical-sizing: auto;
+  letter-spacing: -0.018em;
 }
 
 /* Atmospheric dark backdrop — subtle warm glow + grain texture */
@@ -180,11 +184,12 @@ input[type='number'] {
   border-radius: 6px;
 }
 
-/* Editorial rate display */
+/* Big rate readout — Geist Sans tightened for a premium fintech look. */
 .rate-display {
-  font-family: var(--font-display), Georgia, serif;
-  font-feature-settings: 'tnum' 1, 'lnum' 1, 'ss01' 1;
-  letter-spacing: -0.025em;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: 'tnum' 1, 'lnum' 1, 'ss01' 1, 'cv11' 1;
+  font-weight: 500;
+  letter-spacing: -0.04em;
   line-height: 0.95;
 }
 

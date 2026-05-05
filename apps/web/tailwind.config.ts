@@ -24,7 +24,8 @@ export default {
       fontFamily: {
         sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         mono: ['var(--font-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
-        display: ['var(--font-display)', 'Cormorant Garamond', 'Georgia', 'serif'],
+        // Display falls back to sans — no serif anywhere in the project.
+        display: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         '2xs': ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.04em' }],

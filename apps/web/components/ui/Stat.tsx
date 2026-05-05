@@ -51,9 +51,9 @@ export function DeltaBadge({ value, label }: { value: number; label?: string }) 
   const sign = value > 0 ? '+' : '';
   return (
     <span
-      className={`tabular inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-sans text-xs font-medium ${tone}`}
+      className={`tabular inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-sans text-[11px] font-medium ${tone}`}
     >
-      <span aria-hidden className="text-[10px]">
+      <span aria-hidden className="text-[9px]">
         {value > 0 ? '↑' : value < 0 ? '↓' : '◆'}
       </span>
       <span>
@@ -61,7 +61,7 @@ export function DeltaBadge({ value, label }: { value: number; label?: string }) 
         {value.toFixed(2)}%
       </span>
       {label && (
-        <span className="text-2xs uppercase tracking-[0.16em] opacity-70">{label}</span>
+        <span className="text-[10px] uppercase tracking-[0.14em] opacity-70">{label}</span>
       )}
     </span>
   );

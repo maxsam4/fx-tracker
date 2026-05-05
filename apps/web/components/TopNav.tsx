@@ -13,9 +13,9 @@ export function TopNav() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-edge/70 bg-bg/75 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-6 px-6 py-5 md:px-10">
+      <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-6 px-5 py-3 md:px-8">
         <Link href="/" className="group flex items-baseline gap-1">
-          <span className="display-italic text-[2rem] font-light leading-none text-text transition-colors group-hover:text-accent">
+          <span className="display-italic text-2xl font-light leading-none text-text transition-colors group-hover:text-accent">
             fx
           </span>
           <span className="ml-1 font-sans text-sm font-medium leading-none tracking-tight text-muted">

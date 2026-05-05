@@ -48,14 +48,14 @@ export function MidMarketChart({
 
   if (merged.length === 0) {
     return (
-      <div className="flex h-[420px] items-center justify-center font-sans text-sm text-muted">
+      <div className="flex h-[300px] items-center justify-center font-sans text-sm text-muted">
         No data in this window yet — first poll runs within the hour.
       </div>
     );
   }
 
   return (
-    <div className="h-[420px] w-full">
+    <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart
           data={merged}

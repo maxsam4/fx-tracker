@@ -55,15 +55,14 @@ const REFERENCE_LABELS: Record<string, string> = {
   wiseMidMarket: 'Wise mid',
   xe: 'XE',
   exchangerateHost: 'open.er-api',
-  googleFinance: 'Google Finance',
+  googleFinance: 'Google',
   visa: 'Visa',
-  frankfurter: 'Frankfurter (ECB)',
+  frankfurter: 'Frankfurter',
   twelveData: 'Twelve Data',
   revolut: 'Revolut',
-  yahooFinance: 'Yahoo Finance',
+  yahooFinance: 'Yahoo',
 };
 
-// Map provider IDs to a friendlier display name. Falls back to the raw id.
 const PROVIDER_LABELS: Record<string, string> = {
   wise: 'Wise',
   remitly: 'Remitly',
@@ -118,11 +117,9 @@ export function ProviderTable({
   const [selUsdAed, setSelUsdAed] = useState<string>('3.67250');
 
   let usdInrValue: number | null = null;
-  if (selUsdInr === 'best') {
-    usdInrValue = bestUsdInr;
-  } else if (selUsdInr === 'mid') {
-    usdInrValue = usdInrMid;
-  } else {
+  if (selUsdInr === 'best') usdInrValue = bestUsdInr;
+  else if (selUsdInr === 'mid') usdInrValue = usdInrMid;
+  else {
     const n = parseFloat(selUsdInr);
     usdInrValue = Number.isFinite(n) && n > 0 ? n : null;
   }
@@ -212,7 +209,7 @@ export function ProviderTable({
 
   if (all.length === 0 && missing.length === 0) {
     return (
-      <div className="px-7 py-16 text-center font-sans text-sm text-muted">
+      <div className="px-5 py-10 text-center font-sans text-xs text-muted">
         No provider quotes captured yet for this amount.
       </div>
     );
@@ -223,14 +220,16 @@ export function ProviderTable({
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-edge text-2xs font-medium uppercase tracking-[0.18em] text-subtle">
-              <th className="px-7 py-4 text-left">#</th>
-              <th className="px-2 py-4 text-left">Provider</th>
-              <th className="px-3 py-4 text-right">Rate</th>
-              <th className="px-3 py-4 text-left">Δ vs mid</th>
-              <th className="px-3 py-4 text-right">You receive</th>
-              <th className="px-3 py-4 text-right">Fee</th>
-              <th className="px-7 py-4 text-right">Updated</th>
+            <tr className="border-b border-edge text-[10px] font-medium uppercase tracking-[0.16em] text-subtle">
+              <th className="w-12 px-3 py-2 text-left">#</th>
+              <th className="px-2 py-2 text-left">Provider</th>
+              <th className="hidden w-24 px-2 py-2 text-left md:table-cell">Source</th>
+              <th className="w-24 px-2 py-2 text-right">Raw</th>
+              <th className="w-24 px-2 py-2 text-right">Effective</th>
+              <th className="w-44 px-2 py-2 text-left">Δ vs mid</th>
+              <th className="w-28 px-2 py-2 text-right">Receive</th>
+              <th className="hidden w-20 px-2 py-2 text-right sm:table-cell">Fee</th>
+              <th className="w-16 px-3 py-2 text-right">Updated</th>
             </tr>
           </thead>
           <tbody>
@@ -261,8 +260,7 @@ export function ProviderTable({
               }
 
               const isProvider = r.kind === 'provider';
-              const isBest =
-                isProvider && all.findIndex((x) => x.kind === 'provider') === i;
+              const isBest = isProvider && all.findIndex((x) => x.kind === 'provider') === i;
               const rank = isProvider ? providerRanks.get(r.id) ?? null : null;
 
               return (
@@ -274,8 +272,6 @@ export function ProviderTable({
                   maxAbsDelta={maxAbsDelta}
                   isBest={isBest}
                   pairKey={pairKey}
-                  toCurrency={toCurrency}
-                  fromCurrency={fromCurrency}
                 />
               );
             })}
@@ -284,16 +280,16 @@ export function ProviderTable({
       </div>
 
       {missing.length > 0 && (
-        <div className="border-t border-edge/60 bg-elevated/40 px-7 py-5">
-          <div className="mb-3 flex items-center gap-3">
-            <span className="font-sans text-2xs font-medium uppercase tracking-[0.22em] text-subtle">
+        <div className="border-t border-edge/60 bg-elevated/40 px-4 py-3">
+          <div className="mb-2 flex items-center gap-2">
+            <span className="font-sans text-[10px] font-medium uppercase tracking-[0.18em] text-subtle">
               Configured · not reporting
             </span>
-            <span className="tabular rounded-full border border-edge bg-surface px-2 py-0.5 font-mono text-2xs text-muted">
+            <span className="tabular rounded-full border border-edge bg-surface px-1.5 py-0.5 font-mono text-[10px] text-muted">
               {missing.length}
             </span>
           </div>
-          <ul className="grid gap-2 sm:grid-cols-2">
+          <ul className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
             {missing.map((id) => {
               const s = statusByProvider.get(id);
               const tone =
@@ -304,18 +300,16 @@ export function ProviderTable({
               return (
                 <li
                   key={id}
-                  className="flex flex-wrap items-center gap-2.5 rounded-lg border border-edge bg-surface px-4 py-3 font-sans text-xs"
+                  className="flex flex-wrap items-center gap-2 rounded-md border border-edge bg-surface px-2.5 py-1.5 font-sans text-xs"
                 >
                   <StatusDot status={tone} />
-                  <span className="font-sans font-medium text-text">
-                    {PROVIDER_LABELS[id] ?? id}
-                  </span>
-                  <span className="font-sans text-2xs uppercase tracking-[0.16em] text-muted">
+                  <span className="font-medium text-text">{PROVIDER_LABELS[id] ?? id}</span>
+                  <span className="font-sans text-[10px] uppercase tracking-[0.14em] text-muted">
                     {s?.status ?? 'no run'}
                   </span>
                   {s?.errorMessage && (
                     <span className="grow truncate text-subtle" title={s.errorMessage}>
-                      — {truncate(s.errorMessage, 60)}
+                      {truncate(s.errorMessage, 40)}
                     </span>
                   )}
                 </li>
@@ -335,8 +329,6 @@ function RowComponent({
   maxAbsDelta,
   isBest,
   pairKey,
-  toCurrency,
-  fromCurrency,
 }: {
   row: UnifiedRow;
   rank: number | null;
@@ -344,8 +336,6 @@ function RowComponent({
   maxAbsDelta: number;
   isBest: boolean;
   pairKey: string;
-  toCurrency: string;
-  fromCurrency: string;
 }) {
   const isProvider = row.kind === 'provider';
   const isMedian = row.kind === 'median';
@@ -355,103 +345,123 @@ function RowComponent({
     ? 'bg-accent/[0.05]'
     : isReference
       ? 'bg-bg/30'
-      : 'hover:bg-elevated/50 transition-colors';
+      : 'transition-colors hover:bg-elevated/50';
 
   return (
-    <tr className={`group border-b border-edge/40 last:border-b-0 ${rowBg}`}>
+    <tr className={`group h-9 border-b border-edge/40 last:border-b-0 ${rowBg}`}>
       {/* RANK */}
-      <td className="px-7 py-5">
+      <td className="px-3">
         {rank !== null ? (
-          <RankBadge n={rank} isBest={isBest} />
-        ) : isMedian ? (
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-accent/40 bg-accent/10 font-sans text-xs">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent dot-glow-accent" />
+          <span
+            className={`tabular inline-flex h-6 w-6 items-center justify-center rounded-full font-sans text-[11px] font-semibold ${
+              isBest
+                ? 'bg-accent/15 text-accent ring-1 ring-accent/40'
+                : rank <= 3
+                  ? 'bg-elevated text-text ring-1 ring-edge-strong'
+                  : 'text-muted'
+            }`}
+          >
+            {rank}
           </span>
+        ) : isMedian ? (
+          <span
+            className="inline-block h-1.5 w-1.5 rounded-full bg-accent dot-glow-accent"
+            aria-hidden
+          />
         ) : (
-          <span className="font-sans text-xs text-subtle">—</span>
+          <span className="font-sans text-[11px] text-subtle">·</span>
         )}
       </td>
 
       {/* PROVIDER */}
-      <td className="px-2 py-5">
-        <div className="flex flex-col gap-1.5">
-          <div className="flex flex-wrap items-center gap-2">
-            {isMedian ? (
-              <>
-                <span className="font-sans text-base font-medium text-text">Mid-market median</span>
-                <Pill tone="accent">benchmark</Pill>
-              </>
-            ) : isReference ? (
-              <>
-                <span className="font-sans text-base text-muted">
-                  {REFERENCE_LABELS[row.id] ?? row.id}
-                </span>
-                <Pill tone="muted">mid feed</Pill>
-              </>
-            ) : (
-              <>
-                <Link
-                  href={`/${encodeURIComponent(pairKey)}/providers/${encodeURIComponent(row.id)}`}
-                  className="font-sans text-base font-medium text-text transition-colors hover:text-accent"
-                >
-                  {PROVIDER_LABELS[row.id] ?? row.id}
-                </Link>
-                {isBest && <Pill tone="accent">best deal</Pill>}
-                {row.dataSource && (
-                  <Pill tone={dataSourceTone(row.dataSource)}>
-                    {dataSourceLabel(row.dataSource)}
-                  </Pill>
-                )}
-              </>
-            )}
-          </div>
-          {isProvider && (
-            <span className="tabular font-mono text-2xs text-subtle">
-              raw {row.rawRate.toFixed(4)} · sending{' '}
-              {row.sendAmount.toLocaleString('en-US')} {fromCurrency}
+      <td className="px-2">
+        <div className="flex items-center gap-1.5 truncate">
+          {isMedian ? (
+            <>
+              <span className="font-sans text-sm font-semibold text-text">Mid-market median</span>
+              <Pill tone="accent">benchmark</Pill>
+            </>
+          ) : isReference ? (
+            <span className="font-sans text-sm text-muted">
+              {REFERENCE_LABELS[row.id] ?? row.id}
+              <span className="ml-1.5 font-sans text-[10px] uppercase tracking-[0.14em] text-subtle">
+                mid feed
+              </span>
             </span>
+          ) : (
+            <>
+              <Link
+                href={`/${encodeURIComponent(pairKey)}/providers/${encodeURIComponent(row.id)}`}
+                className="font-sans text-sm font-semibold text-text transition-colors hover:text-accent"
+              >
+                {PROVIDER_LABELS[row.id] ?? row.id}
+              </Link>
+              {isBest && <Pill tone="accent">best</Pill>}
+            </>
           )}
         </div>
       </td>
 
-      {/* RATE */}
-      <td className="px-3 py-5 text-right">
+      {/* SOURCE TAG (md+) */}
+      <td className="hidden px-2 md:table-cell">
+        {isProvider && row.dataSource ? (
+          <span
+            className={`tabular font-mono text-[11px] ${
+              dataSourceToneText(row.dataSource)
+            }`}
+          >
+            {dataSourceLabel(row.dataSource)}
+          </span>
+        ) : (
+          <span className="text-subtle">—</span>
+        )}
+      </td>
+
+      {/* RAW RATE */}
+      <td
+        className={`tabular px-2 text-right font-mono text-[13px] ${
+          isReference || isMedian ? 'text-subtle' : 'text-muted'
+        }`}
+      >
+        {row.rawRate.toFixed(4)}
+      </td>
+
+      {/* EFFECTIVE RATE */}
+      <td className="px-2 text-right">
         <span
-          className={`tabular block font-mono text-lg ${
-            isReference ? 'text-muted font-normal' : 'text-text font-medium'
+          className={`tabular font-mono text-[14px] ${
+            isReference ? 'text-muted' : 'text-text font-semibold'
           }`}
         >
           {row.effectiveRate.toFixed(4)}
         </span>
-        <span className="font-sans text-2xs uppercase tracking-[0.16em] text-subtle">
-          {toCurrency} / {fromCurrency}
-        </span>
       </td>
 
       {/* DELTA */}
-      <td className="px-3 py-5">
+      <td className="px-2">
         <DeltaCell delta={delta} maxAbsDelta={maxAbsDelta} />
       </td>
 
       {/* RECEIVE */}
-      <td className="px-3 py-5 text-right">
+      <td className="px-2 text-right">
         <span
-          className={`tabular block font-mono text-base ${
-            isReference ? 'text-muted' : 'text-text font-medium'
+          className={`tabular font-mono text-[13px] ${
+            isReference ? 'text-muted' : 'text-text font-semibold'
           }`}
         >
           {row.receiveAmount === null ? '—' : fmt(row.receiveAmount)}
         </span>
-        <span className="font-sans text-2xs uppercase tracking-[0.16em] text-subtle">
-          {toCurrency}
-        </span>
       </td>
 
-      {/* FEE */}
-      <td className="px-3 py-5 text-right">
+      {/* FEE (sm+) */}
+      <td className="hidden px-2 text-right sm:table-cell">
         <span
-          className={`tabular font-mono text-sm ${
-            row.feeAmount === null ? 'text-subtle' : row.feeAmount > 0 ? 'text-muted' : 'text-good'
+          className={`tabular font-mono text-[12px] ${
+            row.feeAmount === null
+              ? 'text-subtle'
+              : row.feeAmount === 0
+                ? 'text-good'
+                : 'text-muted'
           }`}
         >
           {row.feeAmount === null
@@ -463,34 +473,10 @@ function RowComponent({
       </td>
 
       {/* UPDATED */}
-      <td className="px-7 py-5 text-right">
-        <span className="font-sans text-2xs uppercase tracking-[0.16em] text-subtle">
-          {ago(row.capturedAt)}
-        </span>
+      <td className="px-3 text-right font-sans text-[10px] uppercase tracking-[0.14em] text-subtle">
+        {ago(row.capturedAt)}
       </td>
     </tr>
-  );
-}
-
-function RankBadge({ n, isBest }: { n: number; isBest: boolean }) {
-  return (
-    <span
-      className={`tabular relative inline-flex h-9 w-9 items-center justify-center rounded-full border font-sans text-sm font-medium ${
-        isBest
-          ? 'border-accent/50 bg-accent/15 text-accent shadow-glow'
-          : n <= 3
-            ? 'border-edge-strong bg-elevated text-text'
-            : 'border-edge bg-surface text-muted'
-      }`}
-    >
-      {n}
-      {isBest && (
-        <span
-          aria-hidden
-          className="absolute -inset-1 rounded-full border border-accent/30"
-        />
-      )}
-    </span>
   );
 }
 
@@ -502,7 +488,7 @@ function DeltaCell({
   maxAbsDelta: number;
 }) {
   if (delta === null) {
-    return <span className="font-sans text-xs text-subtle">—</span>;
+    return <span className="font-sans text-[11px] text-subtle">—</span>;
   }
   const halfPct = (Math.abs(delta) / maxAbsDelta) * 50;
   const isNeg = delta < 0;
@@ -524,12 +510,12 @@ function DeltaCell({
           : 'bg-bad';
 
   return (
-    <div className="flex items-center gap-3">
-      <span className={`tabular font-sans text-sm font-medium ${tone} min-w-[3.75rem]`}>
+    <div className="flex items-center gap-2">
+      <span className={`tabular font-sans text-[12px] font-semibold ${tone} min-w-[3.25rem]`}>
         {delta >= 0 ? '+' : ''}
         {delta.toFixed(2)}%
       </span>
-      <div className="relative h-1.5 w-20 overflow-hidden rounded-full bg-edge sm:w-32">
+      <div className="relative h-1 w-20 overflow-hidden rounded-full bg-edge">
         <span
           aria-hidden
           className="absolute inset-y-0 left-1/2 w-px bg-edge-strong"
@@ -538,7 +524,7 @@ function DeltaCell({
           aria-hidden
           className={`absolute inset-y-0 ${barColor} ${
             isNeg ? 'right-1/2' : 'left-1/2'
-          } rounded-sm shadow-[0_0_8px_currentColor] opacity-90`}
+          } rounded-sm shadow-[0_0_6px_currentColor] opacity-90`}
           style={{ width: `${halfPct}%` }}
         />
       </div>
@@ -550,39 +536,29 @@ const fmt = (n: number) => n.toLocaleString('en-US', { maximumFractionDigits: 2 
 
 function dataSourceLabel(ds: string): string {
   switch (ds) {
-    case 'remitly_promo':
-      return 'promo';
-    case 'remitly_standard':
-      return 'standard';
-    case 'wise_comparisons':
-      return 'wise comp';
-    case 'wise_api':
-      return 'wise api';
-    case 'aspora_api':
-      return 'aspora api';
-    case 'instarem_api':
-      return 'instarem api';
-    case 'masarif':
-      return 'masarif';
-    case 'lulu_direct':
-      return 'lulu';
-    case 'remitly_ssr_promo':
-      return 'promo (ssr)';
-    default:
-      return ds;
+    case 'remitly_promo': return 'promo';
+    case 'remitly_standard': return 'standard';
+    case 'wise_comparisons': return 'wise comp';
+    case 'wise_api': return 'wise api';
+    case 'aspora_api': return 'aspora';
+    case 'instarem_api': return 'instarem';
+    case 'masarif': return 'masarif';
+    case 'lulu_direct': return 'lulu';
+    case 'remitly_ssr_promo': return 'promo (ssr)';
+    default: return ds;
   }
 }
 
-function dataSourceTone(ds: string): 'neutral' | 'accent' | 'warn' | 'muted' {
-  if (ds === 'remitly_promo' || ds === 'remitly_ssr_promo') return 'warn';
-  if (ds === 'remitly_standard' || ds === 'wise_comparisons') return 'accent';
-  return 'muted';
+function dataSourceToneText(ds: string): string {
+  if (ds === 'remitly_promo' || ds === 'remitly_ssr_promo') return 'text-warn';
+  if (ds === 'remitly_standard' || ds === 'wise_comparisons') return 'text-accent';
+  return 'text-subtle';
 }
 
 function ago(iso: string): string {
   const ms = Date.now() - new Date(iso).getTime();
   const min = Math.floor(ms / 60000);
-  if (min < 1) return 'just now';
+  if (min < 1) return 'now';
   if (min < 60) return `${min}m`;
   const h = Math.floor(min / 60);
   if (h < 24) return `${h}h`;

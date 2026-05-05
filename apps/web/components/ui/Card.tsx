@@ -31,12 +31,12 @@ export function CardHeader({
 }) {
   return (
     <div
-      className={`flex items-start justify-between gap-6 border-b border-edge/60 px-7 py-5 ${className}`}
+      className={`flex items-center justify-between gap-4 border-b border-edge/60 px-5 py-3 ${className}`}
     >
-      <div className="min-w-0">
-        <h3 className="display text-xl font-normal leading-tight text-text">{title}</h3>
+      <div className="min-w-0 flex items-baseline gap-3">
+        <h3 className="display text-lg font-normal leading-tight text-text">{title}</h3>
         {subtitle && (
-          <p className="mt-1.5 font-sans text-sm leading-snug text-muted">{subtitle}</p>
+          <p className="font-sans text-xs text-muted">{subtitle}</p>
         )}
       </div>
       {right && <div className="shrink-0">{right}</div>}
@@ -51,5 +51,5 @@ export function CardBody({
   children: ReactNode;
   className?: string;
 }) {
-  return <div className={`px-7 py-6 ${className}`}>{children}</div>;
+  return <div className={`px-5 py-4 ${className}`}>{children}</div>;
 }

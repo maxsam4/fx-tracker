@@ -4,9 +4,8 @@ import type { CurrencyPair } from '@fx/core';
 import { MidMarketChart } from './MidMarketChart';
 import { ProviderTable } from './ProviderTable';
 import { WindowControls } from './WindowControls';
-import { Card, CardHeader } from './ui/Card';
+import { Card } from './ui/Card';
 import { StatusDot } from './ui/Pill';
-import { Sparkline } from './ui/Sparkline';
 
 interface MidPoint { t: string; rate: number; sources: string[]; }
 interface RefPoint { t: string; rate: number; sourceId: string; }
@@ -76,179 +75,109 @@ export function Dashboard(initial: Props) {
   const freshnessLabel =
     freshness === 'ok' ? 'live' : freshness === 'warn' ? 'delayed' : freshness === 'bad' ? 'stale' : 'no data';
 
-  // Best rate from provider table for the "best deal today" callout.
   const bestProvider = table.length ? [...table].sort((a, b) => b.effectiveRate - a.effectiveRate)[0] : null;
   const bestSpread = bestProvider && mid ? ((bestProvider.effectiveRate - mid.rate) / mid.rate) * 100 : null;
 
-  // Split rate into integer + decimal so the decimals can be set softer for visual rhythm.
   const rateString = mid ? formatRate(mid.rate) : null;
-  const [intPart, decPart] = rateString ? splitRate(rateString) : ['—', ''];
 
   return (
-    <div className="stagger space-y-10">
-      {/* HERO */}
-      <section className="relative overflow-hidden rounded-2xl border border-edge rate-ribbon">
-        <div className="pointer-events-none absolute inset-0 paper-grain opacity-40" aria-hidden />
-        <div className="relative grid gap-10 px-8 pb-10 pt-9 md:grid-cols-[1.3fr_1fr] md:gap-14 md:px-12 md:pb-14 md:pt-12">
-          {/* LEFT — pair, rate, sparkline */}
-          <div className="flex flex-col justify-between gap-10">
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-baseline gap-2">
-                <span className="display-italic text-3xl font-light leading-none text-muted">
-                  {initial.pair.from.toLowerCase()}
-                </span>
-                <span className="display text-2xl font-light leading-none text-subtle">→</span>
-                <span className="display-italic text-3xl font-light leading-none text-text">
-                  {initial.pair.to.toLowerCase()}
-                </span>
-              </div>
-              <span className="mx-1 h-4 w-px bg-edge-strong" aria-hidden />
-              <span className="font-sans text-2xs font-medium uppercase tracking-[0.22em] text-subtle">
-                Mid-market median
+    <div className="stagger space-y-5">
+      {/* HERO — single horizontal band, dense */}
+      <section className="relative overflow-hidden rounded-xl border border-edge rate-ribbon">
+        <div className="pointer-events-none absolute inset-0 paper-grain opacity-30" aria-hidden />
+        <div className="relative grid grid-cols-1 items-stretch divide-y divide-edge/60 lg:grid-cols-[auto_1fr_auto] lg:divide-x lg:divide-y-0">
+          {/* Pair + rate */}
+          <div className="flex flex-col gap-2 px-6 py-5">
+            <div className="flex items-center gap-2 font-sans text-2xs font-medium uppercase tracking-[0.22em] text-subtle">
+              <span className="tabular text-muted">{initial.pair.from}</span>
+              <span className="text-subtle">→</span>
+              <span className="tabular text-text">{initial.pair.to}</span>
+              <span className="mx-1 h-3 w-px bg-edge-strong" aria-hidden />
+              <span>Mid-market median</span>
+            </div>
+            <div className="flex items-baseline gap-3">
+              <span className="rate-display text-[clamp(3rem,5.5vw,4.75rem)] text-text">
+                {rateString ?? '—'}
               </span>
-              <span className="ml-auto inline-flex items-center gap-2 rounded-full border border-edge bg-surface/60 px-3 py-1.5 backdrop-blur">
+              {delta24h !== null && <DeltaTag value={delta24h} />}
+            </div>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-sans text-2xs text-muted">
+              <span className="inline-flex items-center gap-1.5">
                 <StatusDot status={freshness} />
-                <span className="font-sans text-2xs font-medium uppercase tracking-[0.18em] text-muted">
-                  {freshnessLabel}
-                </span>
-                {mid && (
-                  <span className="tabular font-mono text-2xs text-subtle">
-                    · {timeAgo(mid.capturedAt)}
-                  </span>
-                )}
+                <span className="font-medium uppercase tracking-[0.16em]">{freshnessLabel}</span>
+                {mid && <span className="tabular text-subtle">· {timeAgo(mid.capturedAt)}</span>}
               </span>
-            </div>
-
-            {/* RATE — the showpiece */}
-            <div className="flex flex-col gap-5">
-              <div className="flex items-baseline gap-3 leading-none">
-                <span className="rate-display text-[clamp(4.5rem,12vw,8.5rem)] font-light text-text">
-                  {intPart}
+              {mid && mid.sources.length > 0 && (
+                <span className="text-subtle">
+                  · {mid.sources.length}-source median ({mid.sources.slice(0, 4).join(', ')}
+                  {mid.sources.length > 4 ? `, +${mid.sources.length - 4}` : ''})
                 </span>
-                {decPart && (
-                  <span className="rate-display text-[clamp(2.5rem,7vw,5rem)] font-light text-muted">
-                    .{decPart}
-                  </span>
-                )}
-                {delta24h !== null && (
-                  <span className="ml-3 hidden md:inline-block">
-                    <DeltaTag value={delta24h} />
-                  </span>
-                )}
-              </div>
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 font-sans text-sm">
-                <span className="font-medium text-muted">
-                  <span className="tabular text-text">1 {initial.pair.from}</span>{' '}
-                  <span className="text-subtle">·</span>{' '}
-                  <span className="tabular text-text">{rateString} {initial.pair.to}</span>
-                </span>
-                {delta24h !== null && (
-                  <span className="md:hidden">
-                    <DeltaTag value={delta24h} />
-                  </span>
-                )}
-                {mid && mid.sources.length > 0 && (
-                  <span className="font-sans text-2xs uppercase tracking-[0.16em] text-subtle">
-                    {mid.sources.length}-source median
-                  </span>
-                )}
-              </div>
+              )}
             </div>
+          </div>
 
-            {/* SPARKLINE — large, beautiful */}
+          {/* Sparkline center band — fills remaining width */}
+          <div className="relative px-6 py-4">
             <HeroSparkline
               points={midSeries}
               tone={delta24h === null ? 'neutral' : delta24h >= 0 ? 'positive' : 'negative'}
             />
           </div>
 
-          {/* RIGHT — meta tiles */}
-          <div className="grid grid-cols-2 gap-4 self-end md:gap-5">
-            <MetaTile
-              label="Window high"
-              value={range ? formatRate(range.max) : '—'}
-              hint={range ? '24h ↗ peak' : undefined}
-            />
-            <MetaTile
-              label="Window low"
-              value={range ? formatRate(range.min) : '—'}
-              hint={range ? '24h ↘ trough' : undefined}
-            />
-            <MetaTile
-              label="Best provider"
-              value={bestProvider ? bestProvider.providerId : '—'}
-              hint={
-                bestSpread !== null
-                  ? `${bestSpread >= 0 ? '+' : ''}${bestSpread.toFixed(2)}% vs mid`
-                  : undefined
-              }
+          {/* Inline meta — 4 stats in a horizontal strip */}
+          <div className="grid grid-cols-2 gap-x-6 gap-y-3 px-6 py-5 sm:grid-cols-4 lg:grid-cols-2 lg:gap-x-8">
+            <Stat label="High" value={range ? formatRate(range.max) : '—'} />
+            <Stat label="Low" value={range ? formatRate(range.min) : '—'} />
+            <Stat
+              label="Best"
+              value={bestProvider ? PROVIDER_LABELS[bestProvider.providerId] ?? bestProvider.providerId : '—'}
+              hint={bestSpread !== null ? `${bestSpread >= 0 ? '+' : ''}${bestSpread.toFixed(2)}%` : undefined}
               tone={bestSpread !== null && bestSpread >= 0 ? 'accent' : 'neutral'}
             />
-            <MetaTile
+            <Stat
               label="Tracked"
-              value={initial.configuredProviders.length}
-              hint={`${refLatest.length} mid feeds`}
+              value={`${initial.configuredProviders.length}p · ${refLatest.length}f`}
             />
           </div>
         </div>
+      </section>
 
-        {/* Source ribbon */}
-        {mid && mid.sources.length > 0 && (
-          <div className="border-t border-edge/60 bg-bg/40 px-8 py-4 md:px-12">
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-              <span className="font-sans text-2xs font-medium uppercase tracking-[0.22em] text-subtle">
-                Median draws from
-              </span>
-              {mid.sources.map((s: string) => (
-                <span
-                  key={s}
-                  className="inline-flex items-center gap-1.5 font-mono text-xs text-muted"
-                >
-                  <span className="h-1 w-1 rounded-full bg-accent/60" aria-hidden />
-                  {s}
-                </span>
-              ))}
-            </div>
+      {/* CONTROLS + CHART */}
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-baseline gap-3">
+            <h2 className="display text-base font-semibold leading-none text-text">
+              Rate history
+            </h2>
+            <p className="font-sans text-xs text-muted">
+              Median against each upstream feed
+            </p>
           </div>
-        )}
+          <WindowControls pairKey={initial.pairKey} currentMs={initial.windowMs} />
+        </div>
+        <Card>
+          <div className="px-2 pb-2 pt-3 md:px-3">
+            <MidMarketChart midSeries={midSeries} refSeries={refSeries} />
+          </div>
+        </Card>
       </section>
 
-      {/* CONTROLS */}
-      <section className="flex flex-wrap items-end justify-between gap-4">
-        <div className="space-y-1.5">
-          <h2 className="display text-3xl font-normal leading-tight text-text">
-            Rate history
-          </h2>
-          <p className="font-sans text-sm text-muted">
-            Live median against each upstream feed — a single line where they agree, divergence where they don&apos;t.
-          </p>
-        </div>
-        <WindowControls pairKey={initial.pairKey} currentMs={initial.windowMs} />
-      </section>
-
-      {/* CHART */}
-      <Card>
-        <div className="px-2 pb-3 pt-1 md:px-4">
-          <MidMarketChart midSeries={midSeries} refSeries={refSeries} />
-        </div>
-      </Card>
-
-      {/* PROVIDER TABLE SECTION */}
-      <section className="space-y-4">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="space-y-1.5">
-            <h2 className="display text-3xl font-normal leading-tight text-text">
+      {/* PROVIDER TABLE */}
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-baseline gap-3">
+            <h2 className="display text-base font-semibold leading-none text-text">
               Provider quotes
             </h2>
-            <p className="font-sans text-sm text-muted">
+            <p className="font-sans text-xs text-muted">
               Sending{' '}
               <span className="tabular font-medium text-text">
                 {formatAmount(initial.sendAmount)} {initial.pair.from}
               </span>{' '}
-              · effective rate accounts for advertised fees · sorted best-first.
+              · effective rate · best first
             </p>
           </div>
-          <span className="inline-flex items-center gap-2 rounded-full border border-edge bg-surface/70 px-4 py-2 backdrop-blur">
+          <span className="inline-flex items-center gap-2 rounded-full border border-edge bg-surface/70 px-3 py-1 backdrop-blur">
             <span
               className="h-1.5 w-1.5 rounded-full bg-accent dot-glow-accent pulse-soft"
               aria-hidden
@@ -258,7 +187,6 @@ export function Dashboard(initial: Props) {
             </span>
           </span>
         </div>
-
         <Card>
           <ProviderTable
             rows={table}
@@ -278,6 +206,19 @@ export function Dashboard(initial: Props) {
   );
 }
 
+const PROVIDER_LABELS: Record<string, string> = {
+  wise: 'Wise',
+  remitly: 'Remitly',
+  instarem: 'Instarem',
+  aspora: 'Aspora',
+  xoom: 'Xoom',
+  westernUnion: 'Western Union',
+  careemPay: 'CareemPay',
+  remitfinder: 'Remitfinder',
+  lulu: 'LuluXchange',
+  masarif: 'Masarif',
+};
+
 function HeroSparkline({
   points,
   tone,
@@ -287,7 +228,7 @@ function HeroSparkline({
 }) {
   if (points.length < 2) {
     return (
-      <div className="flex h-[88px] items-center justify-start font-sans text-sm text-subtle">
+      <div className="flex h-[64px] items-center justify-start font-sans text-xs text-subtle">
         Awaiting data — first poll runs within the hour.
       </div>
     );
@@ -296,8 +237,8 @@ function HeroSparkline({
   const min = Math.min(...ys);
   const max = Math.max(...ys);
   const span = max - min || 1;
-  const W = 560;
-  const H = 88;
+  const W = 600;
+  const H = 64;
   const stepX = W / (points.length - 1);
 
   const coords = points.map((p, i) => {
@@ -320,13 +261,13 @@ function HeroSparkline({
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
-      className="h-[88px] w-full"
+      className="h-[64px] w-full"
       preserveAspectRatio="none"
       aria-hidden
     >
       <defs>
         <linearGradient id="hero-spark" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={stroke} stopOpacity={0.35} />
+          <stop offset="0%" stopColor={stroke} stopOpacity={0.32} />
           <stop offset="100%" stopColor={stroke} stopOpacity={0} />
         </linearGradient>
       </defs>
@@ -335,20 +276,20 @@ function HeroSparkline({
         d={path}
         fill="none"
         stroke={stroke}
-        strokeWidth={1.75}
+        strokeWidth={1.5}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <circle
         cx={coords.at(-1)?.[0] ?? 0}
         cy={coords.at(-1)?.[1] ?? 0}
-        r={4}
+        r={3.5}
         fill={stroke}
       />
       <circle
         cx={coords.at(-1)?.[0] ?? 0}
         cy={coords.at(-1)?.[1] ?? 0}
-        r={9}
+        r={7}
         fill={stroke}
         fillOpacity={0.18}
       />
@@ -366,17 +307,19 @@ function DeltaTag({ value }: { value: number }) {
       : 'border-edge bg-surface text-muted';
   return (
     <span
-      className={`tabular inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-sans text-xs font-medium ${tone}`}
+      className={`tabular inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-sans text-2xs font-medium ${tone}`}
     >
-      <span aria-hidden>{positive ? '↑' : negative ? '↓' : '◆'}</span>
+      <span aria-hidden className="text-[9px]">
+        {positive ? '↑' : negative ? '↓' : '◆'}
+      </span>
       {value > 0 ? '+' : ''}
       {value.toFixed(2)}%
-      <span className="text-2xs uppercase tracking-[0.18em] opacity-70">24h</span>
+      <span className="opacity-70">24h</span>
     </span>
   );
 }
 
-function MetaTile({
+function Stat({
   label,
   value,
   hint,
@@ -388,26 +331,28 @@ function MetaTile({
   tone?: 'neutral' | 'accent';
 }) {
   return (
-    <div
-      className={`relative overflow-hidden rounded-xl border bg-surface/40 px-5 py-4 backdrop-blur ${
-        tone === 'accent' ? 'border-accent/30' : 'border-edge'
-      }`}
-    >
-      <div className="font-sans text-2xs font-medium uppercase tracking-[0.22em] text-subtle">
+    <div className="flex flex-col gap-0.5">
+      <span className="font-sans text-[10px] font-medium uppercase tracking-[0.18em] text-subtle">
         {label}
+      </span>
+      <div className="flex items-baseline gap-1.5">
+        <span
+          className={`tabular truncate font-sans text-base font-semibold leading-tight ${
+            tone === 'accent' ? 'text-accent' : 'text-text'
+          }`}
+        >
+          {value}
+        </span>
+        {hint && (
+          <span
+            className={`tabular shrink-0 font-sans text-2xs font-medium ${
+              tone === 'accent' ? 'text-accent' : 'text-muted'
+            }`}
+          >
+            {hint}
+          </span>
+        )}
       </div>
-      <div
-        className={`tabular mt-2 font-sans text-2xl font-medium ${
-          tone === 'accent' ? 'text-accent' : 'text-text'
-        }`}
-      >
-        {value}
-      </div>
-      {hint && (
-        <div className="mt-1 font-sans text-2xs uppercase tracking-[0.16em] text-muted">
-          {hint}
-        </div>
-      )}
     </div>
   );
 }
@@ -432,11 +377,6 @@ function formatRate(n: number): string {
     minimumFractionDigits: 4,
     maximumFractionDigits: 4,
   });
-}
-
-function splitRate(s: string): [string, string] {
-  const [int, dec = ''] = s.split('.');
-  return [int ?? '—', dec];
 }
 
 function formatAmount(n: number): string {

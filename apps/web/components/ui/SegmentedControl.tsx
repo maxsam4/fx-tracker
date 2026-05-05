@@ -35,7 +35,7 @@ export function SegmentedControl({
             href={o.href}
             role="radio"
             aria-checked={o.active}
-            className={`tabular relative rounded-full px-3.5 py-1.5 font-sans text-xs font-medium transition-all ${
+            className={`tabular relative rounded-full px-3 py-1 font-sans text-xs font-medium transition-all ${
               o.active
                 ? 'bg-text text-bg shadow-sm'
                 : 'text-muted hover:text-text'

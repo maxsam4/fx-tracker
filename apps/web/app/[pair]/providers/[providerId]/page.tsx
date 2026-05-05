@@ -88,56 +88,53 @@ export default async function ProviderPage({
   const providerLabel = PROVIDER_LABELS[providerId] ?? providerId;
 
   return (
-    <div className="stagger space-y-10">
+    <div className="stagger space-y-5">
       {/* HEADER */}
-      <section className="relative overflow-hidden rounded-2xl border border-edge rate-ribbon">
-        <div className="pointer-events-none absolute inset-0 paper-grain opacity-40" aria-hidden />
-        <div className="relative grid gap-10 px-8 pb-10 pt-9 md:grid-cols-[1.4fr_1fr] md:px-12 md:pb-12 md:pt-10">
-          <div className="flex flex-col gap-7">
-            <div className="flex flex-wrap items-center gap-3">
+      <section className="relative overflow-hidden rounded-xl border border-edge rate-ribbon">
+        <div className="pointer-events-none absolute inset-0 paper-grain opacity-30" aria-hidden />
+        <div className="relative grid grid-cols-1 items-stretch divide-y divide-edge/60 lg:grid-cols-[1fr_auto] lg:divide-x lg:divide-y-0">
+          <div className="flex flex-col gap-3 px-6 py-5">
+            <div className="flex flex-wrap items-center gap-2">
               <Link
                 href={`/${pairKey}`}
-                className="font-sans text-2xs uppercase tracking-[0.22em] text-muted transition-colors hover:text-text"
+                className="font-sans text-2xs uppercase tracking-[0.18em] text-muted transition-colors hover:text-text"
               >
                 ← {pairKey}
               </Link>
               <span className="text-subtle">/</span>
-              <span className="font-sans text-2xs uppercase tracking-[0.22em] text-subtle">
+              <span className="font-sans text-2xs uppercase tracking-[0.18em] text-subtle">
                 provider
               </span>
-            </div>
-            <div className="flex flex-wrap items-baseline gap-4">
-              <h1 className="display text-6xl font-normal leading-none text-text">
-                {providerLabel}
-              </h1>
               <Pill tone="muted" mono>
                 {pair.from} → {pair.to}
               </Pill>
             </div>
-            <div className="flex flex-col gap-2">
-              <span className="font-sans text-2xs font-medium uppercase tracking-[0.22em] text-subtle">
-                Latest effective rate · sending {sendAmount} {pair.from}
+            <div className="flex flex-wrap items-baseline gap-4">
+              <h1 className="display text-3xl font-semibold leading-none text-text">
+                {providerLabel}
+              </h1>
+              <span className="font-sans text-xs text-muted">
+                Latest effective rate · sending{' '}
+                <span className="tabular text-text">{sendAmount} {pair.from}</span>
               </span>
-              <div className="flex flex-wrap items-baseline gap-4">
-                <span className="rate-display text-7xl font-light text-text">
-                  {latestRate !== null ? latestRate.toFixed(4) : '—'}
-                </span>
-                <span className="font-sans text-sm font-medium uppercase tracking-[0.18em] text-muted">
-                  {pair.to} per {pair.from}
-                </span>
-                {deltaVsMid !== null && (
-                  <DeltaBadge value={deltaVsMid} label="vs mid" />
-                )}
-              </div>
+            </div>
+            <div className="flex flex-wrap items-baseline gap-3">
+              <span className="rate-display text-5xl text-text">
+                {latestRate !== null ? latestRate.toFixed(4) : '—'}
+              </span>
+              <span className="font-sans text-2xs font-medium uppercase tracking-[0.18em] text-muted">
+                {pair.to} / {pair.from}
+              </span>
+              {deltaVsMid !== null && <DeltaBadge value={deltaVsMid} label="vs mid" />}
             </div>
           </div>
 
-          <aside className="grid content-end gap-4">
+          <aside className="grid grid-cols-2 gap-x-6 gap-y-3 px-6 py-5 lg:grid-cols-1 lg:gap-y-4">
             {mid && (
               <Tile
-                label="Mid-market reference"
+                label="Mid-market"
                 value={mid.rate.toFixed(4)}
-                hint={`captured ${timeAgo(mid.capturedAt)}`}
+                hint={`${timeAgo(mid.capturedAt)} ago`}
               />
             )}
             {latest && (
@@ -154,13 +151,11 @@ export default async function ProviderPage({
       </section>
 
       {/* WINDOW CONTROLS */}
-      <section className="flex flex-wrap items-end justify-between gap-4">
-        <div className="space-y-1.5">
-          <h2 className="display text-3xl font-normal leading-tight text-text">
-            History
-          </h2>
-          <p className="font-sans text-sm text-muted">
-            {providerLabel} after advertised fees, against the live mid-market.
+      <section className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-baseline gap-3">
+          <h2 className="display text-base font-semibold leading-none text-text">History</h2>
+          <p className="font-sans text-xs text-muted">
+            {providerLabel} after fees, against the live mid-market
           </p>
         </div>
         <div className="inline-flex rounded-full border border-edge bg-surface/80 p-1 backdrop-blur">
@@ -168,7 +163,7 @@ export default async function ProviderPage({
             <Link
               key={k}
               href={`/${pairKey}/providers/${encodeURIComponent(providerId)}?window=${k}`}
-              className={`tabular rounded-full px-3.5 py-1.5 font-sans text-xs font-medium transition-all ${
+              className={`tabular rounded-full px-3 py-1 font-sans text-xs font-medium transition-all ${
                 k === activeWindow ? 'bg-text text-bg shadow-sm' : 'text-muted hover:text-text'
               }`}
             >
@@ -180,9 +175,9 @@ export default async function ProviderPage({
 
       {/* CHART */}
       <Card>
-        <div className="px-2 pb-3 pt-1 md:px-4">
+        <div className="px-2 pb-2 pt-3 md:px-3">
           {providerSeries.length === 0 ? (
-            <div className="py-20 text-center font-sans text-sm text-muted">
+            <div className="py-16 text-center font-sans text-sm text-muted">
               No history captured yet for {providerLabel} at this amount.
             </div>
           ) : (
@@ -231,16 +226,16 @@ function Tile({
   hint?: string;
 }) {
   return (
-    <div className="rounded-xl border border-edge bg-surface/40 px-5 py-4 backdrop-blur">
-      <div className="font-sans text-2xs font-medium uppercase tracking-[0.22em] text-subtle">
+    <div className="flex flex-col gap-0.5">
+      <span className="font-sans text-[10px] font-medium uppercase tracking-[0.18em] text-subtle">
         {label}
+      </span>
+      <div className="flex items-baseline gap-1.5">
+        <span className="tabular font-sans text-base font-semibold text-text">{value}</span>
+        {hint && (
+          <span className="tabular font-sans text-2xs text-muted">{hint}</span>
+        )}
       </div>
-      <div className="tabular mt-2 font-sans text-2xl font-medium text-text">{value}</div>
-      {hint && (
-        <div className="mt-1 font-sans text-2xs uppercase tracking-[0.16em] text-muted">
-          {hint}
-        </div>
-      )}
     </div>
   );
 }
@@ -264,7 +259,7 @@ function RecentTable({
 }) {
   if (rows.length === 0) {
     return (
-      <div className="px-7 py-16 text-center font-sans text-sm text-muted">
+      <div className="px-5 py-12 text-center font-sans text-sm text-muted">
         No recent quotes.
       </div>
     );
@@ -273,12 +268,12 @@ function RecentTable({
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead>
-          <tr className="border-b border-edge text-2xs font-medium uppercase tracking-[0.18em] text-subtle">
-            <th className="px-7 py-4 text-left">When</th>
-            <th className="px-3 py-4 text-right">Effective rate</th>
-            <th className="px-3 py-4 text-right">Δ vs mid</th>
-            <th className="px-3 py-4 text-right">Receive ({to})</th>
-            <th className="px-7 py-4 text-right">Fee ({from})</th>
+          <tr className="border-b border-edge text-[10px] font-medium uppercase tracking-[0.16em] text-subtle">
+            <th className="px-3 py-2 text-left">When</th>
+            <th className="px-2 py-2 text-right">Effective rate</th>
+            <th className="px-2 py-2 text-right">Δ vs mid</th>
+            <th className="px-2 py-2 text-right">Receive ({to})</th>
+            <th className="px-3 py-2 text-right">Fee ({from})</th>
           </tr>
         </thead>
         <tbody>
@@ -288,9 +283,9 @@ function RecentTable({
             return (
               <tr
                 key={r.t}
-                className="border-b border-edge/40 transition-colors last:border-b-0 hover:bg-elevated/40"
+                className="h-9 border-b border-edge/40 transition-colors last:border-b-0 hover:bg-elevated/40"
               >
-                <td className="px-7 py-4 font-sans text-2xs uppercase tracking-[0.16em] text-muted">
+                <td className="px-3 font-sans text-[11px] uppercase tracking-[0.14em] text-muted">
                   {new Date(r.t).toLocaleString('en-US', {
                     month: 'short',
                     day: 'numeric',
@@ -299,22 +294,22 @@ function RecentTable({
                     hour12: false,
                   })}
                 </td>
-                <td className="tabular px-3 py-4 text-right font-mono text-base text-text">
+                <td className="tabular px-2 text-right font-mono text-[13px] font-semibold text-text">
                   {rate.toFixed(4)}
                 </td>
-                <td className="px-3 py-4 text-right">
+                <td className="px-2 text-right">
                   {delta === null ? (
-                    <span className="text-subtle">—</span>
+                    <span className="font-sans text-[11px] text-subtle">—</span>
                   ) : (
                     <DeltaBadge value={delta} />
                   )}
                 </td>
-                <td className="tabular px-3 py-4 text-right font-mono text-base text-text">
+                <td className="tabular px-2 text-right font-mono text-[13px] text-text">
                   {r.receiveAmount.toLocaleString('en-US', {
                     maximumFractionDigits: 2,
                   })}
                 </td>
-                <td className="tabular px-7 py-4 text-right font-mono text-sm text-muted">
+                <td className="tabular px-3 text-right font-mono text-[12px] text-muted">
                   {r.feeAmount.toLocaleString('en-US', {
                     maximumFractionDigits: 2,
                   })}
