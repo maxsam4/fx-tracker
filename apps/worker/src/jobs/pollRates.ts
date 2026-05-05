@@ -22,6 +22,7 @@ import { computeMidMarket, dedupeQuotes } from '@fx/core';
 import { evaluateThresholdsForPair } from '@fx/core/alerts';
 import { withTimeout } from '@fx/core';
 import type { CurrencyPair } from '@fx/core';
+import { and, desc, eq } from 'drizzle-orm';
 
 // 45s accommodates Remitly's Playwright calculator-drive path (~6-15s on a
 // memory-constrained VPS where Chromium hydration is slow). Drop back to 30s
@@ -70,17 +71,28 @@ async function runForPair(
   // so the dashboard can show wiseMidMarket / xe / exchangerateHost individually
   // alongside provider quotes. Reuses the rates already fetched for the median —
   // no extra HTTP calls.
+  //
+  // `capturedAt` is the source's OWN upstream timestamp where it provides one
+  // (e.g. exchangerateHost's `time_last_update_unix` — daily). Sources that
+  // don't expose one fall back to the median computation time.
+  //
+  // Dedup: if the most recent stored row for (pair, source) already has the
+  // same `capturedAt`, we skip the insert. This stops once-a-day feeds from
+  // emitting 24 identical hourly rows.
   const midSourceRows = Object.entries(mid.perSource)
     .filter(([, v]) => typeof v.rate === 'number')
     .map(([sourceId, v]) => ({
       pairId,
       sourceId,
-      capturedAt: mid.capturedAt,
+      capturedAt: v.capturedAt ?? mid.capturedAt,
       rate: (v.rate as number).toString(),
       raw: { fromMidMarket: true } as object,
     }));
   if (midSourceRows.length > 0) {
-    await db.insert(referenceRates).values(midSourceRows);
+    const fresh = await dropUnchangedReferenceRows(midSourceRows);
+    if (fresh.length > 0) {
+      await db.insert(referenceRates).values(fresh);
+    }
   }
 
   // 2. reference rates (display-only — sources NOT used for the median)
@@ -188,6 +200,32 @@ async function runForPair(
   } catch (err) {
     logger.error({ err: String(err) }, 'threshold alert evaluation failed');
   }
+}
+
+// Drop rows whose (pairId, sourceId, capturedAt) tuple is already the most
+// recent stored row for that pair+source. Sources with stale upstream
+// timestamps (e.g. open.er-api's once-a-day refresh) would otherwise emit
+// the same row every hour; this keeps the table truthful without a unique
+// constraint + ON CONFLICT.
+async function dropUnchangedReferenceRows<
+  T extends { pairId: number; sourceId: string; capturedAt: Date },
+>(rows: T[]): Promise<T[]> {
+  const db = getDb();
+  const out: T[] = [];
+  for (const row of rows) {
+    const latest = await db
+      .select({ ts: referenceRates.capturedAt })
+      .from(referenceRates)
+      .where(
+        and(eq(referenceRates.pairId, row.pairId), eq(referenceRates.sourceId, row.sourceId)),
+      )
+      .orderBy(desc(referenceRates.capturedAt))
+      .limit(1);
+    const lastTs = latest[0]?.ts;
+    if (lastTs && lastTs.getTime() === row.capturedAt.getTime()) continue;
+    out.push(row);
+  }
+  return out;
 }
 
 function safeGetProvider(id: string) {

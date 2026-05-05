@@ -10,7 +10,7 @@ export interface MidMarketResult {
   midRate: number;
   capturedAt: Date;
   sourcesUsed: string[];
-  perSource: Record<string, { rate: number | null; error?: string }>;
+  perSource: Record<string, { rate: number | null; capturedAt?: Date; error?: string }>;
 }
 
 interface ComputeInput {
@@ -28,13 +28,13 @@ export async function computeMidMarket(input: ComputeInput): Promise<MidMarketRe
     ),
   );
 
-  const perSource: Record<string, { rate: number | null; error?: string }> = {};
+  const perSource: Record<string, { rate: number | null; capturedAt?: Date; error?: string }> = {};
   const valid: ReferenceRate[] = [];
   for (let i = 0; i < sourceIds.length; i++) {
     const id = sourceIds[i]!;
     const r = settled[i];
     if (r && r.status === 'fulfilled') {
-      perSource[id] = { rate: r.value.rate };
+      perSource[id] = { rate: r.value.rate, capturedAt: r.value.capturedAt };
       valid.push(r.value);
     } else {
       const err = r && r.status === 'rejected' ? String(r.reason) : 'unknown';
