@@ -45,6 +45,8 @@ services:
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       TELEGRAM_ADMIN_CHAT_ID: ${TELEGRAM_ADMIN_CHAT_ID}
       TELEGRAM_BOT_PIN: ${TELEGRAM_BOT_PIN}
+      TWELVE_DATA_API_KEY: ${TWELVE_DATA_API_KEY:-}
+      XE_API_AUTH: ${XE_API_AUTH:-}
       NODE_ENV: production
     depends_on:
       postgres:
