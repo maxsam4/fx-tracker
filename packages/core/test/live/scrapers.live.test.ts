@@ -2,7 +2,7 @@
  * Live Playwright-driven tests for scrape-based providers + reference sources.
  *
  *   FX_LIVE_SCRAPE=1            — required-pass tier (Google Finance only)
- *   FX_LIVE_SCRAPE_FRAGILE=1    — advisory tier (masarif/lulu/careem/rf)
+ *   FX_LIVE_SCRAPE_FRAGILE=1    — advisory tier (masarif/lulu/careem)
  *
  * The advisory tier scrapers are documented as best-effort in providers.yml.
  * Their failures here mean exactly what they mean in production: that
@@ -16,7 +16,6 @@ import { describe, it, expect, afterAll } from 'vitest';
 import { masarifProvider } from '../../src/providers/masarif.js';
 import { luluProvider } from '../../src/providers/lulu.js';
 import { careemPayProvider } from '../../src/providers/careemPay.js';
-import { remitfinderProvider } from '../../src/providers/remitfinder.js';
 import { googleFinanceSource } from '../../src/providers/reference/googleFinance.js';
 import { shutdownBrowser } from '../../src/scrape/browserPool.js';
 
@@ -78,13 +77,3 @@ dAdvisory('LIVE-SCRAPE [advisory]: AED-INR scrape providers', () => {
   }, 60_000);
 });
 
-dAdvisory('LIVE-SCRAPE [advisory]: aggregators', () => {
-  it('Remitfinder USD-INR', async () => {
-    const result = await remitfinderProvider.fetchQuote({ pair: USD_INR, sendAmount: 1000 });
-    const quotes = Array.isArray(result) ? result : [result];
-    for (const q of quotes) {
-      expect(q.rate).toBeGreaterThan(usdLo);
-      expect(q.rate).toBeLessThan(usdHi);
-    }
-  }, 60_000);
-});

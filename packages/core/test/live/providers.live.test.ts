@@ -15,6 +15,7 @@ import { xoomProvider } from '../../src/providers/xoom.js';
 import { instaremProvider } from '../../src/providers/instarem.js';
 import { asporaProvider } from '../../src/providers/aspora.js';
 import { westernUnionProvider } from '../../src/providers/westernUnion.js';
+import { remitfinderProvider } from '../../src/providers/remitfinder.js';
 import { wiseMidMarketSource } from '../../src/providers/reference/wiseMidMarket.js';
 import { exchangerateHostSource } from '../../src/providers/reference/exchangerateHost.js';
 import { xeSource } from '../../src/providers/reference/xe.js';
@@ -138,5 +139,27 @@ d('LIVE: API-based remittance providers', () => {
     expect(single.providerId).toBe('westernUnion');
     expect(single.dataSource).toBe('westernunion_api');
     expectRateInRange(single.rate, aedInrLo, aedInrHi, 'wu AED-INR');
+  }, 30_000);
+});
+
+d('LIVE: Remitfinder aggregator', () => {
+  it('USD-INR returns multiple allowlisted providers', async () => {
+    const result = await remitfinderProvider.fetchQuote({ pair: USD_INR, sendAmount: 1000 });
+    const quotes = Array.isArray(result) ? result : [result];
+    expect(quotes.length).toBeGreaterThan(0);
+    for (const q of quotes) {
+      expect(q.dataSource).toBe('remitfinder');
+      expectRateInRange(q.rate, usdInrLo, usdInrHi, `remitfinder USD-INR ${q.providerId}`);
+    }
+  }, 30_000);
+
+  it('AED-INR returns multiple allowlisted providers', async () => {
+    const result = await remitfinderProvider.fetchQuote({ pair: AED_INR, sendAmount: 1000 });
+    const quotes = Array.isArray(result) ? result : [result];
+    expect(quotes.length).toBeGreaterThan(0);
+    for (const q of quotes) {
+      expect(q.dataSource).toBe('remitfinder');
+      expectRateInRange(q.rate, aedInrLo, aedInrHi, `remitfinder AED-INR ${q.providerId}`);
+    }
   }, 30_000);
 });

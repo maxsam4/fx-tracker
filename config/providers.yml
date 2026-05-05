@@ -1,11 +1,12 @@
 # fx-tracker provider manifest
 # Edit + restart the worker to add/remove pairs or providers.
 #
-# Reliability tiers (verified live 2026-05-03):
+# Reliability tiers (verified live 2026-05-05):
 #   API-backed (verified working):
-#     wise, remitly, xoom, instarem, aspora, westernUnion, careemPay — direct JSON APIs
+#     wise, remitly, xoom, instarem, aspora, westernUnion, careemPay,
+#     remitfinder — direct JSON APIs
 #   Scrape-based (best-effort, may fail on first deploy):
-#     masarif, lulu, remitfinder
+#     masarif, lulu
 #     -> these need selector tuning against the live DOM. Failures show in
 #        provider_runs (status='error') and do NOT block other providers.
 #        Run `pnpm --filter @fx/core test:live:scrape` to validate selectors.
@@ -32,7 +33,7 @@ pairs:
       - instarem          # direct API + Wise fallback
       - aspora            # direct API
       - westernUnion      # API (wuconnect/prices/catalog, Direct-to-Bank)
-      - remitfinder       # SCRAPE — corridor URLs return only popular preview; needs work
+      - remitfinder       # API aggregator (signed /api/v1/rates/USA/IND)
     # No display-only feeds — googleFinance et al. now contribute to the
     # midMarket median, and pollRates step 1b persists every successful
     # per-source rate to reference_rates automatically.
@@ -49,7 +50,7 @@ pairs:
       - westernUnion      # API (UAE retail catalog via WRET channel)
       - careemPay         # API (platform.careemapis.com remittance-widget-rates)
       - lulu              # SCRAPE direct (complements masarif)
-      - remitfinder       # SCRAPE
+      - remitfinder       # API aggregator (signed /api/v1/rates/ARE/IND)
       # Note: Instarem's public API rejects AED→INR ("Invalid combination of
       # country-currency details") — they don't operate that corridor.
     referenceSources: []

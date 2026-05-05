@@ -1,0 +1,1261 @@
+{
+  "latestFxRate": {
+    "id": null,
+    "created": 1777987625000,
+    "source": null,
+    "from": {
+      "name": "United States Dollar",
+      "code": "USD"
+    },
+    "to": {
+      "name": "Indian Rupee",
+      "code": "INR"
+    },
+    "rate": 95.1978,
+    "trendingUp": false,
+    "difference": 0.0621,
+    "differencePercent": 0.0652
+  },
+  "remitRateResultDTOs": [
+    {
+      "serviceProvider": {
+        "name": "RIAMONEYTX",
+        "longName": "Ria Money Transfer",
+        "description": null,
+        "url": "https://ria-money-transfer.7eer.net/DJRAb",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 24,
+        "speedRatingSum": 24,
+        "easeRatingSum": 24,
+        "csRatingSum": 22,
+        "noOfRatings": 5
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971735000,
+        "indicative": false,
+        "tiers": [
+          {
+            "lower": 1,
+            "upper": 49999,
+            "rate": 95.1194,
+            "trendingUp": true,
+            "difference": 0.2994,
+            "differencePercent": 0.3158
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "MONEYGRAM",
+        "longName": "MoneyGram",
+        "description": null,
+        "url": "https://moneygram.pxf.io/NKMXM1",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 47,
+        "speedRatingSum": 50,
+        "easeRatingSum": 45,
+        "csRatingSum": 41,
+        "noOfRatings": 12
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971734000,
+        "indicative": false,
+        "tiers": [
+          {
+            "lower": 0,
+            "upper": 5000,
+            "rate": 95.9796,
+            "trendingUp": true,
+            "difference": 0.3007,
+            "differencePercent": 0.3143
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "REMITLY",
+        "longName": "Remitly",
+        "description": null,
+        "url": "https://remitly.tod8mp.net/c/1991571/742578/10408",
+        "p": true,
+        "m": "Special exchange rate applied for first transfer",
+        "mt": "info"
+      },
+      "averageRating": {
+        "rateRatingSum": 28,
+        "speedRatingSum": 30,
+        "easeRatingSum": 34,
+        "csRatingSum": 30,
+        "noOfRatings": 8
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971736000,
+        "indicative": false,
+        "tiers": [
+          {
+            "lower": 0,
+            "upper": 20000,
+            "rate": 95.7,
+            "trendingUp": true,
+            "difference": 0.31,
+            "differencePercent": 0.325
+          }
+        ]
+      },
+      "deals": [
+        {
+          "intName": "REMITLY-FX-BOOST",
+          "name": "Get a special exchange rate",
+          "description": "RemitFinder users get a special exchange rate when they send money with Remitly. No Remitly coupon code is needed to take advantage of this offer. Simply send money with Remitly as a new customer and you will get the promotional exchange rate.<br/><br/>Offer valid for new customers for the first transfer only. Take advantage of this great Remitly offer now and get a better exchange rate!",
+          "link": "https://remitly.tod8mp.net/c/1991571/742578/10408",
+          "asset": null,
+          "can": null,
+          "endDateTimeMillis": -1,
+          "terms": "1. You must be a new customer to get the special rate. Existing customers are not eligible for this promotion. <br/> 2. All Remitly terms and conditions apply.",
+          "exclusive": true,
+          "shareSubject": "Remitly money transfer deal",
+          "shareText": "I have been using RemitFinder to track money transfer exchange rates, and saw this great Remitly deal! Check it out - http://bit.ly/1F9m5nM, Android - http://bit.ly/1JiWzaG, iOS - http://apple.co/1IFlhbT",
+          "f": null,
+          "t": null,
+          "fC": null,
+          "tC": null,
+          "nf": true
+        }
+      ],
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "TRANSFERWISE",
+        "longName": "Wise",
+        "description": null,
+        "url": "https://wise.prf.hn/click/camref:1101l7sHY",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 60,
+        "speedRatingSum": 64,
+        "easeRatingSum": 66,
+        "csRatingSum": 61,
+        "noOfRatings": 14
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971736000,
+        "indicative": false,
+        "tiers": [
+          {
+            "lower": 1,
+            "upper": 1000000,
+            "rate": 94.2844,
+            "trendingUp": true,
+            "difference": 0.2027,
+            "differencePercent": 0.2155
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "WORLDREMIT",
+        "longName": "WorldRemit",
+        "description": null,
+        "url": "https://worldremit.sjv.io/5bOXjL",
+        "p": true,
+        "m": "Special exchange rate applied for first transfer",
+        "mt": "info"
+      },
+      "averageRating": {
+        "rateRatingSum": 23,
+        "speedRatingSum": 31,
+        "easeRatingSum": 29,
+        "csRatingSum": 25,
+        "noOfRatings": 7
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971736000,
+        "indicative": false,
+        "tiers": [
+          {
+            "lower": 0,
+            "upper": 999,
+            "rate": 94.9086,
+            "trendingUp": true,
+            "difference": 0.4181,
+            "differencePercent": 0.4425
+          },
+          {
+            "lower": 1000,
+            "upper": null,
+            "rate": 95.0039,
+            "trendingUp": true,
+            "difference": 0.4185,
+            "differencePercent": 0.4425
+          }
+        ]
+      },
+      "deals": [
+        {
+          "intName": "worldremit-free-transfers",
+          "name": "Get 3 free transfers",
+          "description": "RemitFinder users get zero fees on their first 3 money transfers with coupon code 3FREE when they send money with WorldRemit, regardless of destination countries.<br/><br/>There is no minimum transfer amount requirement for this WorldRemit promotion. Offer valid for new customers for the first 3 transfers only. Take advantage of this great WorldRemit offer now!",
+          "link": "https://worldremit.sjv.io/5bOXjL",
+          "asset": null,
+          "can": null,
+          "endDateTimeMillis": -1,
+          "terms": "1. You must use coupon code 3FREE to get the fees waived. The offer code must be applied in the Promo Code section. <br/> 2. You must apply the code to your first, second and third transactions in order to benefit from the discount. If the code is not applied to your first transaction it will not be valid for your second and third transactions and if the code is not applied to your second transaction it will not be valid for your third transaction. <br/> 3. This offer can only be redeemed by first time, new WorldRemit customers. <br/> 4. All WorldRemit terms and conditions apply.",
+          "exclusive": true,
+          "shareSubject": "WorldRemit money transfer deal",
+          "shareText": "I have been using RemitFinder to track money transfer exchange rates, and saw this great WorldRemit deal! Check it out - http://bit.ly/1F9m5nM, Android - http://bit.ly/1JiWzaG, iOS - http://apple.co/1IFlhbT",
+          "f": null,
+          "t": null,
+          "fC": null,
+          "tC": null,
+          "nf": true
+        },
+        {
+          "intName": "worldremit-usa-refer-friend-get-usd-20",
+          "name": "Refer a friend to earn USD 20",
+          "description": "Tell a friend about WorldRemit, and both you and your friend will get USD 20 reward voucher after your friend completes their first money transfer of at least USD 50 from United States, regardless of destination countries or currencies.<br/><br/>To refer a friend, grab your personalized unique referral code which will be accessible to you once you have signed up with WorldRemit and made your first money transfer. Your friend must sign up with your unique referral code.<br/><br/>Your friend must send at least USD 50 for you both to earn the USD 20 reward voucher. Your friend can meet the minimum amount requirement in one or several transactions. Your friend must not be an existing WorldRemit customer in United States, and must register a new account.<br/><br/>No WorldRemit coupon code is needed for this deal; you and your friend both get the USD 20 reward voucher after your friend completes minimum USD 50 worth money transfer from United States with WorldRemit.<br/><br/>You can use your USD 20 reward voucher with any future transaction (as long as you send minimum USD 20) over the next 12 months. Take advantage of this great WorldRemit promotion now!",
+          "link": "https://worldremit.sjv.io/5bOXjL",
+          "asset": null,
+          "can": null,
+          "endDateTimeMillis": -1,
+          "terms": "1. To refer a friend, grab your unique referral code which will be accessible to you once you have signed up with WorldRemit and made your first money transfer. Your friend must sign up with your unique referral code. <br/> 2. Your friend must complete their first money transfer of at least USD 50 from United States with WorldRemit for you both to earn the USD 20 reward voucher. <br/> 3. All WorldRemit terms and conditions apply.",
+          "exclusive": true,
+          "shareSubject": "WorldRemit money transfer deal",
+          "shareText": "I have been using RemitFinder to track money transfer exchange rates, and saw this great WorldRemit deal! Check it out - http://bit.ly/1F9m5nM, Android - http://bit.ly/1JiWzaG, iOS - http://apple.co/1IFlhbT",
+          "f": null,
+          "t": null,
+          "fC": null,
+          "tC": null,
+          "nf": true
+        }
+      ],
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "WESTERNUNION",
+        "longName": "Western Union",
+        "description": null,
+        "url": "https://www.anrdoezrs.net/click-100746896-15657927",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 73,
+        "speedRatingSum": 71,
+        "easeRatingSum": 71,
+        "csRatingSum": 67,
+        "noOfRatings": 15
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971735000,
+        "indicative": false,
+        "tiers": [
+          {
+            "lower": null,
+            "upper": null,
+            "rate": 95.9391,
+            "trendingUp": true,
+            "difference": 1.5349,
+            "differencePercent": 1.6259
+          }
+        ]
+      },
+      "deals": [
+        {
+          "intName": "western-union-us-refer-a-friend",
+          "name": "Refer a friend to earn USD 20",
+          "description": "Tell a friend about Western Union, and both you and your friend will get USD 20 Amazon e-gift code after your friend complete their first money transfer from the United States, regardless of destination countries or currencies.<br/><br/>To refer a friend, request your personal referral link which will be accessible in your Western Union account. Your friend must sign up with Western Union using your unique referral link. Your friend must not be an existing Western Union customer, and must register a new account.<br/><br/>No Western Union coupon code is needed for this deal; you get the USD 20 Amazon e-gift code after your friend completes their first transfer with Western Union.<br/><br/>Take advantage of this great Western Union promotion now!",
+          "link": "https://www.anrdoezrs.net/click-100746896-15657932",
+          "asset": null,
+          "can": null,
+          "endDateTimeMillis": -1,
+          "terms": "1. To refer a friend, get your personal referral link in your Western Union account. Your friend must sign up with Western Union using your unique referral link. <br/> 2. Your friend must complete their first money transfer from the US with Western Union for you to earn the USD 20 Amazon e-gift code. <br/> 3. FX gains apply. Not valid on credit cards or sends to Cuba. <br/> 4. All Western Union terms and conditions apply.",
+          "exclusive": true,
+          "shareSubject": "Western Union money transfer deal",
+          "shareText": "I have been using RemitFinder to track money transfer exchange rates, and saw this great Western Union deal! Check it out - http://bit.ly/1F9m5nM, Android - http://bit.ly/1JiWzaG, iOS - http://apple.co/1IFlhbT",
+          "f": null,
+          "t": null,
+          "fC": null,
+          "tC": null,
+          "nf": true
+        },
+        {
+          "intName": "western-union-us-free-transfers",
+          "name": "Get first transfer free in US",
+          "description": "RemitFinder users get their first international money transfer for free when they send money overseas from the US with Western Union, regardless of destination countries or currencies.<br/><br/>There is no Western Union coupon code needed to redeem this deal. This is a great way to save up to USD 1.99 on your first international funds transfer sent from the United States with Western Union.<br/><br/>There is no minimum amount threshold needed to qualify for this promotion. Simply register as a new customer and send your first international money transfer to take advantage of this Western Union offer.<br/><br/>Only the first transfer is free for new RemitFinder users who sign up with Western Union. Limited time offer. Take advantage of this great Western Union offer now and save even more money on your first transfer!",
+          "link": "https://www.jdoqocy.com/click-100746896-15657847",
+          "asset": "western-union-us-money-transfers-0-fee.jpg",
+          "can": null,
+          "endDateTimeMillis": -1,
+          "terms": "1. This no fees Western Union promotion applies for only the first international money transfer for new RemitFinder users. <br/> 2. FX gains apply. Not valid on credit cards or sends to Cuba. <br/> 3. All Western Union terms and conditions apply.",
+          "exclusive": true,
+          "shareSubject": "Western Union money transfer deal",
+          "shareText": "I have been using RemitFinder to track money transfer exchange rates, and saw this great Western Union deal! Check it out - http://bit.ly/1F9m5nM, Android - http://bit.ly/1JiWzaG, iOS - http://apple.co/1IFlhbT",
+          "f": null,
+          "t": null,
+          "fC": null,
+          "tC": null,
+          "nf": true
+        }
+      ],
+      "featured": true
+    },
+    {
+      "serviceProvider": {
+        "name": "INSTAREM",
+        "longName": "Instarem",
+        "description": null,
+        "url": "https://prf.hn/click/camref:1101lfQHY",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 24,
+        "speedRatingSum": 24,
+        "easeRatingSum": 23,
+        "csRatingSum": 24,
+        "noOfRatings": 5
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971736000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": 0,
+            "upper": null,
+            "rate": 95.2469,
+            "trendingUp": true,
+            "difference": 0.302,
+            "differencePercent": 0.3181
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "OFX",
+        "longName": "OFX",
+        "description": null,
+        "url": "https://ofx.pxf.io/c/384025/2191872/16874",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 9,
+        "speedRatingSum": 10,
+        "easeRatingSum": 10,
+        "csRatingSum": 10,
+        "noOfRatings": 3
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971738000,
+        "indicative": false,
+        "tiers": [
+          {
+            "lower": null,
+            "upper": null,
+            "rate": 94.5677,
+            "trendingUp": true,
+            "difference": 0.2062,
+            "differencePercent": 0.2185
+          }
+        ]
+      },
+      "deals": [
+        {
+          "intName": "OFX-FREE-TRANSFERS",
+          "name": "Get 10 free transfers",
+          "description": "RemitFinder users can make 10 fee free transfers when they send money with OFX, regardless of source or destination countries or currencies. You must send a minimum amount of AUD 250 (or equivalent in other currencies) to take advantage of this 10 free OFX transfers deal.<br/><br/>This is a great chance to save up to AUD 150 (or equivalent in other currencies) in fees as the standard OFX fee for money transfers under AUD 10,000 is AUD 15.<br/><br/>No OFX coupon code is needed for this deal; transfer fees are automatically waived when you sign up with OFX as a RemitFinder customer. Take advantage of this great OFX promotion now for your money transfers across any countries that OFX operates in!",
+          "link": "https://www.ofx.com/p/remit-finder",
+          "asset": null,
+          "can": null,
+          "endDateTimeMillis": -1,
+          "terms": "1. You must send a minimum amount of AUD 250 (or equivalent in other currencies) to be eligible for 10 fee free transfers. <br/> 2. Only the first 10 money transfers are free, after which, standard OFX fees may apply. <br/> 3. All OFX terms and conditions apply.",
+          "exclusive": true,
+          "shareSubject": "OFX money transfer deal",
+          "shareText": "I have been using RemitFinder to track money transfer exchange rates, and saw this great OFX deal! Check it out - http://bit.ly/1F9m5nM, Android - http://bit.ly/1JiWzaG, iOS - http://apple.co/1IFlhbT",
+          "f": null,
+          "t": null,
+          "fC": null,
+          "tC": null,
+          "nf": true
+        }
+      ],
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "XEMONEYTX",
+        "longName": "XE Money Transfer",
+        "description": null,
+        "url": "https://xe-money-transfer.sjv.io/c/384025/1267929/12610",
+        "p": true,
+        "m": "New! Cash pickup available",
+        "mt": "info"
+      },
+      "averageRating": {
+        "rateRatingSum": 12,
+        "speedRatingSum": 9,
+        "easeRatingSum": 7,
+        "csRatingSum": 7,
+        "noOfRatings": 3
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971737000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": null,
+            "upper": null,
+            "rate": 95.024,
+            "trendingUp": true,
+            "difference": 0.2991,
+            "differencePercent": 0.3158
+          }
+        ]
+      },
+      "deals": [
+        {
+          "intName": "XEMONEYTX-USD-REFER-FRIEND-25",
+          "name": "Refer a friend to earn USD 25",
+          "description": "Tell a friend about XE Money Transfer, and both you and your friend will get a USD 25 Visa Gift Card after your friend completes their first money transfer of at least USD 1,000.<br/><br/>To refer a friend, grab a personalised referral link which will be accessible to you once you have signed up with XE.<br/><br/>Your friend must not be an existing XE customer in the US, and must register a new account. No XE coupon code is needed for this deal; you and your friend both get the USD 25 Visa Gift Card after your friend completes their first transfer from the United States with XE Money Transfer. Take advantage of this great XE promotion now!",
+          "link": "https://xe-money-transfer.sjv.io/c/384025/1267929/12610",
+          "asset": null,
+          "can": null,
+          "endDateTimeMillis": -1,
+          "terms": "1. To refer a friend, grab a personalised referral link which will be accessible to you once you have signed up with XE. <br/> 2. Your friend must complete their first money transfer of at least USD 1,000 from the USA with XE for you both to earn the USD 25 reward. <br/> 3. All XE terms and conditions apply.",
+          "exclusive": true,
+          "shareSubject": "XE Money Transfer money transfer deal",
+          "shareText": "I have been using RemitFinder to track money transfer exchange rates, and saw this great XE Money Transfer deal! Check it out - http://bit.ly/1F9m5nM, Android - http://bit.ly/1JiWzaG, iOS - http://apple.co/1IFlhbT",
+          "f": null,
+          "t": null,
+          "fC": null,
+          "tC": null,
+          "nf": true
+        }
+      ],
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "CURRENCYFAIR",
+        "longName": "CurrencyFair",
+        "description": null,
+        "url": "https://prf.hn/click/camref:1110l34Zq",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 0,
+        "speedRatingSum": 0,
+        "easeRatingSum": 0,
+        "csRatingSum": 0,
+        "noOfRatings": 0
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971734000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": 100,
+            "upper": 99000000,
+            "rate": 94.7385,
+            "trendingUp": true,
+            "difference": 0.144,
+            "differencePercent": 0.1522
+          }
+        ]
+      },
+      "deals": [
+        {
+          "intName": "CURRENCYFAIR-FIRST-3-FREE",
+          "name": "First 3 transfers free for RemitFinder users",
+          "description": "RemitFinder users can make their first 3 transfers with 0 fee when they send money with CurrencyFair.",
+          "link": "https://prf.hn/click/camref:1110l34Zq",
+          "asset": null,
+          "can": null,
+          "endDateTimeMillis": -1,
+          "terms": "1. You must register on CurrencyFair after clicking Remit Now button to get the free transfers. <br/> 2. All CurrencyFair terms and conditions apply.",
+          "exclusive": true,
+          "shareSubject": "CurrencyFair money transfer deal",
+          "shareText": "I have been using RemitFinder to track money transfer exchange rates, and saw this great CurrencyFair deal! Check it out - http://bit.ly/1F9m5nM, Android - http://bit.ly/1JiWzaG, iOS - http://apple.co/1IFlhbT",
+          "f": null,
+          "t": null,
+          "fC": null,
+          "tC": null,
+          "nf": true
+        }
+      ],
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "PANDAREMIT",
+        "longName": "Panda Remit",
+        "description": null,
+        "url": "https://pandaremit.sjv.io/ZQvdgW",
+        "p": true,
+        "m": "Special exchange rate applied for first transfer",
+        "mt": "info"
+      },
+      "averageRating": {
+        "rateRatingSum": 268,
+        "speedRatingSum": 265,
+        "easeRatingSum": 263,
+        "csRatingSum": 262,
+        "noOfRatings": 54
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971733000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": 50,
+            "upper": 3000,
+            "rate": 95.8433,
+            "trendingUp": true,
+            "difference": 0.2968,
+            "differencePercent": 0.3106
+          }
+        ]
+      },
+      "deals": [
+        {
+          "intName": "pandaremit-5-off-0-fee",
+          "name": "Get 5 bucks off and zero fee",
+          "description": "RemitFinder users get 5 bucks off, 0 fees and a welcome exchange rate on the first transfer when they send money with Panda Remit, regardless of source and destination countries or currencies.<br/><br/>If you are a new RemitFinder user registering with Panda Remit and making your first transfer, you will immediately enjoy 0 transfer fees on your first transaction and receive a welcome exchange rate. Note that the first-transfer promotional rate varies by country and market conditions, and is subject to adjustments by Panda Remit.<br/><br/>Additionally, as a valued RemitFinder user, you will receive a $5 coupon based on your sending currency. For example, if you send from the US, you get USD 5. If you send from Australia, you get AUD 5, and so on for other countries. Note that the $5 coupon is valid for 30 days from the date it is issued.<br/><br/>Offer valid for new customers for the first transfer only. No Panda Remit coupon code is needed for this deal; discounts are automatically applied on the first transfer. Take advantage of this great Panda Remit promotion now!",
+          "link": "https://pandaremit.sjv.io/ZQvdgW",
+          "asset": null,
+          "can": null,
+          "endDateTimeMillis": -1,
+          "terms": "1. Offer valid for new Panda Remit users only, for their first transfer. Existing users are not eligible. <br/> 2. Coupon amount is equivalent to 5 units of your sending currency and the coupon is valid for 30 days from issuance. <br/> 3. All Panda Remit terms and conditions apply.",
+          "exclusive": true,
+          "shareSubject": "Panda Remit money transfer deal",
+          "shareText": "I have been using RemitFinder to track money transfer exchange rates, and saw this great Panda Remit deal! Check it out - http://bit.ly/1F9m5nM, Android - http://bit.ly/1JiWzaG, iOS - http://apple.co/1IFlhbT",
+          "f": null,
+          "t": null,
+          "fC": null,
+          "tC": null,
+          "nf": true
+        }
+      ],
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "REVOLUT",
+        "longName": "Revolut",
+        "description": null,
+        "url": "https://revolut.ngih.net/c/3113886/3040958/9626",
+        "p": true,
+        "m": "Revolut is not a bank; banking services by Lead Bank",
+        "mt": "info"
+      },
+      "averageRating": {
+        "rateRatingSum": 5,
+        "speedRatingSum": 5,
+        "easeRatingSum": 5,
+        "csRatingSum": 5,
+        "noOfRatings": 1
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971736000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": null,
+            "upper": null,
+            "rate": 94.9957,
+            "trendingUp": true,
+            "difference": 0.3294,
+            "differencePercent": 0.348
+          }
+        ]
+      },
+      "deals": [
+        {
+          "intName": "revolut-10-free-usd-transfers",
+          "name": "Sign up and get USD 20",
+          "description": "New RemitFinder users who join Revolut in the United States get USD 20 in their account when they order a physical card or virtual card and make one Qualifying Transaction of at least USD 1 or more. Qualifying Transaction must be a genuine physical or virtual card transaction (for example, card transactions to payment, gambling, gift card or currency exchange service providers, and money transfers are not valid).<br/><br/>This is a great way to save even more money on your qualifying Revolut transactions done from the USA with Revolut.<br/><br/>You must sign up with Revolut in the US as a new user and order a physical card or virtual card and make one Qualifying Transaction of at least USD 1 or more to qualify for the USD 20 bonus.<br/><br/>There is no Revolut coupon code needed to take advantage of this promotion. Offer applicable to only new RemitFinder users who sign up with Revolut in the United States. Limited time offer. Take advantage of this great Revolut offer now!",
+          "link": "https://revolut.ngih.net/c/3113886/3434971/9626",
+          "asset": null,
+          "can": null,
+          "endDateTimeMillis": -1,
+          "terms": "1. This Revolut promotion is only available for new RemitFinder users who sign up with Revolut in the US and order a physical card or virtual card and make one Qualifying Transaction of at least USD 1 or more. <br/> 2. All Revolut terms and conditions apply.",
+          "exclusive": true,
+          "shareSubject": "Revolut money transfer deal",
+          "shareText": "I have been using RemitFinder to track money transfer exchange rates, and saw this great Revolut deal! Check it out - http://bit.ly/1F9m5nM, Android - http://bit.ly/1JiWzaG, iOS - http://apple.co/1IFlhbT",
+          "f": null,
+          "t": null,
+          "fC": null,
+          "tC": null,
+          "nf": true
+        }
+      ],
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "REGENCYFX",
+        "longName": "Regency FX",
+        "description": null,
+        "url": "https://www.regencyfx.com/partner/remitfinder",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 30,
+        "speedRatingSum": 30,
+        "easeRatingSum": 30,
+        "csRatingSum": 30,
+        "noOfRatings": 6
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971732000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": null,
+            "upper": null,
+            "rate": 95.2428,
+            "trendingUp": true,
+            "difference": 0.1052,
+            "differencePercent": 0.1106
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "abound",
+        "longName": "Abound",
+        "description": null,
+        "url": "https://abound.onelink.me/P9V6/qa8c2sbi",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 0,
+        "speedRatingSum": 0,
+        "easeRatingSum": 0,
+        "csRatingSum": 0,
+        "noOfRatings": 0
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971736000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": 10,
+            "upper": 5000,
+            "rate": 89.1,
+            "trendingUp": false,
+            "difference": 0,
+            "differencePercent": 0
+          },
+          {
+            "lower": 5001,
+            "upper": 7500,
+            "rate": 94.84,
+            "trendingUp": true,
+            "difference": 0.31,
+            "differencePercent": 0.3279
+          }
+        ]
+      },
+      "deals": [
+        {
+          "intName": "abound-usa-india-special-rate-0-fees",
+          "name": "Get special introductory rate",
+          "description": "RemitFinder users get a special welcome exchange rate when they send money from USA to India with Abound (by the Times of India).<br/><br/>The special FX rate applies on your first USD 500, after which, the regular exchange rate will apply. This is a great way to save up to INR 1000 or more on a money transfer of USD 500 with Abound!<br/><br/>Plus, Abound is also waiving the transfer fee for new RemitFinder users. This helps you save even more on your Abound remittances from United States to India.<br/><br/>There is no Abound coupon code needed to take advantage of this promotion. Offer valid for new customers for the first money transfer with Abound. Limited time offer. Take advantage of this great Abound offer now!",
+          "link": "https://abound.onelink.me/P9V6/qa8c2sbi",
+          "asset": "abound-usa-india-special-rate-0-fees.jpg",
+          "can": null,
+          "endDateTimeMillis": -1,
+          "terms": "1. The special FX rate only applies to the first USD 500 of your money transfer with Abound; amount over USD 500 will be sent at the regular FX rate. <br/> 2. Offer valid for new Abound customers in United States for their first transfer only. <br/> 3. All Abound terms and conditions apply.",
+          "exclusive": true,
+          "shareSubject": "Abound money transfer deal",
+          "shareText": "I have been using RemitFinder to track money transfer exchange rates, and saw this great Abound deal! Check it out - http://bit.ly/1F9m5nM, Android - http://bit.ly/1JiWzaG, iOS - http://apple.co/1IFlhbT",
+          "f": null,
+          "t": null,
+          "fC": null,
+          "tC": null,
+          "nf": true
+        }
+      ],
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "key-currency",
+        "longName": "Key Currency",
+        "description": null,
+        "url": "https://www.keycurrency.co.uk/great-rates-on-currency-exchange-remit-finder/?src=remitfinder",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 5,
+        "speedRatingSum": 5,
+        "easeRatingSum": 5,
+        "csRatingSum": 5,
+        "noOfRatings": 1
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971732000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": 6766,
+            "upper": null,
+            "rate": 95.1643,
+            "trendingUp": false,
+            "difference": null,
+            "differencePercent": null
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "cambridge-currencies",
+        "longName": "Cambridge Currencies",
+        "description": null,
+        "url": "https://cambridgecurrencies.com/remitfinder/",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 25,
+        "speedRatingSum": 25,
+        "easeRatingSum": 24,
+        "csRatingSum": 25,
+        "noOfRatings": 5
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971732000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": 0,
+            "upper": 5000,
+            "rate": 95.0998,
+            "trendingUp": true,
+            "difference": 0.1051,
+            "differencePercent": 0.1106
+          },
+          {
+            "lower": 5001,
+            "upper": 25000,
+            "rate": 95.1474,
+            "trendingUp": true,
+            "difference": 0.1051,
+            "differencePercent": 0.1106
+          },
+          {
+            "lower": 25001,
+            "upper": null,
+            "rate": 95.2428,
+            "trendingUp": true,
+            "difference": 0.1052,
+            "differencePercent": 0.1106
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "airwallex",
+        "longName": "Airwallex",
+        "description": null,
+        "url": "https://www.airwallex.com/us/business-account/transfers?utm_source=701Nn00000BqH86IAF",
+        "p": true,
+        "m": "B2B transfers only",
+        "mt": "warn"
+      },
+      "averageRating": {
+        "rateRatingSum": 10,
+        "speedRatingSum": 10,
+        "easeRatingSum": 10,
+        "csRatingSum": 10,
+        "noOfRatings": 2
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971736000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": null,
+            "upper": null,
+            "rate": 94.4178,
+            "trendingUp": true,
+            "difference": 0.3051,
+            "differencePercent": 0.3242
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "rutland-fx",
+        "longName": "Rutland FX",
+        "description": null,
+        "url": "https://rutlandfx.com/remitfinder/",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 0,
+        "speedRatingSum": 0,
+        "easeRatingSum": 0,
+        "csRatingSum": 0,
+        "noOfRatings": 0
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971732000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": 0,
+            "upper": 3381.6468,
+            "rate": 95.0215,
+            "trendingUp": false,
+            "difference": null,
+            "differencePercent": null
+          },
+          {
+            "lower": 3383,
+            "upper": 18944.8,
+            "rate": 95.1643,
+            "trendingUp": false,
+            "difference": null,
+            "differencePercent": null
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "unplex",
+        "longName": "Unplex",
+        "description": null,
+        "url": "https://unplex.money/?utm_source=remitfinder&utm_medium=partner&utm_campaign=list",
+        "p": true,
+        "m": "Special exchange rate applied for first transfer",
+        "mt": "info"
+      },
+      "averageRating": {
+        "rateRatingSum": 100,
+        "speedRatingSum": 97,
+        "easeRatingSum": 98,
+        "csRatingSum": 98,
+        "noOfRatings": 20
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971737000,
+        "indicative": false,
+        "tiers": [
+          {
+            "lower": 1,
+            "upper": 100,
+            "rate": 104.4,
+            "trendingUp": true,
+            "difference": 0.08,
+            "differencePercent": 0.0767
+          },
+          {
+            "lower": 101,
+            "upper": 250,
+            "rate": 98.958,
+            "trendingUp": true,
+            "difference": 0.08,
+            "differencePercent": 0.0809
+          },
+          {
+            "lower": 251,
+            "upper": 500,
+            "rate": 97.144,
+            "trendingUp": true,
+            "difference": 0.08,
+            "differencePercent": 0.0824
+          },
+          {
+            "lower": 501,
+            "upper": 1000,
+            "rate": 96.237,
+            "trendingUp": true,
+            "difference": 0.08,
+            "differencePercent": 0.0832
+          },
+          {
+            "lower": 1001,
+            "upper": 2000,
+            "rate": 95.784,
+            "trendingUp": true,
+            "difference": 0.08,
+            "differencePercent": 0.0836
+          },
+          {
+            "lower": 2001,
+            "upper": 2500,
+            "rate": 95.693,
+            "trendingUp": true,
+            "difference": 0.08,
+            "differencePercent": 0.0837
+          },
+          {
+            "lower": 2501,
+            "upper": 5000,
+            "rate": 95.511,
+            "trendingUp": true,
+            "difference": 0.08,
+            "differencePercent": 0.0838
+          },
+          {
+            "lower": 5001,
+            "upper": 10000,
+            "rate": 95.421,
+            "trendingUp": true,
+            "difference": 0.08,
+            "differencePercent": 0.0839
+          },
+          {
+            "lower": 10001,
+            "upper": 15000,
+            "rate": 95.33,
+            "trendingUp": true,
+            "difference": 0.08,
+            "differencePercent": 0.084
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "verto",
+        "longName": "Verto",
+        "description": null,
+        "url": "https://verto.co/business-accounts/?utm_campaign=38649888-remitfinder-campaign_updated&utm_source=remitfinder_new&utm_medium=affiliate&utm_term=remitfinder_new",
+        "p": true,
+        "m": "B2B transfers only",
+        "mt": "warn"
+      },
+      "averageRating": {
+        "rateRatingSum": 10,
+        "speedRatingSum": 10,
+        "easeRatingSum": 10,
+        "csRatingSum": 10,
+        "noOfRatings": 2
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971733000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": null,
+            "upper": null,
+            "rate": 95.2428,
+            "trendingUp": true,
+            "difference": 0.1052,
+            "differencePercent": 0.1106
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "archway-finance",
+        "longName": "Archway Finance",
+        "description": null,
+        "url": "https://archway.finance/transfers?utm_source=remitfinder&utm_medium=comparison+site",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 5,
+        "speedRatingSum": 4,
+        "easeRatingSum": 5,
+        "csRatingSum": 5,
+        "noOfRatings": 1
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971737000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": 5,
+            "upper": 5000,
+            "rate": 93.6668,
+            "trendingUp": false,
+            "difference": 0.246,
+            "differencePercent": 0.2619
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "pangea",
+        "longName": "Pangea Money Transfer",
+        "description": null,
+        "url": "https://pangea.onelink.me/2231221683/bnecmddw",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 5,
+        "speedRatingSum": 5,
+        "easeRatingSum": 5,
+        "csRatingSum": 5,
+        "noOfRatings": 1
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971737000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": null,
+            "upper": 6000,
+            "rate": 94.86,
+            "trendingUp": true,
+            "difference": 0.25,
+            "differencePercent": 0.2642
+          }
+        ]
+      },
+      "deals": [
+        {
+          "intName": "pangea-free-transfers",
+          "name": "Get 0 fee first transfer",
+          "description": "RemitFinder users can send their first international money transfer for free when they send money overseas with Pangea Money Transfer, regardless of source or destination countries and currencies. Your first transfer is free as per this attractive Pangea Money Transfer promotion.<br/><br/>No Pangea Money Transfer coupon code is needed to redeem this deal to waive the fee on your first money transfer. This is a great way to save on transfer fee on your first international funds transfer sent with Pangea Money Transfer.<br/><br/>Simply register as a new customer with Pangea Money Transfer and send your international money transfer to take advantage of this Pangea Money Transfer offer.<br/><br/>The first transfer is free for new RemitFinder users who sign up with Pangea Money Transfer. Limited time offer. Take advantage of this great Pangea Money Transfer offer now and save even more money on your money transfers!",
+          "link": "https://pangea.onelink.me/2231221683/bnecmddw",
+          "asset": null,
+          "can": null,
+          "endDateTimeMillis": -1,
+          "terms": "1. This no fees Pangea Money Transfer promotion applies for the first international money transfer for new RemitFinder users. <br/> 2. There is no Pangea Money Transfer coupon code needed to qualify for this promotion. <br/> 3. All Pangea Money Transfer terms and conditions apply.",
+          "exclusive": true,
+          "shareSubject": "Pangea Money Transfer money transfer deal",
+          "shareText": "I have been using RemitFinder to track money transfer exchange rates, and saw this great Pangea Money Transfer deal! Check it out - http://bit.ly/1F9m5nM, Android - http://bit.ly/1JiWzaG, iOS - http://apple.co/1IFlhbT",
+          "f": null,
+          "t": null,
+          "fC": null,
+          "tC": null,
+          "nf": true
+        }
+      ],
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "aspora",
+        "longName": "Aspora",
+        "description": null,
+        "url": "https://link.aspora.com/DYot/qxa2hlbi",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 0,
+        "speedRatingSum": 0,
+        "easeRatingSum": 0,
+        "csRatingSum": 0,
+        "noOfRatings": 0
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971733000,
+        "indicative": false,
+        "tiers": [
+          {
+            "lower": null,
+            "upper": 30000,
+            "rate": 95.3381,
+            "trendingUp": true,
+            "difference": 0.1053,
+            "differencePercent": 0.1106
+          }
+        ]
+      },
+      "deals": [
+        {
+          "intName": "aspora-usa-free-transfers",
+          "name": "Get 3 free transfers",
+          "description": "RemitFinder users get 3 free transfers when they send money from the United States with Aspora, regardless of destination countries or currencies.<br/><br/>If you are a new RemitFinder user registering with Aspora from the USA, you will immediately enjoy 0 transfer fees on your first 3 transactions.<br/><br/>Offer valid for new customers in the US for the first 3 transfers only. No Aspora coupon code is needed for this deal; fee discounts are automatically applied on the first 3 transfers sent from the United States. Take advantage of this great Aspora promotion now and save even more money for your international money transfers sent from the US!",
+          "link": "https://link.aspora.com/DYot/qxa2hlbi",
+          "asset": null,
+          "can": null,
+          "endDateTimeMillis": -1,
+          "terms": "1. Offer valid for new Aspora users in the United States only, for their first 3 transfers. Existing users are not eligible. <br/> 2. All Aspora terms and conditions apply.",
+          "exclusive": true,
+          "shareSubject": "Aspora money transfer deal",
+          "shareText": "I have been using RemitFinder to track money transfer exchange rates, and saw this great Aspora deal! Check it out - http://bit.ly/1F9m5nM, Android - http://bit.ly/1JiWzaG, iOS - http://apple.co/1IFlhbT",
+          "f": null,
+          "t": null,
+          "fC": null,
+          "tC": null,
+          "nf": true
+        }
+      ],
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "currencyflow",
+        "longName": "Currencyflow",
+        "description": null,
+        "url": "https://www.currencyflow.com/?utm_source=remitfinder&utm_medium=referral&utm_campaign=rforganic",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 0,
+        "speedRatingSum": 0,
+        "easeRatingSum": 0,
+        "csRatingSum": 0,
+        "noOfRatings": 0
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971733000,
+        "indicative": false,
+        "tiers": [
+          {
+            "lower": 0,
+            "upper": 13530.6468,
+            "rate": 95.0405,
+            "trendingUp": false,
+            "difference": null,
+            "differencePercent": null
+          },
+          {
+            "lower": 13532,
+            "upper": 27062.6468,
+            "rate": 95.0691,
+            "trendingUp": false,
+            "difference": null,
+            "differencePercent": null
+          },
+          {
+            "lower": 27064,
+            "upper": null,
+            "rate": 95.1167,
+            "trendingUp": false,
+            "difference": null,
+            "differencePercent": null
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "taptap-send",
+        "longName": "Taptap Send",
+        "description": null,
+        "url": "https://taptapsend.com/?utm_source=aggregator&utm_medium=remitfinder",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 0,
+        "speedRatingSum": 0,
+        "easeRatingSum": 0,
+        "csRatingSum": 0,
+        "noOfRatings": 0
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777971640000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": 1,
+            "upper": 10000,
+            "rate": 95.3,
+            "trendingUp": false,
+            "difference": 0.02,
+            "differencePercent": 0.021
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    }
+  ]
+}

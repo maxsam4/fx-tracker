@@ -1,0 +1,691 @@
+{
+  "latestFxRate": {
+    "id": null,
+    "created": 1777991200000,
+    "source": null,
+    "from": {
+      "name": "United Arab Emirates Dirham",
+      "code": "AED"
+    },
+    "to": {
+      "name": "Indian Rupee",
+      "code": "INR"
+    },
+    "rate": 25.9112,
+    "trendingUp": false,
+    "difference": 0.0239,
+    "differencePercent": 0.0922
+  },
+  "remitRateResultDTOs": [
+    {
+      "serviceProvider": {
+        "name": "CURRENCYFAIR",
+        "longName": "CurrencyFair",
+        "description": null,
+        "url": "https://prf.hn/click/camref:1110l34Zq",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 0,
+        "speedRatingSum": 0,
+        "easeRatingSum": 0,
+        "csRatingSum": 0,
+        "noOfRatings": 0
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777986494000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": 100,
+            "upper": 99000000,
+            "rate": 25.7278,
+            "trendingUp": false,
+            "difference": 0.02,
+            "differencePercent": 0.0777
+          }
+        ]
+      },
+      "deals": [
+        {
+          "intName": "CURRENCYFAIR-FIRST-3-FREE",
+          "name": "First 3 transfers free for RemitFinder users",
+          "description": "RemitFinder users can make their first 3 transfers with 0 fee when they send money with CurrencyFair.",
+          "link": "https://prf.hn/click/camref:1110l34Zq",
+          "asset": null,
+          "can": null,
+          "endDateTimeMillis": -1,
+          "terms": "1. You must register on CurrencyFair after clicking Remit Now button to get the free transfers. <br/> 2. All CurrencyFair terms and conditions apply.",
+          "exclusive": true,
+          "shareSubject": "CurrencyFair money transfer deal",
+          "shareText": "I have been using RemitFinder to track money transfer exchange rates, and saw this great CurrencyFair deal! Check it out - http://bit.ly/1F9m5nM, Android - http://bit.ly/1JiWzaG, iOS - http://apple.co/1IFlhbT",
+          "f": null,
+          "t": null,
+          "fC": null,
+          "tC": null,
+          "nf": true
+        }
+      ],
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "TRANSFERWISE",
+        "longName": "Wise",
+        "description": null,
+        "url": "https://wise.prf.hn/click/camref:1101l7sHY",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 60,
+        "speedRatingSum": 64,
+        "easeRatingSum": 66,
+        "csRatingSum": 61,
+        "noOfRatings": 14
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777986493000,
+        "indicative": false,
+        "tiers": [
+          {
+            "lower": 1,
+            "upper": 1000000,
+            "rate": 25.4818,
+            "trendingUp": false,
+            "difference": 0.0008,
+            "differencePercent": 0.0031
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "OFX",
+        "longName": "OFX",
+        "description": null,
+        "url": "https://www.ofx.com/p/remit-finder",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 9,
+        "speedRatingSum": 10,
+        "easeRatingSum": 10,
+        "csRatingSum": 10,
+        "noOfRatings": 3
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777986496000,
+        "indicative": false,
+        "tiers": [
+          {
+            "lower": null,
+            "upper": null,
+            "rate": 25.6917,
+            "trendingUp": true,
+            "difference": 0.0025,
+            "differencePercent": 0.0097
+          }
+        ]
+      },
+      "deals": [
+        {
+          "intName": "OFX-FREE-TRANSFERS",
+          "name": "Get 10 free transfers",
+          "description": "RemitFinder users can make 10 fee free transfers when they send money with OFX, regardless of source or destination countries or currencies. You must send a minimum amount of AUD 250 (or equivalent in other currencies) to take advantage of this 10 free OFX transfers deal.<br/><br/>This is a great chance to save up to AUD 150 (or equivalent in other currencies) in fees as the standard OFX fee for money transfers under AUD 10,000 is AUD 15.<br/><br/>No OFX coupon code is needed for this deal; transfer fees are automatically waived when you sign up with OFX as a RemitFinder customer. Take advantage of this great OFX promotion now for your money transfers across any countries that OFX operates in!",
+          "link": "https://www.ofx.com/p/remit-finder",
+          "asset": null,
+          "can": null,
+          "endDateTimeMillis": -1,
+          "terms": "1. You must send a minimum amount of AUD 250 (or equivalent in other currencies) to be eligible for 10 fee free transfers. <br/> 2. Only the first 10 money transfers are free, after which, standard OFX fees may apply. <br/> 3. All OFX terms and conditions apply.",
+          "exclusive": true,
+          "shareSubject": "OFX money transfer deal",
+          "shareText": "I have been using RemitFinder to track money transfer exchange rates, and saw this great OFX deal! Check it out - http://bit.ly/1F9m5nM, Android - http://bit.ly/1JiWzaG, iOS - http://apple.co/1IFlhbT",
+          "f": null,
+          "t": null,
+          "fC": null,
+          "tC": null,
+          "nf": true
+        }
+      ],
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "XEMONEYTX",
+        "longName": "XE Money Transfer",
+        "description": null,
+        "url": "https://xe-money-transfer.sjv.io/c/384025/1267929/12610",
+        "p": true,
+        "m": "New! Cash pickup available",
+        "mt": "info"
+      },
+      "averageRating": {
+        "rateRatingSum": 12,
+        "speedRatingSum": 9,
+        "easeRatingSum": 7,
+        "csRatingSum": 7,
+        "noOfRatings": 3
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777986494000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": null,
+            "upper": null,
+            "rate": 25.4514,
+            "trendingUp": true,
+            "difference": 0.0787,
+            "differencePercent": 0.3102
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "REMITLY",
+        "longName": "Remitly",
+        "description": null,
+        "url": "https://remitly.tod8mp.net/c/1991571/742578/10408",
+        "p": true,
+        "m": "Special exchange rate applied for first transfer",
+        "mt": "info"
+      },
+      "averageRating": {
+        "rateRatingSum": 28,
+        "speedRatingSum": 30,
+        "easeRatingSum": 34,
+        "csRatingSum": 30,
+        "noOfRatings": 8
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777986493000,
+        "indicative": false,
+        "tiers": [
+          {
+            "lower": 0,
+            "upper": 20000,
+            "rate": 26.05,
+            "trendingUp": true,
+            "difference": 0.05,
+            "differencePercent": 0.1923
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "SKRILL",
+        "longName": "Skrill Money Transfer",
+        "description": null,
+        "url": "https://smpromo.skrill.com/C.ashx?btag=a_24b_41c_&affid=23&siteid=24&adid=41&c=&senderCountry=ARE&senderCurrency=AED&recipientCountry=IND&recipientCurrency=INR",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 5,
+        "speedRatingSum": 5,
+        "easeRatingSum": 5,
+        "csRatingSum": 5,
+        "noOfRatings": 1
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777986491000,
+        "indicative": false,
+        "tiers": [
+          {
+            "lower": 8.5876,
+            "upper": 42938,
+            "rate": 25.2586,
+            "trendingUp": false,
+            "difference": null,
+            "differencePercent": null
+          }
+        ]
+      },
+      "deals": [
+        {
+          "intName": "SKRILL-AED-FIRST-TRANSFER-CREDIT",
+          "name": "Get AED 45 bonus for first transfer",
+          "description": "RemitFinder users get AED 45 credit for first transfer when they send money from UAE with Skrill Money Transfer, regardless of destination countries or currencies. You must send a minimum transfer amount of AED 2000 to be eligible for this Skrill promotion in UAE.<br/><br/>There is no coupon code needed to take advantage of this Skrill promotion. Offer valid for new Skrill customers in UAE for the first transfer only. Take advantage of this great Skrill offer now and save AED 45 on your first money transfer from UAE!",
+          "link": "https://smpromo.skrill.com/C.ashx?btag=a_24b_41c_&affid=23&siteid=24&adid=41&c=",
+          "asset": null,
+          "can": null,
+          "endDateTimeMillis": -1,
+          "terms": "1. You must register with Skrill Money Transfer in UAE and send a minimum transfer amount of AED 2000 to be eligible for this deal. <br/> 2. This offer is only applicable for the first money transfer by new customers in UAE. <br/> 3. All Skrill Money Transfer terms and conditions apply.",
+          "exclusive": true,
+          "shareSubject": "Skrill Money Transfer money transfer deal",
+          "shareText": "I have been using RemitFinder to track money transfer exchange rates, and saw this great Skrill Money Transfer deal! Check it out - http://bit.ly/1F9m5nM, Android - http://bit.ly/1JiWzaG, iOS - http://apple.co/1IFlhbT",
+          "f": null,
+          "t": null,
+          "fC": null,
+          "tC": null,
+          "nf": true
+        }
+      ],
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "PROFEE",
+        "longName": "Profee",
+        "description": null,
+        "url": "https://profee.link/remitfinder",
+        "p": true,
+        "m": "Get promotional rate on your first transfer",
+        "mt": "info"
+      },
+      "averageRating": {
+        "rateRatingSum": 55,
+        "speedRatingSum": 55,
+        "easeRatingSum": 55,
+        "csRatingSum": 54,
+        "noOfRatings": 11
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777986493000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": 0,
+            "upper": null,
+            "rate": 25.5651,
+            "trendingUp": true,
+            "difference": 0.0043,
+            "differencePercent": 0.0168
+          }
+        ]
+      },
+      "deals": [
+        {
+          "intName": "profee-first-transfer-free",
+          "name": "Get 0 fee on first transfer",
+          "description": "RemitFinder users get their first international money transfers for free when they send money overseas with Profee.<br/><br/>This is a great way to save on your international remittances sent with Profee by saving on transfer fee on your first transfers (usually 4.5%).<br/><br/>There is no Profee coupon code needed to take advantage of this promotion. Only the first transfer is free for new RemitFinder users who sign up with Profee. Limited time offer. Take advantage of this great Profee offer now!",
+          "link": "https://profee.link/remitfinder",
+          "asset": null,
+          "can": null,
+          "endDateTimeMillis": -1,
+          "terms": "1. No fees apply for only the first Profee international money transfer for new RemitFinder users. <br/> 2. All Profee terms and conditions apply.",
+          "exclusive": true,
+          "shareSubject": "Profee money transfer deal",
+          "shareText": "I have been using RemitFinder to track money transfer exchange rates, and saw this great Profee deal! Check it out - http://bit.ly/1F9m5nM, Android - http://bit.ly/1JiWzaG, iOS - http://apple.co/1IFlhbT",
+          "f": null,
+          "t": null,
+          "fC": null,
+          "tC": null,
+          "nf": true
+        },
+        {
+          "intName": "profee-refer-friend-get-eur-10",
+          "name": "Refer a friend: earn EUR 25, they earn EUR 5",
+          "description": "Tell a friend about Profee, and you will get EUR 25 reward after your friend completes their first money transfer of at least EUR 200 (or equivalent in other currencies). Note that only the invitees sending transfers to India, Kenya, Nigeria, Brazil, the Philippines, Pakistan, Kyrgystan, Uzbekistan or Tajikistan are eligible for this Profee deal.<br/><br/>What is more - your friend will also get a reward of EUR 10 after their first money transfer of at least EUR 200 (or equivalent in other currencies) to India, Kenya, Nigeria, Brazil, the Philippines, Pakistan, Kyrgystan, Uzbekistan or Tajikistan.<br/><br/>To refer a friend, grab your personal referral link which will be accessible to in your Profee account under the Invite Friends tab. Your friend must sign up using your referral link.<br/><br/> Your friend must send at least EUR 200 (or equivalent in other currencies) for you to earn the EUR 25 reward and for them to earn EUR 10. Your friend may enjoy special terms for their first Profee transfer, including a 0% fee to any destination and special promo exchange rate for selected currencies. Your friend must not be an existing Profee customer and must register a new account.<br/><br/>No Profee coupon code is needed for this deal; you get the EUR 25 reward and your friend gets the EUR 10 reward after your friend completes minimum EUR 200 worth money transfer with Profee.<br/><br/>You can refer as many friends as you want. Take advantage of this great Profee promotion now!",
+          "link": "https://profee.link/remitfinder",
+          "asset": null,
+          "can": null,
+          "endDateTimeMillis": -1,
+          "terms": "1. To refer a friend, get your personal referral link in your Profee account (under the Invite Friends tab). Your friend must sign up using your referral link. <br/> 2. Your friend must complete their first money transfer of at least EUR 200 (or equivalent in other currencies) with Profee to India, Kenya, Nigeria, Brazil, the Philippines, Pakistan, Kyrgystan, Uzbekistan or Tajikistan within 30 days for you to earn the EUR 25 reward and your friend to earn the EUR 10 reward. <br/> 3. No limit to the number of friends you can refer. <br/> 4. All Profee terms and conditions apply.",
+          "exclusive": true,
+          "shareSubject": "Profee money transfer deal",
+          "shareText": "I have been using RemitFinder to track money transfer exchange rates, and saw this great Profee deal! Check it out - http://bit.ly/1F9m5nM, Android - http://bit.ly/1JiWzaG, iOS - http://apple.co/1IFlhbT",
+          "f": null,
+          "t": null,
+          "fC": null,
+          "tC": null,
+          "nf": true
+        }
+      ],
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "REGENCYFX",
+        "longName": "Regency FX",
+        "description": null,
+        "url": "https://www.regencyfx.com/partner/remitfinder",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 30,
+        "speedRatingSum": 30,
+        "easeRatingSum": 30,
+        "csRatingSum": 30,
+        "noOfRatings": 6
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777986490000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": null,
+            "upper": null,
+            "rate": 25.8884,
+            "trendingUp": false,
+            "difference": 0.0168,
+            "differencePercent": 0.0649
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "key-currency",
+        "longName": "Key Currency",
+        "description": null,
+        "url": "https://www.keycurrency.co.uk/great-rates-on-currency-exchange-remit-finder/?src=remitfinder",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 5,
+        "speedRatingSum": 5,
+        "easeRatingSum": 5,
+        "csRatingSum": 5,
+        "noOfRatings": 1
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777986490000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": 24847,
+            "upper": null,
+            "rate": 25.9128,
+            "trendingUp": false,
+            "difference": null,
+            "differencePercent": null
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "cambridge-currencies",
+        "longName": "Cambridge Currencies",
+        "description": null,
+        "url": "https://cambridgecurrencies.com/remitfinder/",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 25,
+        "speedRatingSum": 25,
+        "easeRatingSum": 24,
+        "csRatingSum": 25,
+        "noOfRatings": 5
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777986491000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": 0,
+            "upper": 5000,
+            "rate": 25.8495,
+            "trendingUp": false,
+            "difference": 0.0168,
+            "differencePercent": 0.0649
+          },
+          {
+            "lower": 5001,
+            "upper": 25000,
+            "rate": 25.8625,
+            "trendingUp": false,
+            "difference": 0.0167,
+            "differencePercent": 0.0645
+          },
+          {
+            "lower": 25001,
+            "upper": null,
+            "rate": 25.8884,
+            "trendingUp": false,
+            "difference": 0.0168,
+            "differencePercent": 0.0649
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "airwallex",
+        "longName": "Airwallex",
+        "description": null,
+        "url": "https://airwallex.sjv.io/AW93nj",
+        "p": true,
+        "m": "B2B transfers only",
+        "mt": "warn"
+      },
+      "averageRating": {
+        "rateRatingSum": 10,
+        "speedRatingSum": 10,
+        "easeRatingSum": 10,
+        "csRatingSum": 10,
+        "noOfRatings": 2
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777986494000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": null,
+            "upper": null,
+            "rate": 25.649,
+            "trendingUp": true,
+            "difference": 0.0576,
+            "differencePercent": 0.2251
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "verto",
+        "longName": "Verto",
+        "description": null,
+        "url": "https://verto.co/business-accounts/?utm_campaign=38649888-remitfinder-campaign_updated&utm_source=remitfinder_new&utm_medium=affiliate&utm_term=remitfinder_new",
+        "p": true,
+        "m": "B2B transfers only",
+        "mt": "warn"
+      },
+      "averageRating": {
+        "rateRatingSum": 10,
+        "speedRatingSum": 10,
+        "easeRatingSum": 10,
+        "csRatingSum": 10,
+        "noOfRatings": 2
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777986491000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": null,
+            "upper": null,
+            "rate": 25.7433,
+            "trendingUp": false,
+            "difference": 0.0167,
+            "differencePercent": 0.0648
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "aspora",
+        "longName": "Aspora",
+        "description": null,
+        "url": "https://link.aspora.com/DYot/qxa2hlbi",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 0,
+        "speedRatingSum": 0,
+        "easeRatingSum": 0,
+        "csRatingSum": 0,
+        "noOfRatings": 0
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777986491000,
+        "indicative": false,
+        "tiers": [
+          {
+            "lower": null,
+            "upper": 150000,
+            "rate": 25.9143,
+            "trendingUp": false,
+            "difference": 0.0168,
+            "differencePercent": 0.0648
+          }
+        ]
+      },
+      "deals": [
+        {
+          "intName": "aspora-uae-free-transfers",
+          "name": "Get 5% cashback on 1st transfer",
+          "description": "RemitFinder users get 5% cashback on their first international money transfer when they send money from the United Arab Emirates with Aspora, regardless of destination countries or currencies.<br/><br/>There is no minimum amount threshold needed to take advantage of this Aspora promotion in the UAE.<br/><br/>Offer valid for new customers in the UAE for the first transfer only. No Aspora coupon code is needed for this deal; the 5% cashback is automatically applied on the first transfer sent from the UAE. Take advantage of this great Aspora promotion now and save even more money for your international money transfers sent from the UAE!",
+          "link": "https://link.aspora.com/DYot/qxa2hlbi",
+          "asset": null,
+          "can": null,
+          "endDateTimeMillis": -1,
+          "terms": "1. Offer valid for new Aspora users in the UAE only, for their first transfer. Existing users are not eligible. <br/> 2. All Aspora terms and conditions apply.",
+          "exclusive": true,
+          "shareSubject": "Aspora money transfer deal",
+          "shareText": "I have been using RemitFinder to track money transfer exchange rates, and saw this great Aspora deal! Check it out - http://bit.ly/1F9m5nM, Android - http://bit.ly/1JiWzaG, iOS - http://apple.co/1IFlhbT",
+          "f": null,
+          "t": null,
+          "fC": null,
+          "tC": null,
+          "nf": true
+        }
+      ],
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "currencyflow",
+        "longName": "Currencyflow",
+        "description": null,
+        "url": "https://www.currencyflow.com/?utm_source=remitfinder&utm_medium=referral&utm_campaign=rforganic",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 0,
+        "speedRatingSum": 0,
+        "easeRatingSum": 0,
+        "csRatingSum": 0,
+        "noOfRatings": 0
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777986491000,
+        "indicative": false,
+        "tiers": [
+          {
+            "lower": 0,
+            "upper": 49689.0306,
+            "rate": 25.879,
+            "trendingUp": false,
+            "difference": null,
+            "differencePercent": null
+          },
+          {
+            "lower": 49694,
+            "upper": 99383.0306,
+            "rate": 25.8868,
+            "trendingUp": false,
+            "difference": null,
+            "differencePercent": null
+          },
+          {
+            "lower": 99388,
+            "upper": null,
+            "rate": 25.8998,
+            "trendingUp": false,
+            "difference": null,
+            "differencePercent": null
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    },
+    {
+      "serviceProvider": {
+        "name": "taptap-send",
+        "longName": "Taptap Send",
+        "description": null,
+        "url": "https://taptapsend.com/?utm_source=aggregator&utm_medium=remitfinder",
+        "p": true,
+        "m": null,
+        "mt": null
+      },
+      "averageRating": {
+        "rateRatingSum": 0,
+        "speedRatingSum": 0,
+        "easeRatingSum": 0,
+        "csRatingSum": 0,
+        "noOfRatings": 0
+      },
+      "latestRemitRate": {
+        "id": null,
+        "created": 1777986086000,
+        "indicative": true,
+        "tiers": [
+          {
+            "lower": 1,
+            "upper": 37000,
+            "rate": 25.85,
+            "trendingUp": true,
+            "difference": 0.1,
+            "differencePercent": 0.3883
+          }
+        ]
+      },
+      "deals": null,
+      "featured": false
+    }
+  ]
+}
