@@ -1,0 +1,55 @@
+# Build artifacts and deps — Docker installs fresh inside the image.
+**/node_modules
+**/.next
+**/.turbo
+**/dist
+**/build
+**/coverage
+**/*.tsbuildinfo
+
+# VCS, editor, OS noise.
+.git
+.gitignore
+.gitattributes
+.github
+.idea
+.vscode
+.DS_Store
+*.swp
+
+# Local-only config and secrets — never copied into images.
+.env
+.env.local
+.env.*.local
+secrets/
+backups/
+PROD.md
+
+# Local Docker / Postgres state.
+.docker/
+postgres-data/
+
+# Browser cache (worker downloads its own pinned chromium during build).
+playwright-browsers/
+
+# Logs + scratch.
+*.log
+npm-debug.log*
+pnpm-debug.log*
+.discovery/
+.pnpm-store/
+
+# Tests aren't needed for the runtime image. Keep them locally for `pnpm test`,
+# but skip shipping them into the build context.
+**/test
+**/__tests__
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+
+# Discovery scripts — Playwright probes used to reverse-engineer provider APIs.
+# Not needed in the runtime image; lives in packages/core/scripts/.
+packages/core/scripts/
+
+# Markdown docs other than the ones we want available at runtime.
+README.md

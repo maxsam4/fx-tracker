@@ -9,7 +9,8 @@ FROM base AS deps
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml* ./
 COPY packages/core/package.json packages/core/
 COPY apps/worker/package.json apps/worker/
-RUN pnpm install --frozen-lockfile=false
+RUN --mount=type=cache,id=pnpm-store-fxworker,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile=false
 
 # Browser cache stage. Reuses the deps stage so the Chromium build that gets
 # downloaded matches the project's pinned `playwright` version exactly. (Using

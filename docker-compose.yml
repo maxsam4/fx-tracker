@@ -20,6 +20,12 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+      # Self-hosted, single-host deploy — skip multi-arch + signed attestations
+      # to cut ~10s off every rebuild (no value when nobody downstream consumes them).
+      platforms:
+        - linux/amd64
+      provenance: false
+      sbom: false
     environment:
       DATABASE_URL: ${DATABASE_URL}
       ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH}
@@ -38,6 +44,10 @@ services:
     build:
       context: .
       dockerfile: apps/worker/Dockerfile
+      platforms:
+        - linux/amd64
+      provenance: false
+      sbom: false
     environment:
       DATABASE_URL: ${DATABASE_URL}
       POLL_INTERVAL_CRON: ${POLL_INTERVAL_CRON:-0 * * * *}
