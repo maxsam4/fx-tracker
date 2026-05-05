@@ -1,10 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Standalone output emits a self-contained server.js + minimal node_modules
-  // under .next/standalone — runtime image becomes much smaller and starts in
-  // ~80ms instead of pnpm-start latency.
-  output: 'standalone',
   experimental: {
     // Allow importing from workspace packages without pre-build.
     externalDir: true,

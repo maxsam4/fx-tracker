@@ -1,4 +1,4 @@
-# Web image: Next.js standalone output for a minimal runtime.
+# Web image: Next.js with workspace deps for a minimal runtime.
 FROM node:22-bookworm-slim AS base
 ENV PNPM_HOME=/usr/local/pnpm
 ENV PATH=$PNPM_HOME:$PATH
@@ -32,26 +32,19 @@ WORKDIR /app/apps/web
 RUN --mount=type=cache,target=/app/apps/web/.next/cache,uid=0,gid=0 \
     pnpm exec next build
 
-# Standalone runtime — Next emits a self-contained tree at
-# `apps/web/.next/standalone/` containing only the modules the server actually
-# requires. Combined with the static assets it's the smallest possible image.
 FROM base AS runtime
 RUN useradd --system --uid 1001 --create-home nextjs
 RUN mkdir -p /app && chown -R nextjs:nextjs /app
 
-# Standalone tree from `next build` — server.js sits at the standalone root
-# along with a trimmed node_modules and the per-app .next directory. We copy
-# the whole tree into /app and run server.js from there.
-COPY --from=build --chown=nextjs:nextjs /app/apps/web/.next/standalone ./
-# Static assets aren't traced by the standalone bundle — copy them into the
-# standalone .next dir so the server can serve them at /_next/static/*.
-COPY --from=build --chown=nextjs:nextjs /app/apps/web/.next/static ./.next/static
-# Provider config is read at runtime by the API routes.
+COPY --from=build --chown=nextjs:nextjs /app/pnpm-workspace.yaml /app/package.json ./
+COPY --from=build --chown=nextjs:nextjs /app/node_modules ./node_modules
+COPY --from=build --chown=nextjs:nextjs /app/packages ./packages
+COPY --from=build --chown=nextjs:nextjs /app/apps ./apps
+COPY --from=build --chown=nextjs:nextjs /app/tsconfig.base.json ./
 COPY --from=build --chown=nextjs:nextjs /app/config ./config
 
 USER nextjs
-WORKDIR /app
+WORKDIR /app/apps/web
 ENV NODE_ENV=production
-ENV PORT=3000
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["pnpm", "start"]
