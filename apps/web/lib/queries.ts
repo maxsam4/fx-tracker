@@ -98,12 +98,16 @@ export async function getProviderSeries(
   }));
 }
 
-// Hide rows older than this from the comparison table. Polling is hourly,
-// so 4h ≈ "we tried 4 cycles and never got a fresh quote" — at that point
-// the provider is effectively dark and surfacing its stale rate alongside
-// fresh ones is misleading. Historical chart queries (getProviderSeries)
-// intentionally do NOT apply this filter — they need the full history.
-const FRESH_WINDOW_MS = 4 * 60 * 60 * 1000;
+// Hide provider rows older than 4 hours from the comparison table. Polling
+// is hourly, so 4h ≈ "we tried 4 cycles and never got a fresh quote" — at
+// that point the provider is effectively dark and surfacing its stale rate
+// alongside fresh ones is misleading.
+const PROVIDER_FRESH_WINDOW_MS = 4 * 60 * 60 * 1000;
+// Reference rates use a 25-hour window because some sources are daily
+// (Visa wholesale, ECB/Frankfurter, etc.) — their `captured_at` reflects
+// the upstream republish moment and may legitimately be 20+h old. Live
+// feeds going dark are still detected via `provider_runs`.
+const REFERENCE_FRESH_WINDOW_MS = 25 * 60 * 60 * 1000;
 
 export async function getLatestProviderTable(pairId: number, sendAmount: number) {
   const db = getDb();
@@ -122,7 +126,7 @@ export async function getLatestProviderTable(pairId: number, sendAmount: number)
       effective_rate, fee_amount, rate
     FROM provider_quotes
     WHERE pair_id = ${pairId} AND send_amount = ${sendAmount}
-      AND captured_at >= now() - (${FRESH_WINDOW_MS} || ' milliseconds')::interval
+      AND captured_at >= now() - (${PROVIDER_FRESH_WINDOW_MS} || ' milliseconds')::interval
     ORDER BY provider_id, captured_at DESC
   `);
   return rows.map((r) => ({
@@ -148,7 +152,7 @@ export async function getLatestReferenceRates(pairId: number) {
       source_id, captured_at, rate
     FROM reference_rates
     WHERE pair_id = ${pairId}
-      AND captured_at >= now() - (${FRESH_WINDOW_MS} || ' milliseconds')::interval
+      AND captured_at >= now() - (${REFERENCE_FRESH_WINDOW_MS} || ' milliseconds')::interval
     ORDER BY source_id, captured_at DESC
   `);
   return rows.map((r) => ({

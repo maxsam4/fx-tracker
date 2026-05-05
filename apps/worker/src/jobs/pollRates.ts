@@ -95,17 +95,24 @@ async function runForPair(
     }
   }
 
-  // 2. reference rates (display-only — sources NOT used for the median)
+  // 2. reference rates (tracking-only — sources NOT used for the median).
+  // Same dedup logic as step 1b: skip the insert if the upstream timestamp
+  // matches what's already on disk. This matters most for daily feeds like
+  // Visa whose rate doesn't change between hourly polls.
   for (const refId of pairCfg.referenceSources) {
     try {
       const r = await getReferenceSource(refId).fetchRate({ pair });
-      await db.insert(referenceRates).values({
+      const row = {
         pairId,
         sourceId: refId,
         capturedAt: r.capturedAt,
         rate: r.rate.toString(),
         raw: r.raw as object | null,
-      });
+      };
+      const fresh = await dropUnchangedReferenceRows([row]);
+      if (fresh.length > 0) {
+        await db.insert(referenceRates).values(fresh);
+      }
     } catch (err) {
       logger.warn({ refId, err: String(err) }, 'reference rate fetch failed');
     }

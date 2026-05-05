@@ -34,10 +34,11 @@ pairs:
       - aspora            # direct API
       - westernUnion      # API (wuconnect/prices/catalog, Direct-to-Bank)
       - remitfinder       # API aggregator (signed /api/v1/rates/USA/IND)
-    # No display-only feeds — googleFinance et al. now contribute to the
-    # midMarket median, and pollRates step 1b persists every successful
-    # per-source rate to reference_rates automatically.
-    referenceSources: []
+    # Tracking-only feeds: polled + persisted to reference_rates each cycle
+    # but NOT fed into the mid-market median. Visa publishes once a day so
+    # it'd skew a sub-hourly median; we still record it for the chart.
+    referenceSources:
+      - visa
 
   AED-INR:
     enabled: true
@@ -53,7 +54,8 @@ pairs:
       - remitfinder       # API aggregator (signed /api/v1/rates/ARE/IND)
       # Note: Instarem's public API rejects AED→INR ("Invalid combination of
       # country-currency details") — they don't operate that corridor.
-    referenceSources: []
+    referenceSources:
+      - visa              # tracking-only: Visa is daily, not fit for sub-hourly median
 
 midMarket:
   # Median of these is the canonical mid-market rate. Sources that fail
@@ -61,19 +63,19 @@ midMarket:
   #
   #   xe              live per-pair JSON (Authorization: Basic, baked in)
   #   googleFinance   Playwright scrape with consent cookie (US locale)
-  #   visa            Visa cmsapi/fx/rates (Playwright via Cloudflare turnstile)
   #   twelveData      twelvedata.com — needs TWELVE_DATA_API_KEY env var
   #                   (free tier 800/day; source disabled if unset)
   #   revolut         /api/exchange/fx-charts/<PAIR> — 5-min consumer feed
   #   yahooFinance    /v8/finance/chart/<PAIR>=X — may be blocked from
   #                   datacenter IPs (Hetzner/AWS); errors swallowed.
   #
-  # Removed 2026-05-05:
+  # Removed (still in the registry, still polled if listed in a pair's
+  # referenceSources, but no longer feeding the median):
+  #   visa             — Visa wholesale settlement rate, daily (now in
+  #                      USD-INR.referenceSources / AED-INR.referenceSources)
   #   exchangerateHost — open.er-api.com refreshes only once a day
   #   frankfurter      — ECB rates publish once a day
-  # Both files remain in the codebase (still wired into the registry) so
-  # re-enabling is just a matter of adding their id back to this list.
-  sources: [xe, googleFinance, visa, twelveData, revolut, yahooFinance]
+  sources: [xe, googleFinance, twelveData, revolut, yahooFinance]
   # Display-only feeds that do not feed the median. Currently empty —
   # all configured sources contribute. If you add a feed you only want
   # to chart (not let influence alerts), put it here.
