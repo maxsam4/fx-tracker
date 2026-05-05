@@ -39,13 +39,13 @@ FROM base AS runtime
 RUN useradd --system --uid 1001 --create-home nextjs
 RUN mkdir -p /app && chown -R nextjs:nextjs /app
 
-# Standalone tree is rooted at the workspace (because outputFileTracingRoot
-# points at ../../). Copying it to /app gives us /app/apps/web/server.js plus
-# trimmed-down node_modules and any traced workspace deps.
+# Standalone tree from `next build` — server.js sits at the standalone root
+# along with a trimmed node_modules and the per-app .next directory. We copy
+# the whole tree into /app and run server.js from there.
 COPY --from=build --chown=nextjs:nextjs /app/apps/web/.next/standalone ./
-# Static assets aren't traced by the standalone bundle — they live in
-# .next/static and (if present) public/.
-COPY --from=build --chown=nextjs:nextjs /app/apps/web/.next/static ./apps/web/.next/static
+# Static assets aren't traced by the standalone bundle — copy them into the
+# standalone .next dir so the server can serve them at /_next/static/*.
+COPY --from=build --chown=nextjs:nextjs /app/apps/web/.next/static ./.next/static
 # Provider config is read at runtime by the API routes.
 COPY --from=build --chown=nextjs:nextjs /app/config ./config
 
@@ -54,4 +54,4 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 EXPOSE 3000
-CMD ["node", "apps/web/server.js"]
+CMD ["node", "server.js"]
