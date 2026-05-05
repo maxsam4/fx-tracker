@@ -59,7 +59,18 @@ midMarket:
   # Median of these is the canonical mid-market rate. Sources that fail
   # for a given pair (e.g. frankfurter for AED-INR) drop out — only
   # successful fetches feed the median.
-  sources: [xe, exchangerateHost, googleFinance, visa, frankfurter]
+  #
+  #   xe              live per-pair JSON (Authorization: Basic, baked in)
+  #   exchangerateHost open.er-api.com — daily refresh; capturedAt = upstream time
+  #   googleFinance   Playwright scrape with consent cookie (US locale)
+  #   visa            Visa cmsapi/fx/rates (Playwright via Cloudflare turnstile)
+  #   frankfurter     ECB-derived; USD-INR only (no AED in ECB feed)
+  #   twelveData      twelvedata.com — needs TWELVE_DATA_API_KEY env var
+  #                   (free tier 800/day; source disabled if unset)
+  #   revolut         /api/exchange/fx-charts/<PAIR> — 5-min consumer feed
+  #   yahooFinance    /v8/finance/chart/<PAIR>=X — may be blocked from
+  #                   datacenter IPs (Hetzner/AWS); errors swallowed.
+  sources: [xe, exchangerateHost, googleFinance, visa, frankfurter, twelveData, revolut, yahooFinance]
   # Display-only feeds that do not feed the median. Currently empty —
   # all configured sources contribute. If you add a feed you only want
   # to chart (not let influence alerts), put it here.

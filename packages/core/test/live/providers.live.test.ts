@@ -19,6 +19,9 @@ import { remitfinderProvider } from '../../src/providers/remitfinder.js';
 import { wiseMidMarketSource } from '../../src/providers/reference/wiseMidMarket.js';
 import { exchangerateHostSource } from '../../src/providers/reference/exchangerateHost.js';
 import { xeSource } from '../../src/providers/reference/xe.js';
+import { revolutSource } from '../../src/providers/reference/revolut.js';
+import { yahooFinanceSource } from '../../src/providers/reference/yahooFinance.js';
+import { twelveDataSource } from '../../src/providers/reference/twelveData.js';
 
 const live = process.env.FX_LIVE === '1';
 const d = live ? describe : describe.skip;
@@ -67,6 +70,40 @@ d('LIVE: mid-market sources', () => {
     const r = await xeSource.fetchRate({ pair: AED_INR });
     expectRateInRange(r.rate, aedInrLo, aedInrHi, 'xe AED-INR');
   }, 45_000);
+
+  it('Revolut USD-INR', async () => {
+    const r = await revolutSource.fetchRate({ pair: USD_INR });
+    expectRateInRange(r.rate, usdInrLo, usdInrHi, 'revolut USD-INR');
+    expect(r.sourceId).toBe('revolut');
+  }, 30_000);
+
+  it('Revolut AED-INR', async () => {
+    const r = await revolutSource.fetchRate({ pair: AED_INR });
+    expectRateInRange(r.rate, aedInrLo, aedInrHi, 'revolut AED-INR');
+  }, 30_000);
+
+  it('Yahoo Finance USD-INR', async () => {
+    const r = await yahooFinanceSource.fetchRate({ pair: USD_INR });
+    expectRateInRange(r.rate, usdInrLo, usdInrHi, 'yahoo USD-INR');
+    expect(r.sourceId).toBe('yahooFinance');
+  }, 30_000);
+
+  it('Yahoo Finance AED-INR', async () => {
+    const r = await yahooFinanceSource.fetchRate({ pair: AED_INR });
+    expectRateInRange(r.rate, aedInrLo, aedInrHi, 'yahoo AED-INR');
+  }, 30_000);
+
+  // Twelve Data is gated on a free API key; skip if unset rather than fail.
+  const twelveSkip = process.env.TWELVE_DATA_API_KEY ? it : it.skip;
+  twelveSkip('Twelve Data USD-INR', async () => {
+    const r = await twelveDataSource.fetchRate({ pair: USD_INR });
+    expectRateInRange(r.rate, usdInrLo, usdInrHi, 'twelveData USD-INR');
+  }, 30_000);
+
+  twelveSkip('Twelve Data AED-INR', async () => {
+    const r = await twelveDataSource.fetchRate({ pair: AED_INR });
+    expectRateInRange(r.rate, aedInrLo, aedInrHi, 'twelveData AED-INR');
+  }, 30_000);
 });
 
 d('LIVE: API-based remittance providers', () => {

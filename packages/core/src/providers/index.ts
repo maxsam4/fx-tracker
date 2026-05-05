@@ -17,6 +17,9 @@ import { exchangerateHostSource } from './reference/exchangerateHost.js';
 import { googleFinanceSource } from './reference/googleFinance.js';
 import { visaSource } from './reference/visa.js';
 import { frankfurterSource } from './reference/frankfurter.js';
+import { twelveDataSource } from './reference/twelveData.js';
+import { revolutSource } from './reference/revolut.js';
+import { yahooFinanceSource } from './reference/yahooFinance.js';
 
 export * from './types.js';
 
@@ -40,6 +43,9 @@ const referenceList: ReferenceSource[] = [
   googleFinanceSource,
   visaSource,
   frankfurterSource,
+  twelveDataSource,
+  revolutSource,
+  yahooFinanceSource,
 ];
 
 export const providerRegistry = new Map(providerList.map((p) => [p.id, p] as const));

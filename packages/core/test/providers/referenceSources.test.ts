@@ -5,6 +5,9 @@ import { fileURLToPath } from 'node:url';
 import { wiseMidMarketSource } from '../../src/providers/reference/wiseMidMarket.js';
 import { exchangerateHostSource } from '../../src/providers/reference/exchangerateHost.js';
 import { xeSource } from '../../src/providers/reference/xe.js';
+import { twelveDataSource } from '../../src/providers/reference/twelveData.js';
+import { revolutSource } from '../../src/providers/reference/revolut.js';
+import { yahooFinanceSource } from '../../src/providers/reference/yahooFinance.js';
 import { installFetchMock, resetFetchMock } from '../helpers/mockFetch.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -136,6 +139,142 @@ describe('xeSource', () => {
   it('throws on unsupported pair without retrying', async () => {
     await expect(
       xeSource.fetchRate({ pair: { from: 'JPY', to: 'INR' } }),
+    ).rejects.toThrow(/not configured/);
+  });
+});
+
+describe('twelveDataSource', () => {
+  const ENV_KEY = 'TWELVE_DATA_API_KEY';
+  const original = process.env[ENV_KEY];
+  afterEach(() => {
+    resetFetchMock();
+    if (original === undefined) delete process.env[ENV_KEY];
+    else process.env[ENV_KEY] = original;
+  });
+
+  it('throws when API key is unset (so source skips quietly in median)', async () => {
+    delete process.env[ENV_KEY];
+    await expect(
+      twelveDataSource.fetchRate({ pair: { from: 'USD', to: 'INR' } }),
+    ).rejects.toThrow(/TWELVE_DATA_API_KEY not set/);
+  });
+
+  it('parses a successful exchange_rate response', async () => {
+    process.env[ENV_KEY] = 'test-key';
+    installFetchMock({
+      'https://api.twelvedata.com/exchange_rate': {
+        body: { symbol: 'USD/INR', rate: 95.14452, timestamp: 1777997820 },
+      },
+    });
+    const r = await twelveDataSource.fetchRate({ pair: { from: 'USD', to: 'INR' } });
+    expect(r.sourceId).toBe('twelveData');
+    expect(r.rate).toBe(95.14452);
+    expect(r.capturedAt.getTime()).toBe(1777997820 * 1000);
+  });
+
+  it('throws on error-status response (e.g. 401 / quota)', async () => {
+    process.env[ENV_KEY] = 'test-key';
+    installFetchMock({
+      'https://api.twelvedata.com/exchange_rate': {
+        body: { status: 'error', code: 401, message: 'apikey is incorrect' },
+      },
+    });
+    await expect(
+      twelveDataSource.fetchRate({ pair: { from: 'USD', to: 'INR' } }),
+    ).rejects.toThrow(/apikey is incorrect/);
+  });
+});
+
+describe('revolutSource', () => {
+  afterEach(() => resetFetchMock());
+
+  it('returns the latest point from /api/exchange/fx-charts/<PAIR>', async () => {
+    installFetchMock({
+      'https://www.revolut.com/api/exchange/fx-charts/USDINR': {
+        body: {
+          previousRangeCloseRate: '95.0000',
+          points: [
+            { start: 1777993500000, rate: '95.05' },
+            { start: 1777993800000, rate: '95.0729' }, // latest
+          ],
+        },
+      },
+    });
+    const r = await revolutSource.fetchRate({ pair: { from: 'USD', to: 'INR' } });
+    expect(r.sourceId).toBe('revolut');
+    expect(r.rate).toBe(95.0729);
+    expect(r.capturedAt.getTime()).toBe(1777993800000);
+  });
+
+  it('handles AED-INR (concatenated symbol form)', async () => {
+    installFetchMock({
+      'https://www.revolut.com/api/exchange/fx-charts/AEDINR': {
+        body: { points: [{ start: 1777993800000, rate: '25.8835' }] },
+      },
+    });
+    const r = await revolutSource.fetchRate({ pair: { from: 'AED', to: 'INR' } });
+    expect(r.rate).toBe(25.8835);
+  });
+
+  it('throws when points array is empty', async () => {
+    installFetchMock({
+      'https://www.revolut.com/api/exchange/fx-charts/USDINR': { body: { points: [] } },
+    });
+    await expect(
+      revolutSource.fetchRate({ pair: { from: 'USD', to: 'INR' } }),
+    ).rejects.toThrow(/no chart points/);
+  });
+
+  it('throws on unsupported pair', async () => {
+    await expect(
+      revolutSource.fetchRate({ pair: { from: 'GBP', to: 'INR' } }),
+    ).rejects.toThrow(/not configured/);
+  });
+});
+
+describe('yahooFinanceSource', () => {
+  afterEach(() => resetFetchMock());
+
+  it('extracts regularMarketPrice from chart API', async () => {
+    installFetchMock({
+      'https://query1.finance.yahoo.com/v8/finance/chart/USDINR': {
+        body: {
+          chart: {
+            error: null,
+            result: [
+              {
+                meta: {
+                  symbol: 'USDINR=X',
+                  regularMarketPrice: 95.27,
+                  regularMarketTime: 1777996630,
+                  currency: 'INR',
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+    const r = await yahooFinanceSource.fetchRate({ pair: { from: 'USD', to: 'INR' } });
+    expect(r.sourceId).toBe('yahooFinance');
+    expect(r.rate).toBe(95.27);
+    expect(r.capturedAt.getTime()).toBe(1777996630 * 1000);
+  });
+
+  it('throws when chart.error is set (e.g. datacenter IP block)', async () => {
+    installFetchMock({
+      'https://query1.finance.yahoo.com/v8/finance/chart/USDINR': {
+        body: { chart: { error: { code: 'Unauthorized', description: 'Edge: Unauthorized' } } },
+      },
+    });
+    await expect(
+      yahooFinanceSource.fetchRate({ pair: { from: 'USD', to: 'INR' } }),
+    ).rejects.toThrow(/chart.error/);
+  });
+
+  it('throws on unsupported pair', async () => {
+    await expect(
+      yahooFinanceSource.fetchRate({ pair: { from: 'EUR', to: 'INR' } }),
     ).rejects.toThrow(/not configured/);
   });
 });
