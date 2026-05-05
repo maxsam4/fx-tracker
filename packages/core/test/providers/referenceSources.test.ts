@@ -26,11 +26,13 @@ const XE_HTML = 'https://www.xe.com/currencyconverter/convert/';
 describe('wiseMidMarketSource', () => {
   afterEach(() => resetFetchMock());
 
-  it('parses live rate response', async () => {
+  it('parses live rate response and uses upstream `time` (ms) as capturedAt', async () => {
     installFetchMock({ 'https://wise.com/rates/live': { body: wiseLive } });
     const r = await wiseMidMarketSource.fetchRate({ pair: { from: 'USD', to: 'INR' } });
     expect(r.sourceId).toBe('wiseMidMarket');
     expect(r.rate).toBe(94.9711);
+    // Fixture `time` is 1777550504295 — already milliseconds (13 digits).
+    expect(r.capturedAt.getTime()).toBe(1777550504295);
   });
 
   it('throws if value is missing', async () => {

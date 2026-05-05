@@ -39,11 +39,21 @@ export const frankfurterSource: ReferenceSource = {
     if (typeof rate !== 'number' || !Number.isFinite(rate) || rate <= 0) {
       throw new Error(`Frankfurter: missing or invalid rate for ${pair.to}`);
     }
+    // The `date` field is the ECB business day the rate applies to (YYYY-MM-DD,
+    // local CET — but YYYY-MM-DD is timezone-agnostic). We anchor it at midnight
+    // UTC of that date as the canonical capturedAt. ECB actually publishes
+    // around 16:00 CET, but a deterministic per-day timestamp is what the
+    // dedup logic in pollRates needs (so subsequent hourly polls of the same
+    // ECB business day skip the duplicate write).
+    const capturedAt =
+      typeof data.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(data.date)
+        ? new Date(`${data.date}T00:00:00Z`)
+        : new Date();
     return {
       sourceId: 'frankfurter',
       pair,
       rate,
-      capturedAt: new Date(),
+      capturedAt,
       raw: data,
     };
   },

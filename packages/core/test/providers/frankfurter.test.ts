@@ -7,7 +7,7 @@ const ENDPOINT = 'https://api.frankfurter.dev/v1/latest';
 describe('frankfurterSource.fetchRate', () => {
   afterEach(() => resetFetchMock());
 
-  it('parses USD-INR happy path', async () => {
+  it('parses USD-INR happy path and anchors capturedAt at midnight UTC of the date', async () => {
     installFetchMock({
       [ENDPOINT]: { body: { amount: 1.0, base: 'USD', date: '2026-04-30', rates: { INR: 94.92 } } },
     });
@@ -15,6 +15,7 @@ describe('frankfurterSource.fetchRate', () => {
     expect(r.sourceId).toBe('frankfurter');
     expect(r.rate).toBe(94.92);
     expect(r.pair).toEqual({ from: 'USD', to: 'INR' });
+    expect(r.capturedAt.toISOString()).toBe('2026-04-30T00:00:00.000Z');
   });
 
   it('throws when ECB does not support the source currency (e.g. AED)', async () => {

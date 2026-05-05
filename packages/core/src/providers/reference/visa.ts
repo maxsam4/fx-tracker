@@ -78,11 +78,21 @@ export const visaSource: ReferenceSource = {
     if (!Number.isFinite(rate) || rate <= 0) {
       throw new Error(`Visa fxRateVisa invalid: ${rateStr}`);
     }
+    // Visa returns `lastUpdatedVisaRate` as either Unix seconds or ms — we
+    // disambiguate by magnitude (>1e12 means ms). Visa publishes the
+    // wholesale rate once a day (US business day) so repeated hourly polls
+    // would otherwise emit identical rows; surfacing the upstream stamp lets
+    // the pollRates dedup drop those.
+    const ts = data.originalValues?.lastUpdatedVisaRate;
+    const capturedAt =
+      typeof ts === 'number' && Number.isFinite(ts)
+        ? new Date(ts > 1e12 ? ts : ts * 1000)
+        : new Date();
     return {
       sourceId: 'visa',
       pair,
       rate,
-      capturedAt: new Date(),
+      capturedAt,
       raw: data,
     };
   },
